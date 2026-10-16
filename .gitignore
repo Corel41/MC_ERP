@@ -1,0 +1,18 @@
+# Database backups
+*.bak
+*.mdf
+*.ldf
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment and dependency directories
+node_modules/
+dist/
+build/
+.env
+.env.local
+.vscode/
+.idea/
