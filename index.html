@@ -649,6 +649,44 @@
       transform: translateY(-1px);
     }
 
+    .btn-elevated-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 12px;
+      background: var(--accent-primary);
+      color: #FFFFFF;
+      font-size: 0.86rem;
+      font-weight: 700;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-elevated-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-action-pill {
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: var(--nav-active-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    .btn-action-pill:hover {
+      color: var(--accent-primary);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
     .view-content { display: none; }
     .view-content.active {
       display: block;
@@ -660,13 +698,183 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Sub-Module 1.1 Specific Navigation Segment Tabs */
+    .reg-nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--nav-active-bg);
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow-sm);
+    }
+
+    .reg-tab-btn {
+      padding: 9px 18px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .reg-tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .reg-tab-btn.active {
+      background: var(--accent-primary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .reg-panel { display: none; }
+    .reg-panel.active {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    /* Form Styles */
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.span-full { grid-column: 1 / -1; }
+
+    .form-label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-input {
+      background: var(--nav-active-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .form-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+    }
+
+    .form-checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .form-checkbox-label input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent-primary);
+      cursor: pointer;
+    }
+
+    /* Nested Builder Table */
+    .builder-table-wrap {
+      border: 1px solid var(--table-border);
+      border-radius: 16px;
+      overflow-x: auto;
+      background: rgba(255, 255, 255, 0.05);
+      margin-top: 10px;
+    }
+
+    table.builder-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.84rem;
+    }
+
+    table.builder-table th {
+      padding: 12px 14px;
+      font-size: 0.70rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.15);
+      border-bottom: 1px solid var(--table-border);
+      white-space: nowrap;
+    }
+
+    table.builder-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--table-border);
+      vertical-align: middle;
+    }
+
+    table.builder-table tr:last-child td { border-bottom: none; }
+
+    .builder-input {
+      width: 100%;
+      background: var(--nav-active-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      background: var(--nav-active-bg);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
     .clean-module-container {
-      padding: 32px;
+      padding: 28px;
       border-radius: 26px;
       display: flex;
       flex-direction: column;
       gap: 20px;
-      min-height: 480px;
     }
 
     .module-header-strip {
@@ -678,72 +886,15 @@
     }
 
     .module-title-box h2 {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 800;
       letter-spacing: -0.02em;
     }
 
     .module-title-box p {
-      font-size: 0.84rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .empty-stage-canvas {
-      flex: 1;
-      border: 2px dashed var(--divider-color);
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 48px;
-      text-align: center;
-      gap: 14px;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .empty-icon-circle {
-      width: 56px;
-      height: 56px;
-      border-radius: 18px;
-      background: var(--nav-active-bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent-primary);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-    }
-
-    .empty-stage-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .empty-stage-sub {
       font-size: 0.82rem;
       color: var(--text-muted);
-      max-width: 460px;
-      line-height: 1.5;
-    }
-
-    .module-spec-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 6px;
-    }
-
-    .spec-pill {
-      font-size: 0.72rem;
-      font-family: 'JetBrains Mono', monospace;
-      padding: 4px 10px;
-      border-radius: 8px;
-      background: var(--nav-active-bg);
-      border: 1px solid var(--glass-border);
-      color: var(--text-secondary);
+      margin-top: 3px;
     }
 
     .settings-grid {
@@ -819,9 +970,7 @@
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
-    .theme-card.active-theme .theme-badge-applied {
-      display: inline-flex;
-    }
+    .theme-card.active-theme .theme-badge-applied { display: inline-flex; }
 
     .theme-info-header {
       display: flex;
@@ -873,16 +1022,8 @@
       border: 1px solid var(--glass-border);
     }
 
-    .pref-meta h4 {
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-
-    .pref-meta p {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
+    .pref-meta h4 { font-size: 0.95rem; font-weight: 700; }
+    .pref-meta p { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
 
     .toast-tray {
       position: fixed;
@@ -911,6 +1052,7 @@
     }
 
     @media (max-width: 1180px) {
+      .form-grid-3 { grid-template-columns: repeat(2, 1fr); }
       .settings-grid { grid-template-columns: 1fr; }
     }
 
@@ -918,6 +1060,7 @@
       aside#sidebar { transform: translateX(-120%); }
       aside#sidebar.mobile-open { transform: translateX(0); width: 284px; }
       main#workspace { margin-left: 0 !important; padding: 12px; }
+      .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -925,7 +1068,6 @@
 
   <!-- Floating Liquid Glass Sidebar -->
   <aside id="sidebar" class="glass-surface">
-
     <div class="window-controls">
       <div class="dot-ctrl dot-red"></div>
       <div class="dot-ctrl dot-yellow"></div>
@@ -962,8 +1104,7 @@
     <div class="nav-divider"></div>
 
     <div class="nav-container">
-
-      <!-- 1. ESTATE MANAGEMENT (ACTIVE CORE) -->
+      <!-- 01. ESTATE MANAGEMENT -->
       <div class="nav-group">
         <div class="nav-group-label" data-full="01. ESTATE MANAGEMENT" data-short="EST">01. ESTATE MANAGEMENT</div>
         <ul class="nav-list">
@@ -1002,7 +1143,7 @@
 
       <div class="nav-divider"></div>
 
-      <!-- 2. CORE ENTERPRISE DEPARTMENTS (CLEAN PLACEHOLDERS) -->
+      <!-- CORE ENTERPRISE DEPARTMENTS -->
       <div class="nav-group">
         <div class="nav-group-label" data-full="ENTERPRISE DEPARTMENTS" data-short="DEP">ENTERPRISE DEPARTMENTS</div>
         <ul class="nav-list">
@@ -1051,7 +1192,7 @@
 
       <div class="nav-divider"></div>
 
-      <!-- 3. SYSTEM & SETTINGS -->
+      <!-- SYSTEM -->
       <div class="nav-group">
         <div class="nav-group-label" data-full="SYSTEM" data-short="SYS">SYSTEM</div>
         <ul class="nav-list">
@@ -1065,7 +1206,6 @@
           </li>
         </ul>
       </div>
-
     </div>
 
     <div class="sidebar-footer">
@@ -1106,239 +1246,611 @@
       </div>
     </header>
 
-    <!-- CLEAN MODULE VIEWS (1.1 TO 1.5 & MODULES 02 TO 06) -->
-    
-    <!-- 1.1 Registration -->
+    <!-- SUB-MODULE 1.1: REGISTRATION (FULL IMPLEMENTATION WITH 5 REGISTRATION ENGINES) -->
     <div class="view-content active" id="view-estate-reg">
-      <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>01. Estate Management — 1.1 Registration</h2>
-            <p>Master onboarding directory for Properties, Units, Landlords, and Tenants.</p>
+
+      <!-- Navigation Segment Tabs -->
+      <div class="reg-nav-tabs">
+        <button class="reg-tab-btn active" data-reg-target="landlords">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>1. Landlord Registration</span>
+        </button>
+        <button class="reg-tab-btn" data-reg-target="tenants">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+          <span>2. Tenant Registration</span>
+        </button>
+        <button class="reg-tab-btn" data-reg-target="properties">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>3. Property Registration</span>
+        </button>
+        <button class="reg-tab-btn" data-reg-target="standalone-units">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="8" height="8" x="2" y="2" rx="2"/><rect width="8" height="8" x="14" y="2" rx="2"/><rect width="8" height="8" x="14" y="14" rx="2"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>
+          <span>4. Standalone Units</span>
+        </button>
+        <button class="reg-tab-btn" data-reg-target="assignments">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>5. Property Assignment</span>
+        </button>
+      </div>
+
+      <!-- 1. LANDLORD REGISTRATION PANEL -->
+      <div class="reg-panel active" id="panel-landlords">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Landlord & Owner Entity Onboarding</h2>
+              <p>Register individual and corporate property owners with statutory KRA PIN and remittance routing.</p>
+            </div>
+            <span class="live-pulse-badge">multi-tenant: organization_id</span>
           </div>
-          <span class="live-pulse-badge">Container Ready</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </div>
-          <div class="empty-stage-title">Property & Entity Registration Stage</div>
-          <div class="empty-stage-sub">Clean workspace initialized. Ready for mounting Property Master Registry, LR Number Indexing, Unit Allocations, and Landlord/Tenant dossiers.</div>
-          <div class="module-spec-pills">
-            <span class="spec-pill">LR Numbers</span>
-            <span class="spec-pill">Unit Master</span>
-            <span class="spec-pill">Landlord Dossiers</span>
-            <span class="spec-pill">KRA PIN Validation</span>
+
+          <form id="form-landlord" onsubmit="handleLandlordSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Entity Type</label>
+                <select class="form-input" id="landlord-entity-type" onchange="toggleLandlordEntityFields()">
+                  <option value="INDIVIDUAL">Individual Owner</option>
+                  <option value="CORPORATE">Corporate / Trust / Investment Firm</option>
+                </select>
+              </div>
+              <div class="form-group" id="group-ll-first-name">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-input" id="landlord-first-name" required placeholder="e.g. Dennis">
+              </div>
+              <div class="form-group" id="group-ll-middle-name">
+                <label class="form-label">Middle Name</label>
+                <input type="text" class="form-input" id="landlord-middle-name" placeholder="e.g. Kamau">
+              </div>
+              <div class="form-group" id="group-ll-last-name">
+                <label class="form-label">Last Name / Surname</label>
+                <input type="text" class="form-input" id="landlord-last-name" required placeholder="e.g. Mugo">
+              </div>
+              <div class="form-group span-full" id="group-ll-company-name" style="display: none;">
+                <label class="form-label">Company / Trust Entity Name</label>
+                <input type="text" class="form-input" id="landlord-company-name" placeholder="e.g. Mugo Investments Holdings Ltd">
+              </div>
+              <div class="form-group">
+                <label class="form-label">National ID / Registration No.</label>
+                <input type="text" class="form-input" id="landlord-id-reg" required placeholder="e.g. 24891023 or CPR/2018/9812">
+              </div>
+              <div class="form-group">
+                <label class="form-label">KRA PIN Number</label>
+                <input type="text" class="form-input" id="landlord-kra-pin" required placeholder="e.g. P051189201A">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Primary Phone (E.164)</label>
+                <input type="tel" class="form-input" id="landlord-phone" required placeholder="e.g. +254722000111">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="landlord-email" placeholder="e.g. owner@investments.co.ke">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Remittance Method</label>
+                <select class="form-input" id="landlord-remit-method" onchange="toggleLandlordRemitFields()">
+                  <option value="BANK">Bank Electronic Funds Transfer</option>
+                  <option value="MPESA_B2C">Safaricom M-Pesa B2C Mobile</option>
+                </select>
+              </div>
+              <div class="form-group" id="group-ll-bank-name">
+                <label class="form-label">Bank Name</label>
+                <select class="form-input" id="landlord-bank-name">
+                  <option value="KCB Bank Kenya">KCB Bank Kenya</option>
+                  <option value="Equity Bank Kenya">Equity Bank Kenya</option>
+                  <option value="Standard Chartered Kenya">Standard Chartered Kenya</option>
+                  <option value="NCBA Bank Kenya">NCBA Bank Kenya</option>
+                  <option value="Co-operative Bank">Co-operative Bank</option>
+                  <option value="Absa Bank Kenya">Absa Bank Kenya</option>
+                </select>
+              </div>
+              <div class="form-group" id="group-ll-bank-branch">
+                <label class="form-label">Bank Branch</label>
+                <input type="text" class="form-input" id="landlord-bank-branch" placeholder="e.g. Thika Section 9 Branch">
+              </div>
+              <div class="form-group" id="group-ll-bank-acc">
+                <label class="form-label">Bank Account Number</label>
+                <input type="text" class="form-input" id="landlord-bank-acc" placeholder="e.g. 1120948192">
+              </div>
+              <div class="form-group" id="group-ll-mpesa-b2c" style="display: none;">
+                <label class="form-label">M-Pesa B2C Payout Mobile No.</label>
+                <input type="tel" class="form-input" id="landlord-mpesa-phone" placeholder="e.g. 0722000111">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Register Landlord</button>
+            </div>
+          </form>
+
+          <!-- Directory Table -->
+          <div style="margin-top: 14px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Registered Landlords</h3>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Entity</th>
+                    <th>Name / Corporate Name</th>
+                    <th>ID / Reg No.</th>
+                    <th>KRA PIN</th>
+                    <th>Primary Phone</th>
+                    <th>Remittance Target</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="table-landlords-body"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- 2. TENANT REGISTRATION PANEL -->
+      <div class="reg-panel" id="panel-tenants">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Tenant Entity Onboarding</h2>
+              <p>Register residential and commercial tenants with primary billing numbers for automated M-Pesa C2B reconciliation.</p>
+            </div>
+            <span class="live-pulse-badge">Daraja C2B Matchable</span>
+          </div>
+
+          <form id="form-tenant" onsubmit="handleTenantSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-input" id="tenant-first-name" required placeholder="e.g. Grace">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Middle Name</label>
+                <input type="text" class="form-input" id="tenant-middle-name" placeholder="e.g. Wanjiru">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Surname</label>
+                <input type="text" class="form-input" id="tenant-surname" required placeholder="e.g. Ndung'u">
+              </div>
+              <div class="form-group">
+                <label class="form-label">National ID / Passport Number</label>
+                <input type="text" class="form-input" id="tenant-id-passport" required placeholder="e.g. 31984210">
+              </div>
+              <div class="form-group">
+                <label class="form-label">KRA PIN (Optional)</label>
+                <input type="text" class="form-input" id="tenant-kra-pin" placeholder="e.g. A010948192K">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Primary Billing Mobile (M-Pesa C2B)</label>
+                <input type="tel" class="form-input" id="tenant-phone-primary" required placeholder="e.g. 0712345678">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="tenant-email" placeholder="e.g. grace.ndungu@gmail.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Emergency Contact Name</label>
+                <input type="text" class="form-input" id="tenant-emergency-name" placeholder="e.g. John Ndung'u (Brother)">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Emergency Contact Phone</label>
+                <input type="tel" class="form-input" id="tenant-emergency-phone" placeholder="e.g. 0722998877">
+              </div>
+              <div class="form-group span-full">
+                <label class="form-label">Physical / Workplace Details</label>
+                <input type="text" class="form-input" id="tenant-workplace" placeholder="e.g. Senior Auditor, PwC Kenya, Delta Corner Tower A, Westlands">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Register Tenant</button>
+            </div>
+          </form>
+
+          <!-- Directory Table -->
+          <div style="margin-top: 14px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Registered Tenants</h3>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Full Name</th>
+                    <th>ID / Passport</th>
+                    <th>Billing Phone (C2B)</th>
+                    <th>KRA PIN</th>
+                    <th>Emergency Contact</th>
+                    <th>Workplace Details</th>
+                  </tr>
+                </thead>
+                <tbody id="table-tenants-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. PROPERTY REGISTRATION (MULTI-SEGMENT WORKFLOW) -->
+      <div class="reg-panel" id="panel-properties">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Property Onboarding Workflow</h2>
+              <p>Primary registration with inline units builder and pre-configured property payables.</p>
+            </div>
+            <span class="live-pulse-badge">Multi-Segment Onboarding</span>
+          </div>
+
+          <form id="form-property" onsubmit="handlePropertySubmit(event)">
+            <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 12px;">Step 1: Primary Property Attributes</h3>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Property Name</label>
+                <input type="text" class="form-input" id="prop-name" required placeholder="e.g. Chania Falls View Courts">
+              </div>
+              <div class="form-group">
+                <label class="form-label">LR Number (Land Registration)</label>
+                <input type="text" class="form-input" id="prop-lr" required placeholder="e.g. THIKA/MUNICIPALITY/BLOCK 4/182">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Property Type</label>
+                <select class="form-input" id="prop-type">
+                  <option value="RESIDENTIAL">Residential Apartment / Estate</option>
+                  <option value="COMMERCIAL">Commercial Office / Retail Plaza</option>
+                  <option value="MIXED_USE">Mixed-Use Commercial & Residential</option>
+                  <option value="INDUSTRIAL">Industrial Warehousing / Logistics Park</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">County</label>
+                <select class="form-input" id="prop-county">
+                  <option value="Kiambu">Kiambu County</option>
+                  <option value="Nairobi">Nairobi County</option>
+                  <option value="Mombasa">Mombasa County</option>
+                  <option value="Machakos">Machakos County</option>
+                  <option value="Nakuru">Nakuru County</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Sub-County / Location</label>
+                <input type="text" class="form-input" id="prop-subcounty" placeholder="e.g. Section 9, Thika">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Paybill Billing Prefix (M-Pesa)</label>
+                <input type="text" class="form-input" id="prop-paybill-prefix" required placeholder="e.g. CFV">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Caretaker Name</label>
+                <input type="text" class="form-input" id="prop-caretaker-name" placeholder="e.g. Samuel Mwangi">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Caretaker Phone</label>
+                <input type="tel" class="form-input" id="prop-caretaker-phone" placeholder="e.g. 0722445566">
+              </div>
+            </div>
+
+            <!-- Nested Segment 1: Units Builder -->
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--divider-color);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                  <h3 style="font-size: 1rem; font-weight: 700;">Nested Segment 1 — Units Builder</h3>
+                  <p style="font-size: 0.78rem; color: var(--text-muted);">Define units inline during initial property onboarding.</p>
+                </div>
+                <button type="button" class="btn-action-pill" onclick="addUnitBuilderRow()">+ Add Unit Row</button>
+              </div>
+
+              <div class="builder-table-wrap">
+                <table class="builder-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 15%;">Unit Code</th>
+                      <th style="width: 15%;">Floor</th>
+                      <th style="width: 25%;">Room Configuration</th>
+                      <th style="width: 15%;">Base Rent (KES)</th>
+                      <th style="width: 15%;">Service Charge</th>
+                      <th style="width: 10%;">Meter Serial</th>
+                      <th style="width: 5%;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="builder-units-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Nested Segment 2: Property Payables -->
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--divider-color);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                  <h3 style="font-size: 1rem; font-weight: 700;">Nested Segment 2 — Property Payables & Liabilities</h3>
+                  <p style="font-size: 0.78rem; color: var(--text-muted);">Pre-configure utility providers, land rates, security contracts, and allocation rules.</p>
+                </div>
+                <button type="button" class="btn-action-pill" onclick="addPayableBuilderRow()">+ Add Payable Row</button>
+              </div>
+
+              <div class="builder-table-wrap">
+                <table class="builder-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 25%;">Payable Name & Provider</th>
+                      <th style="width: 15%;">Category</th>
+                      <th style="width: 20%;">Provider Account / Meter</th>
+                      <th style="width: 15%;">Budget / Amount</th>
+                      <th style="width: 12%;">Frequency</th>
+                      <th style="width: 18%;">Allocation Rule</th>
+                      <th style="width: 5%;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="builder-payables-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+              <button type="submit" class="btn-elevated-primary">+ Complete Property Onboarding</button>
+            </div>
+          </form>
+
+          <!-- Properties Directory Table -->
+          <div style="margin-top: 20px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Onboarded Properties</h3>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Property Name</th>
+                    <th>LR Number</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Prefix</th>
+                    <th>Units Configured</th>
+                    <th>Payables Configured</th>
+                  </tr>
+                </thead>
+                <tbody id="table-properties-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. STANDALONE UNIT REGISTRATION -->
+      <div class="reg-panel" id="panel-standalone-units">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Standalone Unit Registration & Editing</h2>
+              <p>Add new units to existing properties with plinth dimensions, sub-metering serials, and baseline rates.</p>
+            </div>
+            <span class="live-pulse-badge">Post-Onboarding Units</span>
+          </div>
+
+          <form id="form-standalone-unit" onsubmit="handleStandaloneUnitSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group span-full">
+                <label class="form-label">Select Target Property</label>
+                <select class="form-input" id="standalone-prop-select" required></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Unit Code</label>
+                <input type="text" class="form-input" id="unit-code" required placeholder="e.g. Unit A-04 or Suite 201">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Floor Level</label>
+                <input type="text" class="form-input" id="unit-floor" placeholder="e.g. 2nd Floor">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Room Configuration</label>
+                <select class="form-input" id="unit-room-config">
+                  <option value="1_BEDROOM">1 Bedroom Apartment</option>
+                  <option value="2_BEDROOM">2 Bedroom Executive</option>
+                  <option value="3_BEDROOM">3 Bedroom Master Ensuite</option>
+                  <option value="BEDSITTER">Studio / Bedsitter</option>
+                  <option value="COMMERCIAL_OFFICE">Commercial Office Suite</option>
+                  <option value="RETAIL_SHOP">Ground Floor Retail Shop</option>
+                  <option value="WAREHOUSE_BAY">Industrial Warehouse Bay</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Plinth Area (Sq Metres / Sq Ft)</label>
+                <input type="number" step="0.01" class="form-input" id="unit-plinth" placeholder="e.g. 85.5">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Baseline Rent (KES / Month)</label>
+                <input type="number" step="0.01" class="form-input" id="unit-baseline-rent" required placeholder="e.g. 35000">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Service Charge (KES / Month)</label>
+                <input type="number" step="0.01" class="form-input" id="unit-service-charge" placeholder="e.g. 4500">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Water Sub-Meter Serial Number</label>
+                <input type="text" class="form-input" id="unit-water-meter" placeholder="e.g. WM-2024-0091">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Initial Water Reading (m³)</label>
+                <input type="number" step="0.01" class="form-input" id="unit-water-reading" placeholder="e.g. 142.50">
+              </div>
+              <div class="form-group">
+                <label class="form-label">KPLC Electricity Meter Number</label>
+                <input type="text" class="form-input" id="unit-elec-meter" placeholder="e.g. 04291829102">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Add Standalone Unit</button>
+            </div>
+          </form>
+
+          <!-- Units Directory Table -->
+          <div style="margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Units Inventory</h3>
+              <select class="pill-select" id="filter-units-by-property" onchange="renderUnitsTable()"></select>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Unit Code</th>
+                    <th>Property</th>
+                    <th>Floor</th>
+                    <th>Configuration</th>
+                    <th>Plinth Area</th>
+                    <th>Base Rent</th>
+                    <th>Service Charge</th>
+                    <th>Water Meter</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="table-units-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. PROPERTY ASSIGNMENT (MANAGEMENT MANDATES) -->
+      <div class="reg-panel" id="panel-assignments">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Property Assignment & Management Mandate</h2>
+              <p>Formally link Landlords to Properties with commission percentages, 7.5% MRI Withholding status, and 16% agency VAT.</p>
+            </div>
+            <span class="live-pulse-badge">Mandate Execution</span>
+          </div>
+
+          <form id="form-mandate" onsubmit="handleMandateSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Registered Landlord</label>
+                <select class="form-input" id="mandate-landlord-select" required></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Target Property</label>
+                <select class="form-input" id="mandate-property-select" required></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Assigned Property Manager</label>
+                <input type="text" class="form-input" id="mandate-manager" required placeholder="e.g. Eng. Dennis Mugo (Branch Lead)">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Effective Start Date</label>
+                <input type="date" class="form-input" id="mandate-effective-date" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                <input type="date" class="form-input" id="mandate-expiry-date">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Agency Management Fee (%)</label>
+                <input type="number" step="0.1" class="form-input" id="mandate-fee-pct" required placeholder="e.g. 8.5">
+              </div>
+              <div class="form-group span-full">
+                <label class="form-label">Disbursement Remittance Account</label>
+                <input type="text" class="form-input" id="mandate-disburse-acc" placeholder="e.g. KCB Bank Kenya — Acc: 1120948192 (Auto-derived from Landlord master)">
+              </div>
+              <div class="form-group span-full" style="display: flex; gap: 28px; margin-top: 4px;">
+                <label class="form-checkbox-label">
+                  <input type="checkbox" id="mandate-vat-applicable" checked>
+                  <span>16% VAT Applicable on Management Fee</span>
+                </label>
+                <label class="form-checkbox-label">
+                  <input type="checkbox" id="mandate-mri-applicable" checked>
+                  <span>7.5% Residential Monthly Rental Income (MRI) Tax Withheld</span>
+                </label>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Execute Management Mandate</button>
+            </div>
+          </form>
+
+          <!-- Mandates Directory Table -->
+          <div style="margin-top: 20px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Active Management Mandates</h3>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Landlord</th>
+                    <th>Property Assigned</th>
+                    <th>Effective - Expiry</th>
+                    <th>Mgmt Fee %</th>
+                    <th>16% VAT</th>
+                    <th>7.5% MRI Tax</th>
+                    <th>Property Manager</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="table-mandates-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- 1.2 Tenants -->
+    <!-- CLEAN PLACEHOLDERS FOR REMAINING SUB-MODULES -->
     <div class="view-content" id="view-estate-tenants">
       <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>01. Estate Management — 1.2 Tenants</h2>
-            <p>Active Leases, Water Sub-Metering, Monthly Rent & Service Charge Ledgers.</p>
-          </div>
-          <span class="live-pulse-badge">Container Ready</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
-          </div>
-          <div class="empty-stage-title">Tenant Billing & Metering Stage</div>
-          <div class="empty-stage-sub">Clean workspace initialized. Ready for mounting Lease Register, Meter Consumption Tariffs, Invoicing Engine, and M-Pesa C2B Paybill feeds.</div>
-          <div class="module-spec-pills">
-            <span class="spec-pill">Active Leases</span>
-            <span class="spec-pill">Water Meters</span>
-            <span class="spec-pill">Rent Ledger</span>
-            <span class="spec-pill">M-Pesa Reconciliation</span>
-          </div>
-        </div>
+        <h2>01. Estate Management — 1.2 Tenants</h2>
+        <p>Active Leases, Water Sub-Metering, Monthly Rent & Service Charge Ledgers.</p>
       </div>
     </div>
 
-    <!-- 1.3 Landlords -->
     <div class="view-content" id="view-estate-landlords">
       <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>01. Estate Management — 1.3 Landlords</h2>
-            <p>Management Mandates, Agency Commission, 7.5% MRI Tax, and Net Remittances.</p>
-          </div>
-          <span class="live-pulse-badge">Container Ready</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          </div>
-          <div class="empty-stage-title">Landlord Remittance & Commission Engine</div>
-          <div class="empty-stage-sub">Clean workspace initialized. Ready for mounting Mandate Terms, Statutory MRI Withholding (7.5%), 16% Agency VAT calculations, and Disbursement statements.</div>
-          <div class="module-spec-pills">
-            <span class="spec-pill">Commission Mandate</span>
-            <span class="spec-pill">7.5% MRI Withholding</span>
-            <span class="spec-pill">16% Agency VAT</span>
-            <span class="spec-pill">Remittance Slips</span>
-          </div>
-        </div>
+        <h2>01. Estate Management — 1.3 Landlords</h2>
+        <p>Management Mandates, Agency Commission, 7.5% MRI Tax, and Net Remittances.</p>
       </div>
     </div>
 
-    <!-- 1.4 Repairs & Maintenance -->
     <div class="view-content" id="view-estate-repairs">
       <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>01. Estate Management — 1.4 Repairs & Maintenance</h2>
-            <p>Incident Ticketing, Work Orders, Vendor LPOs, and 3-Way Cost Allocation.</p>
-          </div>
-          <span class="live-pulse-badge">Container Ready</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-          </div>
-          <div class="empty-stage-title">Maintenance Ticketing & LPO Pipeline</div>
-          <div class="empty-stage-sub">Clean workspace initialized. Ready for mounting Work Order authorizations, Contractor Quotations, and 3-Way allocation rules (Landlord vs Tenant vs Service Charge).</div>
-          <div class="module-spec-pills">
-            <span class="spec-pill">Job Cards</span>
-            <span class="spec-pill">Contractor LPOs</span>
-            <span class="spec-pill">3-Way Cost Split</span>
-            <span class="spec-pill">Approval Hierarchy</span>
-          </div>
-        </div>
+        <h2>01. Estate Management — 1.4 Repairs & Maintenance</h2>
+        <p>Incident Ticketing, Work Orders, Vendor LPOs, and 3-Way Cost Allocation.</p>
       </div>
     </div>
 
-    <!-- 1.5 Admin -->
     <div class="view-content" id="view-estate-admin">
       <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>01. Estate Management — 1.5 Admin</h2>
-            <p>Global Billing Periods, Utility Tariffs, Notice Templates, and Audit Trails.</p>
-          </div>
-          <span class="live-pulse-badge">Container Ready</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          <div class="empty-stage-title">Estate Administration & Governance</div>
-          <div class="empty-stage-sub">Clean workspace initialized. Ready for mounting Month Billing Automation, Water Tariff Multipliers, SMS Notice Generators, and Immutable Audit Logs.</div>
-          <div class="module-spec-pills">
-            <span class="spec-pill">Billing Batch Jobs</span>
-            <span class="spec-pill">Tariff Tables</span>
-            <span class="spec-pill">SMS Templates</span>
-            <span class="spec-pill">Audit Trail</span>
-          </div>
-        </div>
+        <h2>01. Estate Management — 1.5 Admin</h2>
+        <p>Global Billing Periods, Utility Tariffs, Notice Templates, and Audit Trails.</p>
       </div>
     </div>
 
-    <!-- 02. Agency CRM -->
     <div class="view-content" id="view-mod-agency">
       <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>02. Agency CRM</h2>
-            <p>Commercial & Residential Sales, Letting Listings, and Client Deal Pipeline.</p>
-          </div>
-          <span class="live-pulse-badge">Placeholder Container</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <div class="empty-stage-title">Agency & Brokerage Pipeline</div>
-          <div class="empty-stage-sub">Clean container strictly aligned with Master Plan Section 02. Ready for property listings, site viewing registries, and agent commissions.</div>
-        </div>
+        <h2>02. Agency CRM</h2>
+        <p>Commercial & Residential Sales, Letting Listings, and Client Deal Pipeline.</p>
       </div>
     </div>
 
-    <!-- 03. Valuation -->
     <div class="view-content" id="view-mod-valuation">
       <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>03. Valuation</h2>
-            <p>Property Appraisals, Comparable Market Analytics, and Sign-off Certifications.</p>
-          </div>
-          <span class="live-pulse-badge">Placeholder Container</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
-          <div class="empty-stage-title">Asset Valuation & Inspection Register</div>
-          <div class="empty-stage-sub">Clean container strictly aligned with Master Plan Section 03. Ready for bank valuation instructions, field inspection notes, and valuation report generation.</div>
-        </div>
+        <h2>03. Valuation</h2>
+        <p>Property Appraisals, Comparable Market Analytics, and Sign-off Certifications.</p>
       </div>
     </div>
 
-    <!-- 04. Administration -->
     <div class="view-content" id="view-mod-admin">
       <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>04. Administration</h2>
-            <p>Human Resources, Fleet Logistics, Corporate Assets, and Procurement.</p>
-          </div>
-          <span class="live-pulse-badge">Placeholder Container</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          </div>
-          <div class="empty-stage-title">Corporate Administration & HR Operations</div>
-          <div class="empty-stage-sub">Clean container strictly aligned with Master Plan Section 04. Ready for employee directory, vehicle checkout logs, and office asset lifecycle registers.</div>
-        </div>
+        <h2>04. Administration</h2>
+        <p>Human Resources, Fleet Logistics, Corporate Assets, and Procurement.</p>
       </div>
     </div>
 
-    <!-- 05. Finance -->
     <div class="view-content" id="view-mod-finance">
       <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>05. Finance</h2>
-            <p>Consolidated Multi-Branch General Ledger, Accounts Payable, and Trial Balance.</p>
-          </div>
-          <span class="live-pulse-badge">Placeholder Container</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-          <div class="empty-stage-title">Corporate Financial Accounting & General Ledger</div>
-          <div class="empty-stage-sub">Clean container strictly aligned with Master Plan Section 05. Ready for double-entry journals, chart of accounts, bank statement reconciliation, and financial reports.</div>
-        </div>
+        <h2>05. Finance</h2>
+        <p>Consolidated Multi-Branch General Ledger, Accounts Payable, and Trial Balance.</p>
       </div>
     </div>
 
-    <!-- 06. Workplace Operations -->
     <div class="view-content" id="view-mod-operations">
       <div class="glass-card clean-module-container">
-        <div class="module-header-strip">
-          <div class="module-title-box">
-            <h2>06. Workplace Operations</h2>
-            <p>Headquarters Operations, Boardroom Bookings, and Archive Management.</p>
-          </div>
-          <span class="live-pulse-badge">Placeholder Container</span>
-        </div>
-        <div class="empty-stage-canvas">
-          <div class="empty-icon-circle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="8" height="8" x="2" y="2" rx="2"/><rect width="8" height="8" x="14" y="2" rx="2"/><rect width="8" height="8" x="14" y="14" rx="2"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>
-          </div>
-          <div class="empty-stage-title">Workplace & Facility Facilities Management</div>
-          <div class="empty-stage-sub">Clean container strictly aligned with Master Plan Section 06. Ready for boardroom schedules, internal IT helpdesk tickets, and barcode document archiving.</div>
-        </div>
+        <h2>06. Workplace Operations</h2>
+        <p>Headquarters Operations, Boardroom Bookings, and Archive Management.</p>
       </div>
     </div>
 
-    <!-- 07. SETTINGS (PRESERVED & FULLY FUNCTIONAL) -->
+    <!-- 07. SETTINGS (PRESERVED) -->
     <div class="view-content" id="view-settings">
       <div class="glass-card" style="padding: 28px; margin-bottom: 24px;">
         <h2 style="font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em;">Enterprise Theme Studio & Settings</h2>
@@ -1346,9 +1858,7 @@
           Configure global design systems, branch routing, and external gateway touchpoints.
         </p>
 
-        <!-- Theme Studio Gallery -->
         <div class="settings-grid">
-          <!-- Flowly -->
           <div class="glass-surface theme-card" data-theme-target="flowly">
             <span class="theme-badge-applied">✓ Active Theme</span>
             <div class="theme-preview-box" style="background: repeating-linear-gradient(90deg, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.18) 4px, rgba(0,0,0,0.02) 10px, rgba(255,255,255,0.3) 18px), linear-gradient(135deg, #DDD6FE, #CFFAFE, #FCE7F3);">
@@ -1371,7 +1881,6 @@
             </div>
           </div>
 
-          <!-- Cobalt -->
           <div class="glass-surface theme-card" data-theme-target="cobalt">
             <span class="theme-badge-applied">✓ Active Theme</span>
             <div class="theme-preview-box" style="background: radial-gradient(circle at 75% 25%, #3B82F6, #1E3A8A 55%, #050B14);">
@@ -1399,7 +1908,6 @@
             </div>
           </div>
 
-          <!-- Hireism -->
           <div class="glass-surface theme-card" data-theme-target="hireism">
             <span class="theme-badge-applied">✓ Active Theme</span>
             <div class="theme-preview-box" style="background: #EAE8FE;">
@@ -1422,7 +1930,6 @@
             </div>
           </div>
 
-          <!-- Obsidian -->
           <div class="glass-surface theme-card" data-theme-target="obsidian">
             <span class="theme-badge-applied">✓ Active Theme</span>
             <div class="theme-preview-box" style="background: linear-gradient(135deg, #060A0D, #0D171A, #081214);">
@@ -1446,10 +1953,8 @@
           </div>
         </div>
 
-        <!-- System Preferences & Integration Endpoints -->
         <div class="pref-section">
           <h3 style="font-size: 1.15rem; font-weight: 800;">System Preferences & External Gateways</h3>
-          
           <div class="pref-row">
             <div class="pref-meta">
               <h4>Active Operational Branch</h4>
@@ -1463,29 +1968,12 @@
               <option>Mombasa Coastal Branch</option>
             </select>
           </div>
-
           <div class="pref-row">
             <div class="pref-meta">
               <h4>Safaricom Daraja M-Pesa C2B Paybill Gateway</h4>
               <p>Shortcode 4098123 • Instant Validation and Confirmation Webhooks</p>
             </div>
-            <span class="spec-pill" style="color: var(--accent-secondary); font-weight: 700;">Connected • Live</span>
-          </div>
-
-          <div class="pref-row">
-            <div class="pref-meta">
-              <h4>KRA eTIMS Tax Compliance Engine</h4>
-              <p>7.5% Residential MRI Withholding & 16% Management Fee VAT Invoicing</p>
-            </div>
-            <span class="spec-pill" style="color: var(--accent-secondary); font-weight: 700;">Compliant • 2026</span>
-          </div>
-
-          <div class="pref-row">
-            <div class="pref-meta">
-              <h4>Repository Cloud Sync</h4>
-              <p>GitHub: Corel41/MC_ERP • Google Drive Automated Backup Pipeline</p>
-            </div>
-            <span class="spec-pill" style="color: var(--accent-primary); font-weight: 700;">Synchronized</span>
+            <span class="badge-status" style="color: var(--accent-secondary);">Connected • Live</span>
           </div>
         </div>
       </div>
@@ -1496,10 +1984,153 @@
   <div class="toast-tray" id="toast-tray"></div>
 
   <script>
-    const App = {
+    const AppState = {
+      organizationId: "org-metrocosmo-001",
       theme: 'flowly',
       sidebarCollapsed: false,
-      activeView: 'estate-reg'
+      activeView: 'estate-reg',
+      activeRegTab: 'landlords',
+      landlords: [
+        {
+          id: 'LL-01',
+          entityType: 'CORPORATE',
+          name: 'Mugo Investments Ltd',
+          idReg: 'CPR/2012/84910',
+          kraPin: 'P051189201A',
+          phone: '+254722100200',
+          email: 'finance@mugoinvestments.co.ke',
+          remitMethod: 'BANK',
+          bank: 'KCB Bank Kenya',
+          branch: 'Thika Section 9',
+          accNo: '1120948192'
+        },
+        {
+          id: 'LL-02',
+          entityType: 'INDIVIDUAL',
+          name: 'Dr. Sarah Simba',
+          idReg: '24189012',
+          kraPin: 'P051482910K',
+          phone: '+254721900800',
+          email: 'sarah.simba@premier.co.ke',
+          remitMethod: 'BANK',
+          bank: 'Standard Chartered',
+          branch: 'Kenyatta Ave',
+          accNo: '01002938102'
+        }
+      ],
+      tenants: [
+        {
+          id: 'TEN-01',
+          name: 'Grace Wanjiru Ndungu',
+          idPassport: '31984210',
+          phone: '0712345678',
+          kraPin: 'A010948192K',
+          emergency: 'John Ndungu (0722998877)',
+          workplace: 'PwC Kenya, Delta Corner Westlands'
+        },
+        {
+          id: 'TEN-02',
+          name: 'Kevin Kiprop Patel',
+          idPassport: '28491022',
+          phone: '0720112233',
+          kraPin: 'A009182910M',
+          emergency: 'Mary Patel (0722334455)',
+          workplace: 'KPMG Kenya, ABC Place Waiyaki Way'
+        }
+      ],
+      properties: [
+        {
+          id: 'PROP-01',
+          name: 'Chania Falls View Courts',
+          lr: 'THIKA/MUNICIPALITY/BLOCK 4/182',
+          type: 'RESIDENTIAL',
+          county: 'Kiambu',
+          subCounty: 'Section 9, Thika',
+          prefix: 'CFV',
+          caretaker: 'Samuel Mwangi (0722445566)',
+          unitsCount: 4,
+          payablesCount: 3
+        },
+        {
+          id: 'PROP-02',
+          name: 'Kilimani Crest Executive Apartments',
+          lr: 'NAIROBI/BLOCK 33/502',
+          type: 'RESIDENTIAL',
+          county: 'Nairobi',
+          subCounty: 'Kilimani, Nairobi',
+          prefix: 'KIL',
+          caretaker: 'Joseph Mutua (0721887766)',
+          unitsCount: 2,
+          payablesCount: 2
+        }
+      ],
+      units: [
+        {
+          id: 'UNIT-01',
+          propertyId: 'PROP-01',
+          propertyName: 'Chania Falls View Courts',
+          code: 'A-01',
+          floor: 'Ground Floor',
+          config: '2_BEDROOM',
+          plinth: 85.0,
+          rent: 32000,
+          sc: 3500,
+          meter: 'WM-CFV-001',
+          status: 'OCCUPIED'
+        },
+        {
+          id: 'UNIT-02',
+          propertyId: 'PROP-01',
+          propertyName: 'Chania Falls View Courts',
+          code: 'A-02',
+          floor: 'Ground Floor',
+          config: '2_BEDROOM',
+          plinth: 85.0,
+          rent: 32000,
+          sc: 3500,
+          meter: 'WM-CFV-002',
+          status: 'VACANT'
+        },
+        {
+          id: 'UNIT-03',
+          propertyId: 'PROP-02',
+          propertyName: 'Kilimani Crest Executive Apartments',
+          code: 'K-101',
+          floor: '1st Floor',
+          config: '3_BEDROOM',
+          plinth: 140.0,
+          rent: 75000,
+          sc: 7500,
+          meter: 'WM-KIL-101',
+          status: 'OCCUPIED'
+        }
+      ],
+      mandates: [
+        {
+          id: 'MND-01',
+          landlordName: 'Mugo Investments Ltd',
+          propertyName: 'Chania Falls View Courts',
+          effective: '2026-01-01',
+          expiry: '2028-12-31',
+          feePct: 8.5,
+          vat: true,
+          mri: true,
+          manager: 'Eng. Dennis Mugo',
+          status: 'ACTIVE'
+        },
+        {
+          id: 'MND-02',
+          landlordName: 'Dr. Sarah Simba',
+          propertyName: 'Kilimani Crest Executive Apartments',
+          effective: '2026-03-01',
+          expiry: '2029-02-28',
+          feePct: 8.0,
+          vat: true,
+          mri: true,
+          manager: 'Alex Kamau',
+          status: 'ACTIVE'
+        }
+      ]
     };
 
     const root = document.documentElement;
@@ -1518,7 +2149,7 @@
     const toastTray = document.getElementById('toast-tray');
 
     function setTheme(newTheme) {
-      App.theme = newTheme;
+      AppState.theme = newTheme;
       root.setAttribute('data-theme', newTheme);
       localStorage.setItem('mc_erp_theme_choice', newTheme);
       quickThemeDropdown.value = newTheme;
@@ -1537,22 +2168,15 @@
         hireism: 'Hireism Modern SaaS',
         obsidian: 'Obsidian & Emerald'
       };
-
       headerThemeIndicator.textContent = themeNames[newTheme] || 'Enterprise Grid';
-      showToast(`Applied Theme: ${themeNames[newTheme]}`);
     }
 
     quickThemeDropdown.addEventListener('change', (e) => setTheme(e.target.value));
-
-    themeCards.forEach(card => {
-      card.addEventListener('click', () => {
-        setTheme(card.getAttribute('data-theme-target'));
-      });
-    });
+    themeCards.forEach(card => card.addEventListener('click', () => setTheme(card.getAttribute('data-theme-target'))));
 
     function toggleSidebar() {
-      App.sidebarCollapsed = !App.sidebarCollapsed;
-      if (App.sidebarCollapsed) {
+      AppState.sidebarCollapsed = !AppState.sidebarCollapsed;
+      if (AppState.sidebarCollapsed) {
         sidebar.classList.add('collapsed');
         body.classList.add('sidebar-collapsed');
         chevronSvg.innerHTML = '<path d="M15 18l-6-6 6-6"/>';
@@ -1566,12 +2190,10 @@
     }
 
     sidebarToggleBtn.addEventListener('click', toggleSidebar);
-    brandGlyphBtn.addEventListener('click', () => {
-      if (App.sidebarCollapsed) toggleSidebar();
-    });
+    brandGlyphBtn.addEventListener('click', () => { if (AppState.sidebarCollapsed) toggleSidebar(); });
 
     function switchView(viewName, title) {
-      App.activeView = viewName;
+      AppState.activeView = viewName;
       currentPageTitle.textContent = title;
 
       navItems.forEach(item => {
@@ -1582,28 +2204,394 @@
         }
       });
 
-      document.querySelectorAll('.view-content').forEach(view => {
-        view.classList.remove('active');
-      });
-
+      document.querySelectorAll('.view-content').forEach(view => view.classList.remove('active'));
       const targetEl = document.getElementById(`view-${viewName}`);
-      if (targetEl) {
-        targetEl.classList.add('active');
-      }
+      if (targetEl) targetEl.classList.add('active');
       showToast(`Active View: ${title}`);
     }
 
     navItems.forEach(item => {
       item.addEventListener('click', () => {
-        const view = item.getAttribute('data-view');
-        const tooltip = item.getAttribute('data-tooltip');
-        switchView(view, tooltip);
+        switchView(item.getAttribute('data-view'), item.getAttribute('data-tooltip'));
       });
     });
 
-    quickSettingsBtn.addEventListener('click', () => {
-      switchView('settings', '07. Settings');
+    quickSettingsBtn.addEventListener('click', () => switchView('settings', '07. Settings'));
+
+    /* 1.1 REGISTRATION TAB SWITCHING */
+    const regTabBtns = document.querySelectorAll('.reg-tab-btn');
+    regTabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        regTabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const target = btn.getAttribute('data-reg-target');
+        AppState.activeRegTab = target;
+        document.querySelectorAll('.reg-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`panel-${target}`).classList.add('active');
+      });
     });
+
+    /* FORM TOGGLES */
+    function toggleLandlordEntityFields() {
+      const type = document.getElementById('landlord-entity-type').value;
+      const isCorp = type === 'CORPORATE';
+      document.getElementById('group-ll-first-name').style.display = isCorp ? 'none' : 'flex';
+      document.getElementById('group-ll-middle-name').style.display = isCorp ? 'none' : 'flex';
+      document.getElementById('group-ll-last-name').style.display = isCorp ? 'none' : 'flex';
+      document.getElementById('group-ll-company-name').style.display = isCorp ? 'flex' : 'none';
+
+      document.getElementById('landlord-first-name').required = !isCorp;
+      document.getElementById('landlord-last-name').required = !isCorp;
+      document.getElementById('landlord-company-name').required = isCorp;
+    }
+
+    function toggleLandlordRemitFields() {
+      const method = document.getElementById('landlord-remit-method').value;
+      const isBank = method === 'BANK';
+      document.getElementById('group-ll-bank-name').style.display = isBank ? 'flex' : 'none';
+      document.getElementById('group-ll-bank-branch').style.display = isBank ? 'flex' : 'none';
+      document.getElementById('group-ll-bank-acc').style.display = isBank ? 'flex' : 'none';
+      document.getElementById('group-ll-mpesa-b2c').style.display = isBank ? 'none' : 'flex';
+    }
+
+    /* 1. LANDLORD SUBMIT */
+    function handleLandlordSubmit(e) {
+      e.preventDefault();
+      const entityType = document.getElementById('landlord-entity-type').value;
+      const name = entityType === 'CORPORATE' 
+        ? document.getElementById('landlord-company-name').value
+        : `${document.getElementById('landlord-first-name').value} ${document.getElementById('landlord-last-name').value}`;
+
+      const newLL = {
+        id: `LL-${String(AppState.landlords.length + 1).padStart(2, '0')}`,
+        entityType,
+        name,
+        idReg: document.getElementById('landlord-id-reg').value,
+        kraPin: document.getElementById('landlord-kra-pin').value,
+        phone: document.getElementById('landlord-phone').value,
+        email: document.getElementById('landlord-email').value,
+        remitMethod: document.getElementById('landlord-remit-method').value,
+        bank: document.getElementById('landlord-bank-name').value,
+        branch: document.getElementById('landlord-bank-branch').value,
+        accNo: document.getElementById('landlord-bank-acc').value
+      };
+
+      AppState.landlords.push(newLL);
+      renderLandlordsTable();
+      populateDropdowns();
+      e.target.reset();
+      showToast(`Landlord ${name} registered successfully`);
+    }
+
+    function renderLandlordsTable() {
+      const tbody = document.getElementById('table-landlords-body');
+      tbody.innerHTML = AppState.landlords.map(ll => `
+        <tr>
+          <td><span class="badge-status">${ll.entityType}</span></td>
+          <td><strong>${ll.name}</strong></td>
+          <td><code>${ll.idReg}</code></td>
+          <td><code>${ll.kraPin}</code></td>
+          <td>${ll.phone}</td>
+          <td>${ll.remitMethod === 'BANK' ? `${ll.bank} (${ll.accNo})` : 'M-Pesa B2C'}</td>
+          <td><span class="badge-status" style="color: var(--accent-secondary);">VERIFIED</span></td>
+        </tr>
+      `).join('');
+    }
+
+    /* 2. TENANT SUBMIT */
+    function handleTenantSubmit(e) {
+      e.preventDefault();
+      const first = document.getElementById('tenant-first-name').value;
+      const mid = document.getElementById('tenant-middle-name').value;
+      const surname = document.getElementById('tenant-surname').value;
+      const name = `${first} ${mid ? mid + ' ' : ''}${surname}`;
+
+      const newTenant = {
+        id: `TEN-${String(AppState.tenants.length + 1).padStart(2, '0')}`,
+        name,
+        idPassport: document.getElementById('tenant-id-passport').value,
+        phone: document.getElementById('tenant-phone-primary').value,
+        kraPin: document.getElementById('tenant-kra-pin').value || 'N/A',
+        emergency: `${document.getElementById('tenant-emergency-name').value} (${document.getElementById('tenant-emergency-phone').value})`,
+        workplace: document.getElementById('tenant-workplace').value || 'Unspecified'
+      };
+
+      AppState.tenants.push(newTenant);
+      renderTenantsTable();
+      e.target.reset();
+      showToast(`Tenant ${name} registered with C2B phone ${newTenant.phone}`);
+    }
+
+    function renderTenantsTable() {
+      const tbody = document.getElementById('table-tenants-body');
+      tbody.innerHTML = AppState.tenants.map(t => `
+        <tr>
+          <td><strong>${t.name}</strong></td>
+          <td><code>${t.idPassport}</code></td>
+          <td><strong>${t.phone}</strong></td>
+          <td><code>${t.kraPin}</code></td>
+          <td>${t.emergency}</td>
+          <td><small>${t.workplace}</small></td>
+        </tr>
+      `).join('');
+    }
+
+    /* 3. PROPERTY SUBMIT & BUILDERS */
+    let builderUnitRows = [
+      { code: 'A-01', floor: 'Ground', config: '2_BEDROOM', rent: 32000, sc: 3500, meter: 'WM-001' },
+      { code: 'A-02', floor: 'Ground', config: '2_BEDROOM', rent: 32000, sc: 3500, meter: 'WM-002' }
+    ];
+
+    let builderPayableRows = [
+      { name: 'KPLC Common Area Power', cat: 'UTILITIES', acc: 'KPLC-8491029', amount: 8500, freq: 'MONTHLY', alloc: 'SERVICE_CHARGE_POOL' },
+      { name: 'NCWSC Bulk Water Inflow', cat: 'UTILITIES', acc: 'NCWSC-09281', amount: 14000, freq: 'MONTHLY', alloc: 'SERVICE_CHARGE_POOL' },
+      { name: 'County Government Land Rates', cat: 'TAX_RATES', acc: 'KMB-LR-8491', amount: 45000, freq: 'ANNUAL', alloc: 'LANDLORD_DEDUCTIBLE' }
+    ];
+
+    function renderBuilderUnits() {
+      const tbody = document.getElementById('builder-units-body');
+      tbody.innerHTML = builderUnitRows.map((r, i) => `
+        <tr>
+          <td><input type="text" class="builder-input" value="${r.code}" onchange="builderUnitRows[${i}].code=this.value"></td>
+          <td><input type="text" class="builder-input" value="${r.floor}" onchange="builderUnitRows[${i}].floor=this.value"></td>
+          <td>
+            <select class="builder-input" onchange="builderUnitRows[${i}].config=this.value">
+              <option value="1_BEDROOM" ${r.config==='1_BEDROOM'?'selected':''}>1 Bedroom</option>
+              <option value="2_BEDROOM" ${r.config==='2_BEDROOM'?'selected':''}>2 Bedroom</option>
+              <option value="3_BEDROOM" ${r.config==='3_BEDROOM'?'selected':''}>3 Bedroom</option>
+              <option value="BEDSITTER" ${r.config==='BEDSITTER'?'selected':''}>Bedsitter / Studio</option>
+              <option value="COMMERCIAL_OFFICE" ${r.config==='COMMERCIAL_OFFICE'?'selected':''}>Commercial Office</option>
+            </select>
+          </td>
+          <td><input type="number" class="builder-input" value="${r.rent}" onchange="builderUnitRows[${i}].rent=Number(this.value)"></td>
+          <td><input type="number" class="builder-input" value="${r.sc}" onchange="builderUnitRows[${i}].sc=Number(this.value)"></td>
+          <td><input type="text" class="builder-input" value="${r.meter}" onchange="builderUnitRows[${i}].meter=this.value"></td>
+          <td><button type="button" class="btn-action-pill" onclick="removeUnitBuilderRow(${i})">✕</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function addUnitBuilderRow() {
+      builderUnitRows.push({ code: `Unit-${builderUnitRows.length + 1}`, floor: '1st', config: '2_BEDROOM', rent: 30000, sc: 3500, meter: `WM-${builderUnitRows.length + 1}` });
+      renderBuilderUnits();
+    }
+
+    function removeUnitBuilderRow(idx) {
+      builderUnitRows.splice(idx, 1);
+      renderBuilderUnits();
+    }
+
+    function renderBuilderPayables() {
+      const tbody = document.getElementById('builder-payables-body');
+      tbody.innerHTML = builderPayableRows.map((r, i) => `
+        <tr>
+          <td><input type="text" class="builder-input" value="${r.name}" onchange="builderPayableRows[${i}].name=this.value"></td>
+          <td>
+            <select class="builder-input" onchange="builderPayableRows[${i}].cat=this.value">
+              <option value="UTILITIES" ${r.cat==='UTILITIES'?'selected':''}>Utilities</option>
+              <option value="TAX_RATES" ${r.cat==='TAX_RATES'?'selected':''}>Tax & Land Rates</option>
+              <option value="SECURITY" ${r.cat==='SECURITY'?'selected':''}>Security</option>
+              <option value="INSURANCE" ${r.cat==='INSURANCE'?'selected':''}>Insurance</option>
+            </select>
+          </td>
+          <td><input type="text" class="builder-input" value="${r.acc}" onchange="builderPayableRows[${i}].acc=this.value"></td>
+          <td><input type="number" class="builder-input" value="${r.amount}" onchange="builderPayableRows[${i}].amount=Number(this.value)"></td>
+          <td>
+            <select class="builder-input" onchange="builderPayableRows[${i}].freq=this.value">
+              <option value="MONTHLY" ${r.freq==='MONTHLY'?'selected':''}>Monthly</option>
+              <option value="QUARTERLY" ${r.freq==='QUARTERLY'?'selected':''}>Quarterly</option>
+              <option value="ANNUAL" ${r.freq==='ANNUAL'?'selected':''}>Annual</option>
+            </select>
+          </td>
+          <td>
+            <select class="builder-input" onchange="builderPayableRows[${i}].alloc=this.value">
+              <option value="SERVICE_CHARGE_POOL" ${r.alloc==='SERVICE_CHARGE_POOL'?'selected':''}>Service Charge Pool</option>
+              <option value="LANDLORD_DEDUCTIBLE" ${r.alloc==='LANDLORD_DEDUCTIBLE'?'selected':''}>Landlord Deductible</option>
+            </select>
+          </td>
+          <td><button type="button" class="btn-action-pill" onclick="removePayableBuilderRow(${i})">✕</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function addPayableBuilderRow() {
+      builderPayableRows.push({ name: 'Private Security Manned Guarding', cat: 'SECURITY', acc: 'SEC-8910', amount: 35000, freq: 'MONTHLY', alloc: 'SERVICE_CHARGE_POOL' });
+      renderBuilderPayables();
+    }
+
+    function removePayableBuilderRow(idx) {
+      builderPayableRows.splice(idx, 1);
+      renderBuilderPayables();
+    }
+
+    function handlePropertySubmit(e) {
+      e.preventDefault();
+      const propId = `PROP-${String(AppState.properties.length + 1).padStart(2, '0')}`;
+      const name = document.getElementById('prop-name').value;
+
+      const newProp = {
+        id: propId,
+        name,
+        lr: document.getElementById('prop-lr').value,
+        type: document.getElementById('prop-type').value,
+        county: document.getElementById('prop-county').value,
+        subCounty: document.getElementById('prop-subcounty').value,
+        prefix: document.getElementById('prop-paybill-prefix').value,
+        caretaker: `${document.getElementById('prop-caretaker-name').value} (${document.getElementById('prop-caretaker-phone').value})`,
+        unitsCount: builderUnitRows.length,
+        payablesCount: builderPayableRows.length
+      };
+
+      AppState.properties.push(newProp);
+
+      // Add built units to unit inventory
+      builderUnitRows.forEach((bu, idx) => {
+        AppState.units.push({
+          id: `UNIT-${AppState.units.length + 1}`,
+          propertyId: propId,
+          propertyName: name,
+          code: bu.code,
+          floor: bu.floor,
+          config: bu.config,
+          plinth: 80.0,
+          rent: bu.rent,
+          sc: bu.sc,
+          meter: bu.meter,
+          status: 'VACANT'
+        });
+      });
+
+      renderPropertiesTable();
+      renderUnitsTable();
+      populateDropdowns();
+      e.target.reset();
+      showToast(`Property "${name}" onboarded with ${newProp.unitsCount} units and ${newProp.payablesCount} payables`);
+    }
+
+    function renderPropertiesTable() {
+      const tbody = document.getElementById('table-properties-body');
+      tbody.innerHTML = AppState.properties.map(p => `
+        <tr>
+          <td><strong>${p.name}</strong></td>
+          <td><code>${p.lr}</code></td>
+          <td><span class="badge-status">${p.type}</span></td>
+          <td>${p.subCounty}, ${p.county}</td>
+          <td><code>${p.prefix}</code></td>
+          <td><strong>${p.unitsCount} Units</strong></td>
+          <td>${p.payablesCount} Payables</td>
+        </tr>
+      `).join('');
+    }
+
+    /* 4. STANDALONE UNIT SUBMIT */
+    function handleStandaloneUnitSubmit(e) {
+      e.preventDefault();
+      const propId = document.getElementById('standalone-prop-select').value;
+      const prop = AppState.properties.find(p => p.id === propId) || AppState.properties[0];
+
+      const newUnit = {
+        id: `UNIT-${AppState.units.length + 1}`,
+        propertyId: prop.id,
+        propertyName: prop.name,
+        code: document.getElementById('unit-code').value,
+        floor: document.getElementById('unit-floor').value || 'Ground',
+        config: document.getElementById('unit-room-config').value,
+        plinth: Number(document.getElementById('unit-plinth').value) || 0,
+        rent: Number(document.getElementById('unit-baseline-rent').value) || 0,
+        sc: Number(document.getElementById('unit-service-charge').value) || 0,
+        meter: document.getElementById('unit-water-meter').value || 'N/A',
+        status: 'VACANT'
+      };
+
+      AppState.units.push(newUnit);
+      prop.unitsCount = (prop.unitsCount || 0) + 1;
+      renderUnitsTable();
+      renderPropertiesTable();
+      e.target.reset();
+      showToast(`Unit ${newUnit.code} added to ${prop.name}`);
+    }
+
+    function renderUnitsTable() {
+      const filterProp = document.getElementById('filter-units-by-property').value;
+      const filtered = filterProp === 'ALL' || !filterProp
+        ? AppState.units
+        : AppState.units.filter(u => u.propertyId === filterProp);
+
+      const tbody = document.getElementById('table-units-body');
+      tbody.innerHTML = filtered.map(u => `
+        <tr>
+          <td><strong>${u.code}</strong></td>
+          <td>${u.propertyName}</td>
+          <td>${u.floor}</td>
+          <td>${u.config}</td>
+          <td>${u.plinth ? u.plinth + ' m²' : '—'}</td>
+          <td><strong>KES ${Number(u.rent).toLocaleString()}</strong></td>
+          <td>KES ${Number(u.sc).toLocaleString()}</td>
+          <td><code>${u.meter}</code></td>
+          <td><span class="badge-status" style="color: ${u.status==='OCCUPIED'?'var(--accent-secondary)':'var(--accent-amber)'};">${u.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    /* 5. PROPERTY ASSIGNMENT (MANDATE) SUBMIT */
+    function handleMandateSubmit(e) {
+      e.preventDefault();
+      const llId = document.getElementById('mandate-landlord-select').value;
+      const propId = document.getElementById('mandate-property-select').value;
+      const landlord = AppState.landlords.find(l => l.id === llId) || AppState.landlords[0];
+      const property = AppState.properties.find(p => p.id === propId) || AppState.properties[0];
+
+      const newMandate = {
+        id: `MND-${String(AppState.mandates.length + 1).padStart(2, '0')}`,
+        landlordName: landlord.name,
+        propertyName: property.name,
+        effective: document.getElementById('mandate-effective-date').value,
+        expiry: document.getElementById('mandate-expiry-date').value || 'Open-ended',
+        feePct: Number(document.getElementById('mandate-fee-pct').value),
+        vat: document.getElementById('mandate-vat-applicable').checked,
+        mri: document.getElementById('mandate-mri-applicable').checked,
+        manager: document.getElementById('mandate-manager').value,
+        status: 'ACTIVE'
+      };
+
+      AppState.mandates.push(newMandate);
+      renderMandatesTable();
+      e.target.reset();
+      showToast(`Management Mandate executed for ${property.name}`);
+    }
+
+    function renderMandatesTable() {
+      const tbody = document.getElementById('table-mandates-body');
+      tbody.innerHTML = AppState.mandates.map(m => `
+        <tr>
+          <td><strong>${m.landlordName}</strong></td>
+          <td>${m.propertyName}</td>
+          <td>${m.effective} to ${m.expiry}</td>
+          <td><strong>${m.feePct}%</strong></td>
+          <td>${m.vat ? '<span style="color: var(--accent-secondary);">✓ 16% VAT</span>' : 'Exempt'}</td>
+          <td>${m.mri ? '<span style="color: var(--accent-secondary);">✓ 7.5% MRI</span>' : 'Exempt'}</td>
+          <td>${m.manager}</td>
+          <td><span class="badge-status" style="color: var(--accent-secondary);">${m.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    function populateDropdowns() {
+      // Standalone units property selector
+      const pSelect = document.getElementById('standalone-prop-select');
+      const pFilter = document.getElementById('filter-units-by-property');
+      const mPropSelect = document.getElementById('mandate-property-select');
+
+      const propOpts = AppState.properties.map(p => `<option value="${p.id}">${p.name} (${p.lr})</option>`).join('');
+      pSelect.innerHTML = propOpts;
+      mPropSelect.innerHTML = propOpts;
+      pFilter.innerHTML = `<option value="ALL">All Properties</option>${propOpts}`;
+
+      // Mandate landlord selector
+      const mLlSelect = document.getElementById('mandate-landlord-select');
+      mLlSelect.innerHTML = AppState.landlords.map(l => `<option value="${l.id}">${l.name} (${l.kraPin})</option>`).join('');
+    }
 
     function showToast(msg) {
       const bubble = document.createElement('div');
@@ -1617,11 +2605,20 @@
         bubble.style.opacity = '0';
         bubble.style.transform = 'translateY(10px)';
         setTimeout(() => bubble.remove(), 250);
-      }, 2800);
+      }, 3000);
     }
 
+    // Initialize Sub-Module 1.1 UI
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'flowly';
     setTheme(savedTheme);
+    renderLandlordsTable();
+    renderTenantsTable();
+    renderBuilderUnits();
+    renderBuilderPayables();
+    renderPropertiesTable();
+    renderUnitsTable();
+    renderMandatesTable();
+    populateDropdowns();
   </script>
 </body>
 </html>
