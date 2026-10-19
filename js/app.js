@@ -1735,7 +1735,7 @@ const AppState = {
           <td>
             <div style="display: flex; gap: 6px;">
               <button type="button" class="btn-action-pill" style="color: var(--accent-primary); border-color: var(--accent-primary);" onclick="editProperty('${p.id}')">Edit</button>
-              <button type="button" class="btn-action-pill" style="color: var(--accent-secondary); border-color: var(--accent-secondary); font-weight: 700;" onclick="openBulkUnitEditor('${p.id}')">⚡ Bulk Units</button>
+              <button type="button" class="btn-action-pill" style="color: #EA580C; border-color: #EA580C; font-weight: 700;" onclick="openBulkUnitEditor('${p.id}')">⚡ Unit Details Bulk</button>
             </div>
           </td>
         </tr>
@@ -1906,11 +1906,17 @@ const AppState = {
       if (mPropSelect) mPropSelect.innerHTML = propOpts;
       if (pFilter) pFilter.innerHTML = `<option value="ALL">All Properties</option>${propOpts}`;
 
-      // Bulk units property selector
+      // Unit Details Bulk property selector (formatted e.g. 'Elgon View - Elijah Chindia')
       const bulkPropSelect = document.getElementById('bulk-prop-select');
       if (bulkPropSelect) {
         const prev = bulkPropSelect.value;
-        bulkPropSelect.innerHTML = propOpts;
+        const bulkOpts = AppState.properties.map(p => {
+          const ll = AppState.landlords.find(l => l.id === p.landlordId) || 
+                     (AppState.mandates.find(m => m.propertyId === p.id) ? AppState.landlords.find(l => l.id === AppState.mandates.find(m => m.propertyId === p.id).landlordId) : null);
+          const label = ll ? `${p.name} - ${ll.name}` : `${p.name} (${p.lr || ''})`;
+          return `<option value="${p.id}">${label}</option>`;
+        }).join('');
+        bulkPropSelect.innerHTML = bulkOpts;
         if (prev && AppState.properties.some(p => p.id === prev)) {
           bulkPropSelect.value = prev;
         } else if (activeBulkPropertyId && AppState.properties.some(p => p.id === activeBulkPropertyId)) {
@@ -1927,15 +1933,67 @@ const AppState = {
     }
 
     /* ==========================================================================
-       SUB-MODULE 1.1: SECTION 6 - BULK UNITS & FINANCIAL FORMULAS ENGINE
+       SUB-MODULE 1.1: SECTION 6 - UNIT DETAILS BULK (LEGACY PROMATRIX LAYOUT)
        ========================================================================== */
     let activeBulkPropertyId = null;
     let bulkGridUnits = [];
-    let bulkSelectedIndices = new Set();
 
-    function formatKES(val) {
-      const num = Number(val) || 0;
-      return num.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const BULK_CATEGORIES = [
+      'Shop',
+      '1 Bedroom',
+      '2 Bedroom',
+      '3 Bedroom',
+      'Stall',
+      'Bedsitter',
+      'Double room',
+      'Business',
+      '4 Bedroom',
+      'Single',
+      '5 Bedroom',
+      'Signage',
+      'Parking Bay',
+      'OFFICE'
+    ];
+
+    const BULK_TYPES = ['Residential', 'Commercial'];
+
+    const BULK_FLOORS = [
+      'Basement Level 3',
+      'Basement Level 2',
+      'Basement Level 1',
+      'Ground Floor',
+      'Mezzanine Floor',
+      '1st Floor',
+      '2nd Floor',
+      '3rd Floor',
+      '4th Floor',
+      '5th Floor',
+      '6th Floor',
+      '7th Floor',
+      '8th Floor',
+      '9th Floor',
+      '10th Floor',
+      'Rooftop / Penthouse'
+    ];
+
+    const BULK_STATUSES = ['Occupied', 'Vacant'];
+    const BULK_ACTIVES = ['Active', 'InActive'];
+
+    function mapConfigToCategory(config) {
+      if (!config) return '1 Bedroom';
+      const clean = config.toUpperCase();
+      if (clean.includes('1_BEDROOM') || clean === '1 BEDROOM') return '1 Bedroom';
+      if (clean.includes('2_BEDROOM') || clean === '2 BEDROOM') return '2 Bedroom';
+      if (clean.includes('3_BEDROOM') || clean === '3 BEDROOM') return '3 Bedroom';
+      if (clean.includes('4_BEDROOM') || clean === '4 BEDROOM') return '4 Bedroom';
+      if (clean.includes('5_BEDROOM') || clean === '5 BEDROOM') return '5 Bedroom';
+      if (clean.includes('BEDSITTER') || clean.includes('STUDIO')) return 'Bedsitter';
+      if (clean.includes('COMMERCIAL') || clean.includes('OFFICE')) return 'OFFICE';
+      if (clean.includes('SHOP') || clean.includes('RETAIL')) return 'Shop';
+      if (clean.includes('STALL')) return 'Stall';
+      if (clean.includes('PARKING')) return 'Parking Bay';
+      if (clean.includes('BUSINESS')) return 'Business';
+      return '1 Bedroom';
     }
 
     function initBulkUnitsTab() {
@@ -1970,7 +2028,7 @@ const AppState = {
       loadBulkGridForProperty(propId);
 
       const prop = AppState.properties.find(p => p.id === propId);
-      showToast(`⚡ Opened Bulk Units Editor for "${prop ? prop.name : propId}"`);
+      showToast(`⚡ Opened Unit Details Bulk for "${prop ? prop.name : propId}"`);
     }
 
     function handleBulkPropSelectChange(propId) {
@@ -1978,463 +2036,141 @@ const AppState = {
       loadBulkGridForProperty(propId);
     }
 
-    function reloadBulkGridUnits() {
-      if (!activeBulkPropertyId) return;
-      loadBulkGridForProperty(activeBulkPropertyId);
-      showToast('⟳ Reverted bulk unit changes to current database state');
-    }
-
     function loadBulkGridForProperty(propId) {
       const prop = AppState.properties.find(p => p.id === propId);
       if (!prop) return;
 
       activeBulkPropertyId = propId;
-      bulkSelectedIndices.clear();
 
       // Load matching units from AppState
       const existing = AppState.units.filter(u => u.propertyId === propId);
-      if (existing.length > 0) {
-        bulkGridUnits = existing.map(u => ({ ...u }));
-      } else if (prop.noOfUnits > 0) {
-        // Auto-seed placeholder units matching the database trigger behavior
-        bulkGridUnits = [];
-        for (let i = 1; i <= prop.noOfUnits; i++) {
-          bulkGridUnits.push({
-            id: `UNIT-GEN-${i}`,
-            propertyId: prop.id,
-            propertyName: prop.name,
-            code: `${prop.prefix ? prop.prefix + '-' : ''}${String(i).padStart(2, '0')}`,
-            floor: 'Ground',
-            config: '2_BEDROOM',
-            plinth: prop.totalSqFt && prop.noOfUnits ? Math.round(prop.totalSqFt / prop.noOfUnits) : 80.0,
-            rent: 0,
-            sc: 0,
-            meter: `WM-${i}`,
-            status: 'VACANT'
-          });
-        }
-      } else {
-        bulkGridUnits = [];
+      bulkGridUnits = existing.map((u, idx) => ({
+        id: u.id,
+        propertyId: prop.id,
+        propertyName: prop.name,
+        rowNumber: u.rowNumber !== undefined ? u.rowNumber : (idx + 1),
+        code: u.code || '',
+        category: u.category || (u.config ? mapConfigToCategory(u.config) : '1 Bedroom'),
+        type: u.type || (prop.type === 'COMMERCIAL' ? 'Commercial' : 'Residential'),
+        floor: u.floor || 'Ground Floor',
+        status: (u.status === 'OCCUPIED' || u.status === 'Occupied') ? 'Occupied' : 'Vacant',
+        waterAcct: u.waterAcct !== undefined ? u.waterAcct : (u.meter || '-'),
+        elecAcct: u.elecAcct !== undefined ? u.elecAcct : '-',
+        otherAcct: u.otherAcct || '',
+        sqFt: parseFloat(u.sqFt !== undefined ? u.sqFt : (u.plinth || 0.00)) || 0.00,
+        active: u.active || 'Active',
+        rent: u.rent || 0,
+        sc: u.sc || 0
+      }));
+
+      // In legacy ProMatrix, pad empty rows up to at least 15 for spreadsheet-style entry
+      const totalPad = Math.max(15, bulkGridUnits.length + 3);
+      while (bulkGridUnits.length < totalPad) {
+        bulkGridUnits.push({
+          id: `UNIT-PAD-${Date.now()}-${bulkGridUnits.length}`,
+          propertyId: prop.id,
+          propertyName: prop.name,
+          rowNumber: 0,
+          code: '',
+          category: 'Shop',
+          type: 'Residential',
+          floor: 'Basement Level 2',
+          status: 'Vacant',
+          waterAcct: '',
+          elecAcct: '',
+          otherAcct: '',
+          sqFt: 0.00,
+          active: 'Active',
+          rent: 0,
+          sc: 0
+        });
       }
 
-      renderBulkPropertyMetaChip(prop);
       renderBulkUnitsGrid();
-      calculateBulkMetrics();
-    }
-
-    function renderBulkPropertyMetaChip(prop) {
-      const metaContainer = document.getElementById('bulk-prop-meta-badges');
-      if (!metaContainer) return;
-
-      const mandate = AppState.mandates.find(m => m.propertyId === prop.id);
-      const mandateText = mandate 
-        ? `<span class="badge-status" style="color: var(--accent-secondary); font-weight: 700;">Mandate: ${mandate.commissionType === 'FIXED' ? `KES ${mandate.feeFixed}/mo` : `${mandate.feePct}% Fee`}</span>`
-        : `<span class="badge-status" style="color: var(--accent-amber);">Mandate: Unassigned (Default 8.5%)</span>`;
-
-      metaContainer.innerHTML = `
-        <span class="badge-status" style="font-weight: 700;">LR: ${prop.lr || 'N/A'}</span>
-        <span class="badge-status">Type: ${prop.type || 'RESIDENTIAL'}</span>
-        <span class="badge-status">Total Sq Ft: ${prop.totalSqFt ? Number(prop.totalSqFt).toLocaleString() : '0'}</span>
-        <span class="badge-status">Parking: ${prop.parkingSpaces || 0} bays @ KES ${prop.pricePerParking || 0}</span>
-        ${mandateText}
-      `;
     }
 
     function renderBulkUnitsGrid() {
       const tbody = document.getElementById('bulk-units-tbody');
       if (!tbody) return;
 
-      if (bulkGridUnits.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="11" style="text-align: center; padding: 32px; color: var(--text-muted);">
-              No units recorded for this property yet. Use <strong>+ Add Single Row</strong> or <strong>+ Append 5/10 Units</strong> above to begin onboarding.
-            </td>
-          </tr>
-        `;
-        updateBulkSelectionText();
-        updateBulkSummaryFooter();
-        return;
-      }
+      tbody.innerHTML = bulkGridUnits.map((u, i) => `
+        <tr style="border-bottom: 1px solid #E5E7EB; background: ${i % 2 === 0 ? '#FFFFFF' : '#F9FAFB'};">
+          <td style="text-align: center; color: #6B7280; font-weight: 600; padding: 4px 6px; border-right: 1px solid #E5E7EB;">
+            ${u.rowNumber !== undefined ? u.rowNumber : (i + 1)}
+          </td>
+          <td style="padding: 3px 6px; border-right: 1px solid #E5E7EB;">
+            <input type="text" class="form-input" style="height: 26px; padding: 2px 6px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; box-sizing: border-box;" value="${u.code || ''}" onchange="bulkGridUnits[${i}].code = this.value">
+          </td>
+          <td style="padding: 3px 6px; border-right: 1px solid #E5E7EB;">
+            <select class="form-input" style="height: 26px; padding: 1px 4px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; box-sizing: border-box;" onchange="bulkGridUnits[${i}].category = this.value">
+              ${BULK_CATEGORIES.map(cat => `<option value="${cat}" ${u.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+            </select>
+          </td>
+          <td style="padding: 3px 6px; border-right: 1px solid #E5E7EB;">
+            <select class="form-input" style="height: 26px; padding: 1px 4px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; box-sizing: border-box;" onchange="bulkGridUnits[${i}].type = this.value">
+              ${BULK_TYPES.map(t => `<option value="${t}" ${u.type === t ? 'selected' : ''}>${t}</option>`).join('')}
+            </select>
+          </td>
+          <td style="padding: 3px 6px; border-right: 1px solid #E5E7EB;">
+            <select class="form-input" style="height: 26px; padding: 1px 4px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; box-sizing: border-box;" onchange="bulkGridUnits[${i}].floor = this.value">
+              ${BULK_FLOORS.map(fl => `<option value="${fl}" ${u.floor === fl ? 'selected' : ''}>${fl}</option>`).join('')}
+            </select>
+          </td>
+          <td style="padding: 3px 6px; border-right: 1px solid #E5E7EB;">
+            <select class="form-input" style="height: 26px; padding: 1px 4px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; box-sizing: border-box;" onchange="bulkGridUnits[${i}].status = this.value">
+              ${BULK_STATUSES.map(st => `<option value="${st}" ${u.status === st ? 'selected' : ''}>${st}</option>`).join('')}
+            </select>
+          </td>
+          <td style="padding: 3px 6px; border-right: 1px solid #E5E7EB;">
+            <input type="text" class="form-input" style="height: 26px; padding: 2px 6px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; box-sizing: border-box;" value="${u.waterAcct !== undefined ? u.waterAcct : '-'}" onchange="bulkGridUnits[${i}].waterAcct = this.value">
+          </td>
+          <td style="padding: 3px 6px; border-right: 1px solid #E5E7EB;">
+            <input type="text" class="form-input" style="height: 26px; padding: 2px 6px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; box-sizing: border-box;" value="${u.elecAcct !== undefined ? u.elecAcct : '-'}" onchange="bulkGridUnits[${i}].elecAcct = this.value">
+          </td>
+          <td style="padding: 3px 6px; border-right: 1px solid #E5E7EB;">
+            <input type="text" class="form-input" style="height: 26px; padding: 2px 6px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; box-sizing: border-box;" value="${u.otherAcct || ''}" onchange="bulkGridUnits[${i}].otherAcct = this.value">
+          </td>
+          <td style="padding: 3px 6px; border-right: 1px solid #E5E7EB; text-align: right;">
+            <input type="number" step="0.01" class="form-input" style="height: 26px; padding: 2px 6px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; text-align: right; box-sizing: border-box;" value="${Number(u.sqFt || 0).toFixed(2)}" onchange="bulkGridUnits[${i}].sqFt = parseFloat(this.value) || 0.00">
+          </td>
+          <td style="padding: 3px 6px;">
+            <select class="form-input" style="height: 26px; padding: 1px 4px; font-size: 0.82rem; border: 1px solid #D1D5DB; border-radius: 3px; width: 100%; box-sizing: border-box;" onchange="bulkGridUnits[${i}].active = this.value">
+              ${BULK_ACTIVES.map(act => `<option value="${act}" ${u.active === act ? 'selected' : ''}>${act}</option>`).join('')}
+            </select>
+          </td>
+        </tr>
+      `).join('');
 
-      tbody.innerHTML = bulkGridUnits.map((u, i) => {
-        const isChecked = bulkSelectedIndices.has(i);
-        return `
-          <tr style="${isChecked ? 'background: rgba(99, 102, 241, 0.08);' : ''}">
-            <td style="text-align: center;">
-              <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleBulkRowSelect(${i}, this.checked)">
-            </td>
-            <td style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">${i + 1}</td>
-            <td>
-              <input type="text" class="builder-input" value="${u.code || ''}" style="width: 100px; font-weight: 700;" onchange="bulkGridUnits[${i}].code = this.value">
-            </td>
-            <td>
-              <input type="text" class="builder-input" value="${u.floor || 'Ground'}" style="width: 90px;" onchange="bulkGridUnits[${i}].floor = this.value">
-            </td>
-            <td>
-              <select class="builder-input" style="min-width: 140px;" onchange="bulkGridUnits[${i}].config = this.value">
-                <option value="1_BEDROOM" ${u.config === '1_BEDROOM' ? 'selected' : ''}>1 Bedroom</option>
-                <option value="2_BEDROOM" ${u.config === '2_BEDROOM' ? 'selected' : ''}>2 Bedroom</option>
-                <option value="3_BEDROOM" ${u.config === '3_BEDROOM' ? 'selected' : ''}>3 Bedroom</option>
-                <option value="4_BEDROOM" ${u.config === '4_BEDROOM' ? 'selected' : ''}>4 Bedroom</option>
-                <option value="BEDSITTER" ${u.config === 'BEDSITTER' ? 'selected' : ''}>Studio/Bedsitter</option>
-                <option value="PENTHOUSE" ${u.config === 'PENTHOUSE' ? 'selected' : ''}>Penthouse Suite</option>
-                <option value="COMMERCIAL_OFFICE" ${u.config === 'COMMERCIAL_OFFICE' ? 'selected' : ''}>Commercial Office</option>
-                <option value="RETAIL_SHOP" ${u.config === 'RETAIL_SHOP' ? 'selected' : ''}>Retail Shop</option>
-                <option value="WAREHOUSE" ${u.config === 'WAREHOUSE' ? 'selected' : ''}>Warehouse / Storage</option>
-              </select>
-            </td>
-            <td>
-              <input type="number" step="0.5" class="builder-input" value="${u.plinth || 80}" style="width: 80px;" onchange="bulkGridUnits[${i}].plinth = Number(this.value)">
-            </td>
-            <td>
-              <input type="number" step="500" class="builder-input" value="${u.rent || 0}" style="width: 110px; font-weight: 700; color: var(--accent-secondary);" oninput="bulkGridUnits[${i}].rent = Number(this.value); calculateBulkMetrics();">
-            </td>
-            <td>
-              <input type="number" step="100" class="builder-input" value="${u.sc || 0}" style="width: 90px; color: var(--accent-primary);" oninput="bulkGridUnits[${i}].sc = Number(this.value); calculateBulkMetrics();">
-            </td>
-            <td>
-              <input type="text" class="builder-input" value="${u.meter || ''}" placeholder="WM/EM..." style="width: 100px;" onchange="bulkGridUnits[${i}].meter = this.value">
-            </td>
-            <td>
-              <select class="builder-input" style="min-width: 125px; font-weight: 700; color: ${u.status === 'OCCUPIED' ? 'var(--accent-secondary)' : (u.status === 'UNDER_MAINTENANCE' ? '#DC2626' : 'var(--accent-amber)')};" onchange="bulkGridUnits[${i}].status = this.value; this.style.color = (this.value === 'OCCUPIED' ? 'var(--accent-secondary)' : (this.value === 'UNDER_MAINTENANCE' ? '#DC2626' : 'var(--accent-amber)')); calculateBulkMetrics();">
-                <option value="VACANT" ${u.status === 'VACANT' ? 'selected' : ''}>Vacant</option>
-                <option value="OCCUPIED" ${u.status === 'OCCUPIED' ? 'selected' : ''}>Occupied</option>
-                <option value="UNDER_MAINTENANCE" ${u.status === 'UNDER_MAINTENANCE' ? 'selected' : ''}>Maintenance</option>
-                <option value="RESERVED" ${u.status === 'RESERVED' ? 'selected' : ''}>Reserved</option>
-              </select>
-            </td>
-            <td style="text-align: center;">
-              <button type="button" class="btn-action-pill" style="color: #DC2626; border-color: rgba(220, 38, 38, 0.4); padding: 4px 8px;" onclick="deleteBulkUnitRow(${i})" title="Delete unit row">✕</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-
-      updateBulkSelectionText();
-      updateBulkSummaryFooter();
-    }
-
-    function toggleBulkRowSelect(idx, checked) {
-      if (checked) {
-        bulkSelectedIndices.add(idx);
-      } else {
-        bulkSelectedIndices.delete(idx);
-      }
-      updateBulkSelectionText();
-    }
-
-    function toggleBulkSelectAll(checked) {
-      if (checked) {
-        bulkGridUnits.forEach((_, i) => bulkSelectedIndices.add(i));
-      } else {
-        bulkSelectedIndices.clear();
-      }
-      renderBulkUnitsGrid();
-    }
-
-    function updateBulkSelectionText() {
-      const selectAll = document.getElementById('bulk-select-all');
-      if (selectAll) {
-        selectAll.checked = bulkGridUnits.length > 0 && bulkSelectedIndices.size === bulkGridUnits.length;
-      }
-      const label = document.getElementById('bulk-selected-count-text');
-      if (label) {
-        label.textContent = `${bulkSelectedIndices.size} of ${bulkGridUnits.length} rows selected`;
-      }
-    }
-
-    function updateBulkSummaryFooter() {
+      const validCount = bulkGridUnits.filter(u => u.code && u.code.trim() !== '').length;
       const footer = document.getElementById('bulk-grid-summary-footer');
-      if (!footer) return;
-      const total = bulkGridUnits.length;
-      const occupied = bulkGridUnits.filter(u => u.status === 'OCCUPIED').length;
-      const vacant = total - occupied;
-      footer.innerHTML = `Showing <strong>${total}</strong> units (<strong>${occupied}</strong> occupied, <strong>${vacant}</strong> vacant)`;
-    }
-
-    /* Core Mathematical Financial Calculations (ProMatrix Master Plan) */
-    function calculateBulkMetrics() {
-      const prop = AppState.properties.find(p => p.id === activeBulkPropertyId);
-      if (!prop) return;
-
-      const totalUnits = bulkGridUnits.length;
-      const occupiedUnits = bulkGridUnits.filter(u => u.status === 'OCCUPIED').length;
-      const vacantUnits = totalUnits - occupiedUnits;
-      const occupancyRate = totalUnits > 0 ? ((occupiedUnits / totalUnits) * 100).toFixed(1) : '0.0';
-
-      const grossPotentialRent = bulkGridUnits.reduce((sum, u) => sum + (Number(u.rent) || 0), 0);
-      const serviceChargePool = bulkGridUnits.reduce((sum, u) => sum + (Number(u.sc) || 0), 0);
-
-      const parkingSpaces = Number(prop.parkingSpaces) || 0;
-      const pricePerParking = Number(prop.pricePerParking) || 0;
-      const parkingRevenue = parkingSpaces * pricePerParking;
-
-      // Mandate Terms
-      const mandate = AppState.mandates.find(m => m.propertyId === prop.id);
-      let feePct = 8.5;
-      let commissionAmount = 0;
-      let isFixedCommission = false;
-
-      if (mandate) {
-        if (mandate.commissionType === 'FIXED') {
-          isFixedCommission = true;
-          commissionAmount = Number(mandate.feeFixed) || 0;
-        } else {
-          feePct = Number(mandate.feePct) || 8.5;
-          commissionAmount = grossPotentialRent * (feePct / 100);
-        }
-      } else {
-        commissionAmount = grossPotentialRent * (feePct / 100);
+      if (footer) {
+        footer.innerHTML = `Showing <strong>${bulkGridUnits.length}</strong> entry rows (<strong>${validCount}</strong> defined door units)`;
       }
-
-      // 16% VAT on Agency Commission (if VAT is applicable, default true in ProMatrix)
-      const isVatApplicable = mandate ? !!mandate.vat : true;
-      const vatAmount = isVatApplicable ? (commissionAmount * 0.16) : 0;
-
-      // 7.5% MRI Withholding Tax on Gross Rent (if MRI applicable, default true)
-      const isMriApplicable = mandate ? !!mandate.mri : true;
-      const mriTax = isMriApplicable ? (grossPotentialRent * 0.075) : 0;
-
-      // Projected Net Landlord Remittance
-      const netRemittance = grossPotentialRent - commissionAmount - vatAmount - mriTax;
-
-      // Rent per Sq Ft Yield
-      const totalSqFt = Number(prop.totalSqFt) || 0;
-      const yieldPerSqFt = totalSqFt > 0 ? (grossPotentialRent / totalSqFt).toFixed(2) : '0.00';
-
-      // Update UI metric cards
-      const occElem = document.getElementById('metric-bulk-occupancy');
-      if (occElem) occElem.textContent = `${totalUnits} Units (${occupancyRate}%)`;
-
-      const occSub = document.getElementById('metric-bulk-occ-sub');
-      if (occSub) occSub.textContent = `${occupiedUnits} Occupied / ${vacantUnits} Vacant`;
-
-      const rentElem = document.getElementById('metric-bulk-gross-rent');
-      if (rentElem) rentElem.textContent = `KES ${formatKES(grossPotentialRent)}`;
-
-      const scElem = document.getElementById('metric-bulk-sc-pool');
-      if (scElem) scElem.textContent = `KES ${formatKES(serviceChargePool)}`;
-
-      const parkElem = document.getElementById('metric-bulk-parking-rev');
-      if (parkElem) parkElem.textContent = `KES ${formatKES(parkingRevenue)}`;
-
-      const parkSub = document.getElementById('metric-bulk-parking-sub');
-      if (parkSub) parkSub.textContent = `${parkingSpaces} bays @ KES ${formatKES(pricePerParking)}`;
-
-      const commElem = document.getElementById('metric-bulk-commission');
-      if (commElem) commElem.textContent = `KES ${formatKES(commissionAmount)}`;
-
-      const commSub = document.getElementById('metric-bulk-comm-sub');
-      if (commSub) commSub.textContent = isFixedCommission ? 'Fixed Fee Contract' : `Mandate: ${feePct}% of Gross Rent`;
-
-      const vatElem = document.getElementById('metric-bulk-vat');
-      if (vatElem) vatElem.textContent = `KES ${formatKES(vatAmount)}`;
-
-      const vatSub = document.getElementById('metric-bulk-vat-sub');
-      if (vatSub) vatSub.textContent = isVatApplicable ? '16% on Agency Commission' : 'Exempt from VAT';
-
-      const mriElem = document.getElementById('metric-bulk-mri');
-      if (mriElem) mriElem.textContent = `KES ${formatKES(mriTax)}`;
-
-      const netElem = document.getElementById('metric-bulk-net-remit');
-      if (netElem) netElem.textContent = `KES ${formatKES(netRemittance)}`;
-
-      const yieldElem = document.getElementById('metric-bulk-yield');
-      if (yieldElem) yieldElem.textContent = `KES ${yieldPerSqFt} / sqft`;
-
-      const yieldSub = document.getElementById('metric-bulk-yield-sub');
-      if (yieldSub) yieldSub.textContent = totalSqFt > 0 ? `Yield on ${totalSqFt.toLocaleString()} sq ft` : 'Property Sq Ft not set';
-
-      updateBulkSummaryFooter();
-    }
-
-    /* Bulk Automation Tools */
-    function applyBulkPattern() {
-      const prefix = document.getElementById('bulk-pattern-prefix').value || '';
-      const startNum = parseInt(document.getElementById('bulk-pattern-start').value, 10) || 1;
-      const pad = parseInt(document.getElementById('bulk-pattern-pad').value, 10) || 2;
-      const floor = document.getElementById('bulk-pattern-floor').value || 'Ground';
-
-      const targetIndices = bulkSelectedIndices.size > 0 
-        ? Array.from(bulkSelectedIndices)
-        : bulkGridUnits.map((_, i) => i);
-
-      if (targetIndices.length === 0) {
-        showToast('No unit rows available to apply pattern.');
-        return;
-      }
-
-      targetIndices.forEach((rowIdx, seq) => {
-        const num = startNum + seq;
-        bulkGridUnits[rowIdx].code = `${prefix}${String(num).padStart(pad, '0')}`;
-        if (floor) bulkGridUnits[rowIdx].floor = floor;
-      });
-
-      renderBulkUnitsGrid();
-      showToast(`✓ Applied pattern "${prefix}..." to ${targetIndices.length} unit(s)`);
-    }
-
-    function applyBulkRent() {
-      const val = parseFloat(document.getElementById('bulk-set-rent').value);
-      if (isNaN(val) || val < 0) {
-        showToast('Please enter a valid positive rent amount.');
-        return;
-      }
-
-      const targetIndices = bulkSelectedIndices.size > 0 
-        ? Array.from(bulkSelectedIndices)
-        : bulkGridUnits.map((_, i) => i);
-
-      targetIndices.forEach(idx => {
-        bulkGridUnits[idx].rent = val;
-      });
-
-      renderBulkUnitsGrid();
-      calculateBulkMetrics();
-      showToast(`✓ Set market rent to KES ${formatKES(val)} for ${targetIndices.length} unit(s)`);
-    }
-
-    function applyBulkSC() {
-      const val = parseFloat(document.getElementById('bulk-set-sc').value);
-      if (isNaN(val) || val < 0) {
-        showToast('Please enter a valid positive service charge amount.');
-        return;
-      }
-
-      const targetIndices = bulkSelectedIndices.size > 0 
-        ? Array.from(bulkSelectedIndices)
-        : bulkGridUnits.map((_, i) => i);
-
-      targetIndices.forEach(idx => {
-        bulkGridUnits[idx].sc = val;
-      });
-
-      renderBulkUnitsGrid();
-      calculateBulkMetrics();
-      showToast(`✓ Set service charge to KES ${formatKES(val)} for ${targetIndices.length} unit(s)`);
-    }
-
-    function applyBulkConfig() {
-      const config = document.getElementById('bulk-set-config').value;
-      const targetIndices = bulkSelectedIndices.size > 0 
-        ? Array.from(bulkSelectedIndices)
-        : bulkGridUnits.map((_, i) => i);
-
-      targetIndices.forEach(idx => {
-        bulkGridUnits[idx].config = config;
-      });
-
-      renderBulkUnitsGrid();
-      showToast(`✓ Set room configuration to "${config}" for ${targetIndices.length} unit(s)`);
     }
 
     function addBulkUnitRow() {
       const prop = AppState.properties.find(p => p.id === activeBulkPropertyId) || AppState.properties[0];
-      const newNum = bulkGridUnits.length + 1;
-      const prefix = prop && prop.prefix ? `${prop.prefix}-` : 'Unit-';
-      
       bulkGridUnits.push({
-        id: `UNIT-NEW-${Date.now()}-${newNum}`,
+        id: `UNIT-PAD-${Date.now()}-${bulkGridUnits.length}`,
         propertyId: prop ? prop.id : '',
         propertyName: prop ? prop.name : '',
-        code: `${prefix}${String(newNum).padStart(2, '0')}`,
-        floor: 'Ground',
-        config: '2_BEDROOM',
-        plinth: 80.0,
-        rent: 30000,
-        sc: 3500,
-        meter: `WM-${newNum}`,
-        status: 'VACANT'
+        rowNumber: 0,
+        code: '',
+        category: 'Shop',
+        type: 'Residential',
+        floor: 'Basement Level 2',
+        status: 'Vacant',
+        waterAcct: '',
+        elecAcct: '',
+        otherAcct: '',
+        sqFt: 0.00,
+        active: 'Active',
+        rent: 0,
+        sc: 0
       });
 
       renderBulkUnitsGrid();
-      calculateBulkMetrics();
-      showToast('✓ Added new unit row');
-    }
-
-    function appendBulkUnits(count) {
-      const prop = AppState.properties.find(p => p.id === activeBulkPropertyId) || AppState.properties[0];
-      const start = bulkGridUnits.length;
-      const prefix = prop && prop.prefix ? `${prop.prefix}-` : 'Unit-';
-
-      for (let i = 1; i <= count; i++) {
-        const num = start + i;
-        bulkGridUnits.push({
-          id: `UNIT-NEW-${Date.now()}-${num}`,
-          propertyId: prop ? prop.id : '',
-          propertyName: prop ? prop.name : '',
-          code: `${prefix}${String(num).padStart(2, '0')}`,
-          floor: 'Ground',
-          config: '2_BEDROOM',
-          plinth: 80.0,
-          rent: 30000,
-          sc: 3500,
-          meter: `WM-${num}`,
-          status: 'VACANT'
-        });
-      }
-
-      renderBulkUnitsGrid();
-      calculateBulkMetrics();
-      showToast(`✓ Appended ${count} unit rows`);
-    }
-
-    function deleteBulkUnitRow(idx) {
-      const unit = bulkGridUnits[idx];
-      confirmAction(
-        `Are you sure you want to remove Unit <strong>${unit.code || `#${idx + 1}`}</strong> from this property editor?`,
-        () => {
-          bulkGridUnits.splice(idx, 1);
-          bulkSelectedIndices.delete(idx);
-          const newSelected = new Set();
-          bulkSelectedIndices.forEach(si => {
-            if (si < idx) newSelected.add(si);
-            else if (si > idx) newSelected.add(si - 1);
-          });
-          bulkSelectedIndices = newSelected;
-
-          renderBulkUnitsGrid();
-          calculateBulkMetrics();
-          showToast(`Removed unit`);
-        },
-        'Delete Unit Confirmation',
-        'Remove Unit Row',
-        true
-      );
-    }
-
-    function deleteSelectedBulkRows() {
-      if (bulkSelectedIndices.size === 0) {
-        showToast('Please select at least one unit row to delete.');
-        return;
-      }
-
-      confirmAction(
-        `Are you sure you want to delete all <strong>${bulkSelectedIndices.size}</strong> selected unit(s) from this property?`,
-        () => {
-          bulkGridUnits = bulkGridUnits.filter((_, i) => !bulkSelectedIndices.has(i));
-          bulkSelectedIndices.clear();
-          renderBulkUnitsGrid();
-          calculateBulkMetrics();
-          showToast(`Deleted selected units.`);
-        },
-        'Bulk Delete Warning',
-        'Delete Selected Units',
-        true
-      );
-    }
-
-    function confirmBulkReset() {
-      confirmAction(
-        'Are you sure you want to discard unsaved edits and reload current units from the database?',
-        () => {
-          reloadBulkGridUnits();
-        },
-        'Discard Changes',
-        'Discard & Reload',
-        true
-      );
+      showToast('✓ Appended new entry row');
     }
 
     function handleBulkUnitsCommit() {
@@ -2444,46 +2180,52 @@ const AppState = {
         return;
       }
 
-      const totalUnits = bulkGridUnits.length;
-      const totalRent = bulkGridUnits.reduce((sum, u) => sum + (Number(u.rent) || 0), 0);
+      // Filter rows that have unit codes defined
+      const unitsToSave = bulkGridUnits.filter(u => u.code && u.code.trim() !== '');
 
       confirmAction(
-        `Are you sure you want to commit and persist <strong>${totalUnits} units</strong> (Total Potential Rent Roll: <code>KES ${formatKES(totalRent)}</code>) for Property <strong>[${prop.propertyIdCode || prop.id}] ${prop.name}</strong> to the live multi-tenant database?`,
+        `Are you sure you want to save and commit <strong>${unitsToSave.length} Unit Details</strong> for Property <strong>[${prop.propertyIdCode || prop.id}] ${prop.name}</strong> to the live multi-tenant database?`,
         () => {
           // Remove old units for this property from AppState.units
           AppState.units = AppState.units.filter(u => u.propertyId !== prop.id);
 
           // Add updated units
-          bulkGridUnits.forEach((u, i) => {
+          unitsToSave.forEach((u, i) => {
             AppState.units.push({
-              id: (u.id && !u.id.startsWith('UNIT-NEW') && !u.id.startsWith('UNIT-GEN')) ? u.id : `UNIT-${AppState.units.length + 1}`,
+              id: (u.id && !u.id.startsWith('UNIT-PAD') && !u.id.startsWith('UNIT-NEW')) ? u.id : `UNIT-${AppState.units.length + 1}`,
               propertyId: prop.id,
               propertyName: prop.name,
-              code: u.code,
+              rowNumber: i + 1,
+              code: u.code.trim(),
+              category: u.category,
+              type: u.type,
               floor: u.floor,
-              config: u.config,
-              plinth: Number(u.plinth) || 80,
-              rent: Number(u.rent) || 0,
-              sc: Number(u.sc) || 0,
-              meter: u.meter,
-              status: u.status || 'VACANT'
+              status: u.status,
+              waterAcct: u.waterAcct,
+              elecAcct: u.elecAcct,
+              otherAcct: u.otherAcct,
+              sqFt: parseFloat(u.sqFt) || 0.00,
+              plinth: parseFloat(u.sqFt) || 0.00,
+              active: u.active,
+              rent: u.rent || 0,
+              sc: u.sc || 0
             });
           });
 
           // Sync property unit count
-          prop.unitsCount = bulkGridUnits.length;
-          prop.noOfUnits = bulkGridUnits.length;
+          prop.unitsCount = unitsToSave.length;
+          prop.noOfUnits = unitsToSave.length;
 
-          // Re-render UI components
+          // Re-render other relevant tables
           renderPropertiesTable();
           renderUnitsTable();
           renderLandlordPortfolioTable();
           loadBulkGridForProperty(prop.id);
 
-          showToast(`✓ Committed and persisted ${totalUnits} units for "${prop.name}" to database!`);
+          showToast(`✓ Successfully saved ${unitsToSave.length} unit details for "${prop.name}"!`);
         },
-        'Database Commit Confirmation',
-        'Save & Persist Units'
+        'Database Execution Warning',
+        'Save Details'
       );
     }
 

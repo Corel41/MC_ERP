@@ -24,7 +24,7 @@
         </button>
         <button class="reg-tab-btn" data-reg-target="bulk-units">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
-          <span>6. Bulk Units & Formulas</span>
+          <span>6. Unit Details Bulk</span>
         </button>
       </div>
 
@@ -683,195 +683,59 @@
         </div>
       </div>
 
-      <!-- 6. BULK UNITS & FORMULAS EDITOR PANEL -->
+      <!-- 6. UNIT DETAILS BULK PANEL (LEGACY PROMATRIX LAYOUT) -->
       <div class="reg-panel" id="panel-bulk-units">
-        <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Property Units Inventory & Financial Formulas Engine</h2>
-              <p>Spreadsheet-like bulk unit editor, real-time rent roll projections, service charge pooling, and statutory KRA MRI & VAT tax yields (ProMatrix Master Plan).</p>
-            </div>
-            <span class="live-pulse-badge">view: property_financial_summary_view</span>
-          </div>
-
-          <!-- Property Selector & Overview Chip -->
-          <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; background: var(--nav-active-bg); padding: 14px 18px; border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 20px;">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; flex: 1;">
-              <label class="form-label" style="margin: 0; font-weight: 700; white-space: nowrap;">Target Property:</label>
-              <select class="form-input" id="bulk-prop-select" style="min-width: 280px; font-weight: 700;" onchange="handleBulkPropSelectChange(this.value)">
-                <!-- Dynamically populated -->
+        <div class="glass-card clean-module-container" style="padding: 18px 22px;">
+          
+          <!-- Outer Group: Unit Details Bulk -->
+          <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 18px 16px; margin-bottom: 20px; background: #FFFFFF;">
+            <legend style="color: #EA580C; font-weight: 700; font-size: 0.88rem; padding: 0 8px;">Unit Details Bulk</legend>
+            
+            <!-- Top Control Bar: Select Property & Orange Save Details Button -->
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+              <label for="bulk-prop-select" style="font-weight: 700; font-size: 0.86rem; color: #1F2937; white-space: nowrap;">Select Property:</label>
+              <select id="bulk-prop-select" class="form-input" style="min-width: 300px; max-width: 440px; height: 32px; padding: 4px 10px; font-size: 0.85rem; border: 1px solid #D1D5DB; border-radius: 4px; background: #FFFFFF; font-weight: 600;" onchange="handleBulkPropSelectChange(this.value)">
+                <!-- Dynamically populated with options like 'Elgon View - Elijah Chindia' -->
               </select>
-              <div id="bulk-prop-meta-badges" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                <!-- Dynamically populated: LR, Total Area, Parking, Mandate -->
-              </div>
-            </div>
-            <div style="display: flex; gap: 8px;">
-              <button type="button" class="btn-action-pill" onclick="reloadBulkGridUnits()" title="Revert edits to current database state">⟳ Reload Units</button>
-            </div>
-          </div>
-
-          <!-- Live Mathematical Summary Metrics Strip -->
-          <div style="margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <h3 style="font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted);">
-                ⚡ Real-Time Mathematical Financial Formulas (ProMatrix Core Projections)
-              </h3>
-              <span class="badge-status" style="font-size: 0.72rem; color: var(--accent-secondary);">Dynamic Live Aggregates</span>
-            </div>
-            <div class="stat-pill-group" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px;">
-              <div class="stat-pill">
-                <span class="stat-pill-title">Total Units & Occupancy</span>
-                <span class="stat-pill-value" id="metric-bulk-occupancy">0 Units (0%)</span>
-                <small id="metric-bulk-occ-sub" style="color: var(--text-muted); font-size: 0.74rem;">0 Occupied / 0 Vacant</small>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">Gross Potential Rent Roll</span>
-                <span class="stat-pill-value" id="metric-bulk-gross-rent" style="color: var(--accent-secondary);">KES 0.00</span>
-                <small style="color: var(--text-muted); font-size: 0.74rem;">Sum of unit market rent / mo</small>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">Service Charge Pool</span>
-                <span class="stat-pill-value" id="metric-bulk-sc-pool" style="color: var(--accent-primary);">KES 0.00</span>
-                <small style="color: var(--text-muted); font-size: 0.74rem;">Common area & utility pool / mo</small>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">Potential Parking Revenue</span>
-                <span class="stat-pill-value" id="metric-bulk-parking-rev">KES 0.00</span>
-                <small id="metric-bulk-parking-sub" style="color: var(--text-muted); font-size: 0.74rem;">0 bays @ KES 0</small>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">Projected Agency Fee</span>
-                <span class="stat-pill-value" id="metric-bulk-commission" style="color: var(--accent-tertiary);">KES 0.00</span>
-                <small id="metric-bulk-comm-sub" style="color: var(--text-muted); font-size: 0.74rem;">Mandate rate: 8.5%</small>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">16% VAT on Commission</span>
-                <span class="stat-pill-value" id="metric-bulk-vat">KES 0.00</span>
-                <small id="metric-bulk-vat-sub" style="color: var(--text-muted); font-size: 0.74rem;">Statutory KRA output VAT</small>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">7.5% KRA MRI Tax</span>
-                <span class="stat-pill-value" id="metric-bulk-mri" style="color: var(--accent-amber);">KES 0.00</span>
-                <small style="color: var(--text-muted); font-size: 0.74rem;">Withholding on Gross Rent</small>
-              </div>
-              <div class="stat-pill" style="border-left: 4px solid var(--accent-secondary);">
-                <span class="stat-pill-title">Net Landlord Remittance</span>
-                <span class="stat-pill-value" id="metric-bulk-net-remit" style="color: var(--accent-secondary); font-size: 1.45rem;">KES 0.00</span>
-                <small style="color: var(--text-muted); font-size: 0.74rem;">Gross - Comm - VAT - MRI</small>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">Yield / Rent per Sq Ft</span>
-                <span class="stat-pill-value" id="metric-bulk-yield">KES 0.00</span>
-                <small id="metric-bulk-yield-sub" style="color: var(--text-muted); font-size: 0.74rem;">Gross Rent / Total Sq Ft</small>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bulk Operations Toolbar -->
-          <div style="background: var(--nav-active-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 16px 20px; margin-bottom: 18px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h4 style="font-size: 0.88rem; font-weight: 700; margin: 0; color: var(--text-primary);">Bulk Automation & Rapid Data Entry</h4>
-              <span style="font-size: 0.75rem; color: var(--text-muted);">Applies to selected rows (or all if none selected)</span>
-            </div>
-
-            <!-- Toolbar Grid -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px;">
-              <!-- 1. Pattern Generator -->
-              <div style="background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 14px;">
-                <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">🔢 Pattern Generator (Unit Codes)</div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                  <input type="text" class="builder-input" id="bulk-pattern-prefix" placeholder="Prefix (e.g. A-)" style="width: 80px;" value="A-">
-                  <input type="number" class="builder-input" id="bulk-pattern-start" placeholder="Start" style="width: 60px;" value="1">
-                  <select class="builder-input" id="bulk-pattern-pad" style="width: 75px;">
-                    <option value="1">1 (1, 2)</option>
-                    <option value="2" selected>01 (01, 02)</option>
-                    <option value="3">001</option>
-                  </select>
-                  <input type="text" class="builder-input" id="bulk-pattern-floor" placeholder="Floor" style="width: 85px;" value="Ground">
-                  <button type="button" class="btn-action-pill" style="color: var(--accent-primary); font-weight: 700;" onclick="applyBulkPattern()">⚡ Apply Pattern</button>
-                </div>
-              </div>
-
-              <!-- 2. Bulk Setters -->
-              <div style="background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 14px;">
-                <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">💰 Bulk Financial & Type Setters</div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                  <div style="display: flex; gap: 4px; align-items: center;">
-                    <input type="number" step="500" class="builder-input" id="bulk-set-rent" placeholder="Rent (KES)" style="width: 100px;">
-                    <button type="button" class="btn-action-pill" onclick="applyBulkRent()">Set Rent</button>
-                  </div>
-                  <div style="display: flex; gap: 4px; align-items: center;">
-                    <input type="number" step="100" class="builder-input" id="bulk-set-sc" placeholder="SC (KES)" style="width: 85px;">
-                    <button type="button" class="btn-action-pill" onclick="applyBulkSC()">Set SC</button>
-                  </div>
-                  <div style="display: flex; gap: 4px; align-items: center;">
-                    <select class="builder-input" id="bulk-set-config" style="width: 120px;">
-                      <option value="1_BEDROOM">1 Bedroom</option>
-                      <option value="2_BEDROOM" selected>2 Bedroom</option>
-                      <option value="3_BEDROOM">3 Bedroom</option>
-                      <option value="4_BEDROOM">4 Bedroom</option>
-                      <option value="BEDSITTER">Studio/Bedsitter</option>
-                      <option value="COMMERCIAL_OFFICE">Commercial Office</option>
-                      <option value="RETAIL_SHOP">Retail Shop</option>
-                    </select>
-                    <button type="button" class="btn-action-pill" onclick="applyBulkConfig()">Set Config</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Row Manipulation Strip -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
-              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <button type="button" class="btn-action-pill" onclick="addBulkUnitRow()">+ Add Single Row</button>
-                <button type="button" class="btn-action-pill" onclick="appendBulkUnits(5)">+ Append 5 Units</button>
-                <button type="button" class="btn-action-pill" onclick="appendBulkUnits(10)">+ Append 10 Units</button>
-                <button type="button" class="btn-action-pill" style="color: #DC2626; border-color: rgba(220, 38, 38, 0.4);" onclick="deleteSelectedBulkRows()">🗑️ Delete Selected Rows</button>
-              </div>
-              <div style="font-size: 0.8rem; color: var(--text-muted);" id="bulk-selected-count-text">
-                0 rows selected
-              </div>
-            </div>
-          </div>
-
-          <!-- Spreadsheet Editable Grid Table -->
-          <div class="builder-table-wrap" style="max-height: 520px; overflow-y: auto;">
-            <table class="builder-table" style="white-space: nowrap;">
-              <thead>
-                <tr>
-                  <th style="width: 38px; text-align: center;">
-                    <input type="checkbox" id="bulk-select-all" onchange="toggleBulkSelectAll(this.checked)">
-                  </th>
-                  <th style="width: 45px;">#</th>
-                  <th>Unit Code</th>
-                  <th>Floor</th>
-                  <th>Room Configuration</th>
-                  <th>Plinth Area (m²)</th>
-                  <th>Market Rent (KES)</th>
-                  <th>Service Charge (KES)</th>
-                  <th>Meter Serial</th>
-                  <th>Occupancy Status</th>
-                  <th style="width: 60px;">Action</th>
-                </tr>
-              </thead>
-              <tbody id="bulk-units-tbody">
-                <!-- Dynamically populated rows -->
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Footer Actions & Save Bar -->
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--divider-color); flex-wrap: wrap; gap: 12px;">
-            <div style="font-size: 0.84rem; color: var(--text-muted);" id="bulk-grid-summary-footer">
-              Showing 0 units
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <button type="button" class="btn-action-pill" style="padding: 10px 18px;" onclick="confirmBulkReset()">✕ Discard Changes</button>
-              <button type="button" class="btn-elevated-primary" style="padding: 10px 22px;" onclick="handleBulkUnitsCommit()">
-                💾 Save & Commit All Units to Database
+              <button type="button" id="btn-save-bulk-details" style="background: #F97316; color: #FFFFFF; font-weight: 700; font-size: 0.85rem; border: 1px solid #EA580C; border-radius: 4px; padding: 6px 22px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12);" onmouseover="this.style.background='#EA580C'" onmouseout="this.style.background='#F97316'" onclick="handleBulkUnitsCommit()">
+                Save Details
               </button>
+              <button type="button" class="btn-action-pill" style="height: 32px; padding: 0 14px; font-size: 0.8rem;" onclick="addBulkUnitRow()" title="Append another empty unit row to the grid">+ Add Row</button>
             </div>
-          </div>
+          </fieldset>
+
+          <!-- Inner Section: List of Unit Details Bulk -->
+          <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 16px 16px; background: #FFFFFF;">
+            <legend style="color: #EA580C; font-weight: 700; font-size: 0.88rem; padding: 0 8px;">List of Unit Details Bulk</legend>
+
+            <div class="builder-table-wrap" style="overflow-x: auto; max-height: 640px; border: 1px solid #D1D5DB; border-radius: 4px;">
+              <table class="builder-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; white-space: nowrap;">
+                <thead style="position: sticky; top: 0; z-index: 5;">
+                  <tr style="background: #374151; color: #FFFFFF;">
+                    <th style="width: 45px; padding: 7px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">#</th>
+                    <th style="min-width: 90px; padding: 7px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Unit</th>
+                    <th style="min-width: 130px; padding: 7px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Category</th>
+                    <th style="min-width: 110px; padding: 7px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Type</th>
+                    <th style="min-width: 140px; padding: 7px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Floor Level</th>
+                    <th style="min-width: 100px; padding: 7px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Status</th>
+                    <th style="min-width: 105px; padding: 7px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Water Acct</th>
+                    <th style="min-width: 105px; padding: 7px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Elec Acct</th>
+                    <th style="min-width: 105px; padding: 7px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Other Acct</th>
+                    <th style="min-width: 80px; padding: 7px 8px; text-align: right; border-right: 1px solid #4B5563; font-weight: 700;">Sq Ft</th>
+                    <th style="min-width: 95px; padding: 7px 8px; text-align: left; font-weight: 700;">Active</th>
+                  </tr>
+                </thead>
+                <tbody id="bulk-units-tbody">
+                  <!-- Dynamically populated rows matching reference image -->
+                </tbody>
+              </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.8rem; color: #6B7280;">
+              <span id="bulk-grid-summary-footer">Showing 0 units</span>
+              <span>ProMatrix Legacy Architecture • Unit Details Bulk</span>
+            </div>
+          </fieldset>
 
         </div>
       </div>
