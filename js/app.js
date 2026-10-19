@@ -7,29 +7,41 @@ const AppState = {
       landlords: [
         {
           id: 'LL-01',
+          landlordCode: 'L001',
           entityType: 'CORPORATE',
           name: 'Mugo Investments Ltd',
           idReg: 'CPR/2012/84910',
           kraPin: 'P051189201A',
+          postalCode: 'P.O. Box 48190-00100 Nairobi',
           phone: '+254722100200',
           email: 'finance@mugoinvestments.co.ke',
+          nextOfKinName: 'David Mugo',
+          nextOfKinPhone: '+254722998811',
+          nextOfKinRelationship: 'Director / Co-Owner',
           remitMethod: 'BANK',
           bank: 'KCB Bank Kenya',
           branch: 'Thika Section 9',
-          accNo: '1120948192'
+          accNo: '1120948192',
+          isActive: true
         },
         {
           id: 'LL-02',
+          landlordCode: 'L002',
           entityType: 'INDIVIDUAL',
           name: 'Dr. Sarah Simba',
           idReg: '24189012',
           kraPin: 'P051482910K',
+          postalCode: 'P.O. Box 29102-00200 Nairobi',
           phone: '+254721900800',
           email: 'sarah.simba@premier.co.ke',
+          nextOfKinName: 'Daniel Simba',
+          nextOfKinPhone: '+254722554433',
+          nextOfKinRelationship: 'Spouse',
           remitMethod: 'BANK',
           bank: 'Standard Chartered',
           branch: 'Kenyatta Ave',
-          accNo: '01002938102'
+          accNo: '01002938102',
+          isActive: true
         }
       ],
       tenants: [
@@ -55,6 +67,7 @@ const AppState = {
       properties: [
         {
           id: 'PROP-01',
+          landlordId: 'LL-01',
           name: 'Chania Falls View Courts',
           lr: 'THIKA/MUNICIPALITY/BLOCK 4/182',
           type: 'RESIDENTIAL',
@@ -63,10 +76,12 @@ const AppState = {
           prefix: 'CFV',
           caretaker: 'Samuel Mwangi (0722445566)',
           unitsCount: 4,
-          payablesCount: 3
+          payablesCount: 3,
+          isActive: true
         },
         {
           id: 'PROP-02',
+          landlordId: 'LL-02',
           name: 'Kilimani Crest Executive Apartments',
           lr: 'NAIROBI/BLOCK 33/502',
           type: 'RESIDENTIAL',
@@ -75,7 +90,8 @@ const AppState = {
           prefix: 'KIL',
           caretaker: 'Joseph Mutua (0721887766)',
           unitsCount: 2,
-          payablesCount: 2
+          payablesCount: 2,
+          isActive: true
         }
       ],
       units: [
@@ -122,11 +138,15 @@ const AppState = {
       mandates: [
         {
           id: 'MND-01',
+          landlordId: 'LL-01',
           landlordName: 'Mugo Investments Ltd',
+          propertyId: 'PROP-01',
           propertyName: 'Chania Falls View Courts',
           effective: '2026-01-01',
           expiry: '2028-12-31',
+          commissionType: 'PERCENTAGE',
           feePct: 8.5,
+          feeFixed: 0,
           vat: true,
           mri: true,
           manager: 'Eng. Dennis Mugo',
@@ -134,11 +154,15 @@ const AppState = {
         },
         {
           id: 'MND-02',
+          landlordId: 'LL-02',
           landlordName: 'Dr. Sarah Simba',
+          propertyId: 'PROP-02',
           propertyName: 'Kilimani Crest Executive Apartments',
           effective: '2026-03-01',
           expiry: '2029-02-28',
+          commissionType: 'PERCENTAGE',
           feePct: 8.0,
+          feeFixed: 0,
           vat: true,
           mri: true,
           manager: 'Alex Kamau',
@@ -694,6 +718,7 @@ const AppState = {
         case 'estate-reg':
           setupRegistrationTabs();
           populateDropdowns();
+          updateNextLandlordCodeDisplay();
           renderLandlordsTable();
           renderTenantsTable();
           renderBuilderUnits();
@@ -753,6 +778,25 @@ const AppState = {
       }
     }
 
+    /* LANDLORD CODE GENERATOR & HELPERS */
+    function getNextLandlordCode() {
+      const existingNums = (AppState.landlords || [])
+        .map(l => {
+          const match = (l.landlordCode || '').match(/^L(\d+)$/i);
+          return match ? parseInt(match[1], 10) : 0;
+        })
+        .filter(n => !isNaN(n));
+      const maxNum = existingNums.length > 0 ? Math.max(...existingNums) : 0;
+      return `L${String(maxNum + 1).padStart(3, '0')}`;
+    }
+
+    function updateNextLandlordCodeDisplay() {
+      const codeInput = document.getElementById('landlord-code');
+      if (codeInput) {
+        codeInput.value = getNextLandlordCode();
+      }
+    }
+
     /* FORM TOGGLES */
     function toggleLandlordEntityFields() {
       const type = document.getElementById('landlord-entity-type').value;
@@ -784,40 +828,164 @@ const AppState = {
         ? document.getElementById('landlord-company-name').value
         : `${document.getElementById('landlord-first-name').value} ${document.getElementById('landlord-last-name').value}`;
 
+      const codeElem = document.getElementById('landlord-code');
+      const landlordCode = (codeElem && codeElem.value) ? codeElem.value : getNextLandlordCode();
+
       const newLL = {
         id: `LL-${String(AppState.landlords.length + 1).padStart(2, '0')}`,
+        landlordCode,
         entityType,
         name,
         idReg: document.getElementById('landlord-id-reg').value,
         kraPin: document.getElementById('landlord-kra-pin').value,
+        postalCode: document.getElementById('landlord-postal-code') ? document.getElementById('landlord-postal-code').value : '',
         phone: document.getElementById('landlord-phone').value,
         email: document.getElementById('landlord-email').value,
+        nextOfKinName: document.getElementById('landlord-next-of-kin-name') ? document.getElementById('landlord-next-of-kin-name').value : '',
+        nextOfKinPhone: document.getElementById('landlord-next-of-kin-phone') ? document.getElementById('landlord-next-of-kin-phone').value : '',
+        nextOfKinRelationship: document.getElementById('landlord-next-of-kin-relationship') ? document.getElementById('landlord-next-of-kin-relationship').value : '',
         remitMethod: document.getElementById('landlord-remit-method').value,
         bank: document.getElementById('landlord-bank-name').value,
         branch: document.getElementById('landlord-bank-branch').value,
-        accNo: document.getElementById('landlord-bank-acc').value
+        accNo: document.getElementById('landlord-bank-acc').value,
+        isActive: true
       };
 
       AppState.landlords.push(newLL);
       renderLandlordsTable();
       populateDropdowns();
       e.target.reset();
-      showToast(`Landlord ${name} registered successfully`);
+      updateNextLandlordCodeDisplay();
+      showToast(`Landlord [${landlordCode}] ${name} registered successfully`);
     }
 
     function renderLandlordsTable() {
       const tbody = document.getElementById('table-landlords-body');
-      tbody.innerHTML = AppState.landlords.map(ll => `
-        <tr>
-          <td><span class="badge-status">${ll.entityType}</span></td>
-          <td><strong>${ll.name}</strong></td>
-          <td><code>${ll.idReg}</code></td>
-          <td><code>${ll.kraPin}</code></td>
-          <td>${ll.phone}</td>
-          <td>${ll.remitMethod === 'BANK' ? `${ll.bank} (${ll.accNo})` : 'M-Pesa B2C'}</td>
-          <td><span class="badge-status" style="color: var(--accent-secondary);">VERIFIED</span></td>
-        </tr>
-      `).join('');
+      if (!tbody) return;
+      tbody.innerHTML = AppState.landlords.map(ll => {
+        const nokHtml = ll.nextOfKinName 
+          ? `<div style="font-size: 0.75rem;"><strong>${ll.nextOfKinName}</strong><br><span style="color:var(--text-muted);">${ll.nextOfKinPhone || ''} ${ll.nextOfKinRelationship ? `(${ll.nextOfKinRelationship})` : ''}</span></div>` 
+          : '<span style="color:var(--text-muted);">—</span>';
+
+        const statusBadge = ll.isActive !== false
+          ? '<span class="badge-status" style="color: var(--accent-secondary); font-weight: 700;">● ACTIVE</span>'
+          : '<span class="badge-status" style="color: #DC2626; background: rgba(239, 68, 68, 0.12); font-weight: 700;">○ DEACTIVATED</span>';
+
+        const actionBtn = ll.isActive !== false
+          ? `<button type="button" class="btn-action-pill" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4);" onclick="openDeactivationWarningModal('${ll.id}')">Deactivate</button>`
+          : `<button type="button" class="btn-action-pill" style="color: var(--accent-secondary); border-color: rgba(16, 185, 129, 0.4);" onclick="reactivateLandlord('${ll.id}')">Reactivate</button>`;
+
+        return `
+          <tr>
+            <td><span class="badge-status" style="font-weight: 800; background: var(--accent-primary); color: #FFFFFF;">${ll.landlordCode || ll.id}</span></td>
+            <td><span class="badge-status">${ll.entityType}</span></td>
+            <td><strong>${ll.name}</strong></td>
+            <td><code>${ll.idReg}</code></td>
+            <td><code>${ll.kraPin}</code></td>
+            <td><small>${ll.postalCode || '—'}</small></td>
+            <td>${ll.phone}</td>
+            <td>${nokHtml}</td>
+            <td>${ll.remitMethod === 'BANK' ? `${ll.bank} (${ll.accNo})` : 'M-Pesa B2C'}</td>
+            <td>${statusBadge}</td>
+            <td>${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /* DATABASE EXECUTION WARNING & CASCADING SOFT-DELETES */
+    let pendingDeactivateLandlordId = null;
+
+    function openDeactivationWarningModal(landlordId) {
+      const ll = AppState.landlords.find(l => l.id === landlordId);
+      if (!ll) return;
+      pendingDeactivateLandlordId = landlordId;
+
+      const titleElem = document.getElementById('warn-landlord-title');
+      if (titleElem) {
+        titleElem.textContent = `[${ll.landlordCode || ll.id}] - ${ll.name}`;
+      }
+
+      // Identify linked properties
+      const linkedProps = AppState.properties.filter(p => 
+        p.landlordId === landlordId || 
+        AppState.mandates.some(m => m.landlordName === ll.name && m.propertyName === p.name)
+      );
+
+      const listContainer = document.getElementById('warn-linked-properties-list');
+      if (listContainer) {
+        if (linkedProps.length === 0) {
+          listContainer.innerHTML = `<span style="color: var(--text-muted); font-style: italic; font-size: 0.8rem;">No properties currently linked to this landlord.</span>`;
+        } else {
+          listContainer.innerHTML = linkedProps.map(p => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--divider-color);">
+              <div>
+                <strong>${p.name}</strong> 
+                <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 6px;">(${p.lr || p.prefix})</span>
+              </div>
+              <span class="badge-status" style="color: #DC2626; background: rgba(239, 68, 68, 0.12); font-size: 0.72rem; font-weight: 700;">CASCADE TO INACTIVE</span>
+            </div>
+          `).join('');
+        }
+      }
+
+      const modal = document.getElementById('modal-landlord-deactivate-warning');
+      if (modal) modal.classList.add('active');
+    }
+
+    function closeDeactivationWarningModal() {
+      pendingDeactivateLandlordId = null;
+      const modal = document.getElementById('modal-landlord-deactivate-warning');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function confirmExecuteLandlordDeactivation() {
+      if (!pendingDeactivateLandlordId) return;
+      const ll = AppState.landlords.find(l => l.id === pendingDeactivateLandlordId);
+      if (!ll) return;
+
+      // Soft delete landlord
+      ll.isActive = false;
+
+      // Cascade soft delete to all linked properties
+      let affectedPropsCount = 0;
+      AppState.properties.forEach(p => {
+        const isDirectLink = p.landlordId === ll.id;
+        const isMandateLink = AppState.mandates.some(m => m.landlordName === ll.name && m.propertyName === p.name);
+        if (isDirectLink || isMandateLink) {
+          p.isActive = false;
+          affectedPropsCount++;
+        }
+      });
+
+      renderLandlordsTable();
+      renderPropertiesTable();
+      renderLandlordPortfolioTable();
+
+      closeDeactivationWarningModal();
+      showToast(`⚠️ Database trigger executed: [${ll.landlordCode || ll.id}] deactivated & ${affectedPropsCount} linked properties set to is_active=false.`);
+    }
+
+    function reactivateLandlord(landlordId) {
+      const ll = AppState.landlords.find(l => l.id === landlordId);
+      if (!ll) return;
+
+      ll.isActive = true;
+      let reactivatedPropsCount = 0;
+      AppState.properties.forEach(p => {
+        const isDirectLink = p.landlordId === ll.id;
+        const isMandateLink = AppState.mandates.some(m => m.landlordName === ll.name && m.propertyName === p.name);
+        if (isDirectLink || isMandateLink) {
+          p.isActive = true;
+          reactivatedPropsCount++;
+        }
+      });
+
+      renderLandlordsTable();
+      renderPropertiesTable();
+      renderLandlordPortfolioTable();
+
+      showToast(`✓ Landlord [${ll.landlordCode || ll.id}] and ${reactivatedPropsCount} linked properties reactivated.`);
     }
 
     /* 2. TENANT SUBMIT */
@@ -961,7 +1129,8 @@ const AppState = {
         prefix: document.getElementById('prop-paybill-prefix').value,
         caretaker: `${document.getElementById('prop-caretaker-name').value} (${document.getElementById('prop-caretaker-phone').value})`,
         unitsCount: builderUnitRows.length,
-        payablesCount: builderPayableRows.length
+        payablesCount: builderPayableRows.length,
+        isActive: true
       };
 
       AppState.properties.push(newProp);
@@ -992,6 +1161,7 @@ const AppState = {
 
     function renderPropertiesTable() {
       const tbody = document.getElementById('table-properties-body');
+      if (!tbody) return;
       tbody.innerHTML = AppState.properties.map(p => `
         <tr>
           <td><strong>${p.name}</strong></td>
@@ -1001,6 +1171,11 @@ const AppState = {
           <td><code>${p.prefix}</code></td>
           <td><strong>${p.unitsCount} Units</strong></td>
           <td>${p.payablesCount} Payables</td>
+          <td>
+            ${p.isActive !== false 
+              ? '<span class="badge-status" style="color: var(--accent-secondary); font-weight: 700;">● ACTIVE</span>' 
+              : '<span class="badge-status" style="color: #DC2626; background: rgba(239, 68, 68, 0.12); font-weight: 700;">○ DEACTIVATED</span>'}
+          </td>
         </tr>
       `).join('');
     }
@@ -1056,6 +1231,16 @@ const AppState = {
     }
 
     /* 5. PROPERTY ASSIGNMENT (MANDATE) SUBMIT */
+    function toggleMandateCommissionType() {
+      const typeElem = document.getElementById('mandate-commission-type');
+      if (!typeElem) return;
+      const isPct = typeElem.value === 'PERCENTAGE';
+      const grpPct = document.getElementById('group-mandate-pct');
+      const grpFixed = document.getElementById('group-mandate-fixed');
+      if (grpPct) grpPct.style.display = isPct ? 'flex' : 'none';
+      if (grpFixed) grpFixed.style.display = isPct ? 'none' : 'flex';
+    }
+
     function handleMandateSubmit(e) {
       e.preventDefault();
       const llId = document.getElementById('mandate-landlord-select').value;
@@ -1063,39 +1248,60 @@ const AppState = {
       const landlord = AppState.landlords.find(l => l.id === llId) || AppState.landlords[0];
       const property = AppState.properties.find(p => p.id === propId) || AppState.properties[0];
 
+      const commTypeElem = document.getElementById('mandate-commission-type');
+      const commissionType = commTypeElem ? commTypeElem.value : 'PERCENTAGE';
+      const feePct = commissionType === 'PERCENTAGE' ? Number(document.getElementById('mandate-fee-pct').value || 0) : 0;
+      const feeFixed = commissionType === 'FIXED' ? Number(document.getElementById('mandate-fee-fixed').value || 0) : 0;
+
       const newMandate = {
         id: `MND-${String(AppState.mandates.length + 1).padStart(2, '0')}`,
+        landlordId: landlord.id,
         landlordName: landlord.name,
+        propertyId: property.id,
         propertyName: property.name,
         effective: document.getElementById('mandate-effective-date').value,
         expiry: document.getElementById('mandate-expiry-date').value || 'Open-ended',
-        feePct: Number(document.getElementById('mandate-fee-pct').value),
+        commissionType,
+        feePct,
+        feeFixed,
         vat: document.getElementById('mandate-vat-applicable').checked,
         mri: document.getElementById('mandate-mri-applicable').checked,
         manager: document.getElementById('mandate-manager').value,
         status: 'ACTIVE'
       };
 
+      // Link property to landlord directly
+      property.landlordId = landlord.id;
+
       AppState.mandates.push(newMandate);
       renderMandatesTable();
+      renderLandlordPortfolioTable();
       e.target.reset();
-      showToast(`Management Mandate executed for ${property.name}`);
+      toggleMandateCommissionType();
+      showToast(`Management Mandate executed for ${property.name} (${commissionType === 'FIXED' ? `KES ${feeFixed.toLocaleString()} Fixed` : `${feePct}%`})`);
     }
 
     function renderMandatesTable() {
       const tbody = document.getElementById('table-mandates-body');
-      tbody.innerHTML = AppState.mandates.map(m => `
-        <tr>
-          <td><strong>${m.landlordName}</strong></td>
-          <td>${m.propertyName}</td>
-          <td>${m.effective} to ${m.expiry}</td>
-          <td><strong>${m.feePct}%</strong></td>
-          <td>${m.vat ? '<span style="color: var(--accent-secondary);">✓ 16% VAT</span>' : 'Exempt'}</td>
-          <td>${m.mri ? '<span style="color: var(--accent-secondary);">✓ 7.5% MRI</span>' : 'Exempt'}</td>
-          <td>${m.manager}</td>
-          <td><span class="badge-status" style="color: var(--accent-secondary);">${m.status}</span></td>
-        </tr>
-      `).join('');
+      if (!tbody) return;
+      tbody.innerHTML = AppState.mandates.map(m => {
+        const commText = m.commissionType === 'FIXED'
+          ? `<strong>KES ${Number(m.feeFixed || 0).toLocaleString()}</strong> <small>(Fixed/Mo)</small>`
+          : `<strong>${m.feePct}%</strong> <small>(Gross Rent)</small>`;
+
+        return `
+          <tr>
+            <td><strong>${m.landlordName}</strong></td>
+            <td>${m.propertyName}</td>
+            <td>${m.effective} to ${m.expiry}</td>
+            <td>${commText}</td>
+            <td>${m.vat ? '<span style="color: var(--accent-secondary);">✓ 16% VAT</span>' : 'Exempt'}</td>
+            <td>${m.mri ? '<span style="color: var(--accent-secondary);">✓ 7.5% MRI</span>' : 'Exempt'}</td>
+            <td>${m.manager}</td>
+            <td><span class="badge-status" style="color: var(--accent-secondary);">${m.status}</span></td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function populateDropdowns() {
@@ -1802,7 +2008,6 @@ const AppState = {
 
     function calculateStatementNet() {
       const gross = parseFloat(document.getElementById('stmt-gross-rent').value) || 0;
-      const feePct = parseFloat(document.getElementById('stmt-fee-pct').value) || 8.5;
       const maint = parseFloat(document.getElementById('stmt-maintenance-deductions').value) || 0;
 
       const landlordId = document.getElementById('stmt-landlord-select').value;
@@ -1817,7 +2022,14 @@ const AppState = {
       const applyVat = mandate ? mandate.vat : true;
       const applyMri = mandate ? mandate.mri : true;
 
-      const comm = gross * (feePct / 100);
+      let comm = 0;
+      if (mandate && mandate.commissionType === 'FIXED') {
+        comm = Number(mandate.feeFixed || 0);
+      } else {
+        const feePct = parseFloat(document.getElementById('stmt-fee-pct').value) || (mandate ? mandate.feePct : 8.5);
+        comm = gross * (feePct / 100);
+      }
+
       const vat = applyVat ? (comm * 0.16) : 0;
       const mri = applyMri ? (gross * 0.075) : 0;
       const net = Math.max(0, gross - comm - vat - maint - mri);
@@ -1897,10 +2109,21 @@ const AppState = {
           ? `🏦 ${landlord.bank} (${landlord.accNo})`
           : `📱 M-Pesa B2C (${landlord.phone})`;
 
+        const commText = m.commissionType === 'FIXED'
+          ? `<strong>KES ${Number(m.feeFixed || 0).toLocaleString()}</strong> <small style="display:block; color:var(--text-muted); font-size:0.72rem;">Fixed / Mo</small>`
+          : `<strong>${m.feePct}%</strong> <small style="display:block; color:var(--text-muted); font-size:0.72rem;">Gross Rent</small>`;
+
+        const propStatusBadge = property && property.isActive === false
+          ? '<span class="badge-status" style="color: #DC2626; background: rgba(239, 68, 68, 0.12); font-size: 0.72rem; font-weight: 700;">○ DEACTIVATED (Cascaded)</span>'
+          : '<span class="badge-status" style="color: var(--accent-secondary); font-size: 0.72rem; font-weight: 700;">● ACTIVE</span>';
+
         return `
           <tr>
             <td>
-              <strong>${m.landlordName}</strong>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <strong>${m.landlordName}</strong>
+                <span class="badge-status" style="font-weight: 800; font-size: 0.72rem; background: var(--accent-primary); color: #FFFFFF;">${landlord.landlordCode || landlord.id}</span>
+              </div>
               <div style="font-size:0.75rem; color:var(--text-muted);">${landlord.entityType} • ${landlord.kraPin}</div>
             </td>
             <td>
@@ -1908,11 +2131,12 @@ const AppState = {
               <div style="font-size:0.75rem; color:var(--text-muted);">${property ? property.lr : 'N/A'}</div>
             </td>
             <td><span class="badge-status" style="font-size:0.75rem;">${unitsCount} Units</span></td>
-            <td><strong>${m.feePct}%</strong></td>
+            <td>${commText}</td>
             <td>${m.vat ? '<span style="color: var(--accent-secondary); font-weight: 700;">✓ 16% VAT</span>' : 'Exempt'}</td>
             <td>${m.mri ? '<span style="color: var(--accent-amber); font-weight: 700;">✓ 7.5% MRI</span>' : 'Exempt'}</td>
             <td>${m.manager}</td>
             <td style="font-size:0.78rem;">${remitText}</td>
+            <td>${propStatusBadge}</td>
             <td>
               <button class="btn-action-pill" onclick="prepareQuickStatement('${landlord.id}', '${property ? property.id : ''}')">Generate</button>
             </td>

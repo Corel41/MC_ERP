@@ -38,6 +38,10 @@
           <form id="form-landlord" onsubmit="handleLandlordSubmit(event)">
             <div class="form-grid-3">
               <div class="form-group">
+                <label class="form-label">Landlord Code (Auto-Generated)</label>
+                <input type="text" class="form-input" id="landlord-code" readonly style="background: rgba(0, 0, 0, 0.04); font-weight: 700; cursor: not-allowed;" value="L003">
+              </div>
+              <div class="form-group">
                 <label class="form-label">Entity Type</label>
                 <select class="form-input" id="landlord-entity-type" onchange="toggleLandlordEntityFields()">
                   <option value="INDIVIDUAL">Individual Owner</option>
@@ -69,12 +73,28 @@
                 <input type="text" class="form-input" id="landlord-kra-pin" required placeholder="e.g. P051189201A">
               </div>
               <div class="form-group">
+                <label class="form-label">Postal Address & Code</label>
+                <input type="text" class="form-input" id="landlord-postal-code" placeholder="e.g. P.O. Box 48190-00100 Nairobi">
+              </div>
+              <div class="form-group">
                 <label class="form-label">Primary Phone (E.164)</label>
                 <input type="tel" class="form-input" id="landlord-phone" required placeholder="e.g. +254722000111">
               </div>
               <div class="form-group">
                 <label class="form-label">Email Address</label>
                 <input type="email" class="form-input" id="landlord-email" placeholder="e.g. owner@investments.co.ke">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Next of Kin Full Name</label>
+                <input type="text" class="form-input" id="landlord-next-of-kin-name" placeholder="e.g. Grace Wanjiku Mugo">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Next of Kin Phone</label>
+                <input type="tel" class="form-input" id="landlord-next-of-kin-phone" placeholder="e.g. +254722000222">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Next of Kin Relationship</label>
+                <input type="text" class="form-input" id="landlord-next-of-kin-relationship" placeholder="e.g. Spouse / Daughter / Brother">
               </div>
               <div class="form-group">
                 <label class="form-label">Remittance Method</label>
@@ -119,13 +139,17 @@
               <table class="builder-table">
                 <thead>
                   <tr>
+                    <th>Code</th>
                     <th>Entity</th>
                     <th>Name / Corporate Name</th>
                     <th>ID / Reg No.</th>
                     <th>KRA PIN</th>
+                    <th>Postal Code</th>
                     <th>Primary Phone</th>
+                    <th>Next of Kin</th>
                     <th>Remittance Target</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="table-landlords-body"></tbody>
@@ -350,6 +374,7 @@
                     <th>Prefix</th>
                     <th>Units Configured</th>
                     <th>Payables Configured</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody id="table-properties-body"></tbody>
@@ -488,8 +513,19 @@
                 <input type="date" class="form-input" id="mandate-expiry-date">
               </div>
               <div class="form-group">
+                <label class="form-label">Commission Model</label>
+                <select class="form-input" id="mandate-commission-type" onchange="toggleMandateCommissionType()">
+                  <option value="PERCENTAGE">Percentage of Gross Rent (%)</option>
+                  <option value="FIXED">Fixed Monthly Retainer (KES)</option>
+                </select>
+              </div>
+              <div class="form-group" id="group-mandate-pct">
                 <label class="form-label">Agency Management Fee (%)</label>
-                <input type="number" step="0.1" class="form-input" id="mandate-fee-pct" required placeholder="e.g. 8.5">
+                <input type="number" step="0.1" class="form-input" id="mandate-fee-pct" placeholder="e.g. 8.5" value="8.5">
+              </div>
+              <div class="form-group" id="group-mandate-fixed" style="display: none;">
+                <label class="form-label">Fixed Monthly Retainer (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="mandate-fee-fixed" placeholder="e.g. 15000">
               </div>
               <div class="form-group span-full">
                 <label class="form-label">Disbursement Remittance Account</label>
@@ -521,7 +557,7 @@
                     <th>Landlord</th>
                     <th>Property Assigned</th>
                     <th>Effective - Expiry</th>
-                    <th>Mgmt Fee %</th>
+                    <th>Commission Terms</th>
                     <th>16% VAT</th>
                     <th>7.5% MRI Tax</th>
                     <th>Property Manager</th>
@@ -531,6 +567,53 @@
                 <tbody id="table-mandates-body"></tbody>
               </table>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATABASE EXECUTION WARNING MODAL: CASCADING LANDLORD SOFT-DELETE -->
+      <div class="modal-overlay" id="modal-landlord-deactivate-warning">
+        <div class="modal-card" style="max-width: 620px; border-left: 6px solid #EF4444;">
+          <div class="modal-header-strip">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.5rem;">⚠️</span>
+              <div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: #DC2626; margin: 0;">Database Execution Warning: Cascading Soft-Delete</h3>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin: 2px 0 0 0;">ProMatrix Legacy Rule: Landlord Deactivation Trigger</p>
+              </div>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeDeactivationWarningModal()">✕</button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88rem; line-height: 1.5;">
+            <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 14px; color: #991B1B;">
+              <strong style="display: block; font-size: 0.92rem; margin-bottom: 6px;">CAUTION: Irreversible Cascade Trigger on Remote Database</strong>
+              Deactivating landlord <strong id="warn-landlord-title">[Code - Name]</strong> will immediately execute trigger 
+              <code style="background: rgba(239, 68, 68, 0.15); padding: 2px 6px; border-radius: 4px; font-weight: 700;">cascade_landlord_deactivation()</code> on PostgreSQL:
+              <ul style="margin: 8px 0 0 18px; padding: 0;">
+                <li><code>landlords.is_active = FALSE</code></li>
+                <li><code>properties.is_active = FALSE</code> for all linked properties</li>
+                <li>Suspends active tenant lease dispatching and monthly remittance pipelines</li>
+              </ul>
+            </div>
+
+            <div>
+              <label class="form-label" style="margin-bottom: 6px; display: block;">Linked Properties Subject to Immediate Cascading Deactivation:</label>
+              <div id="warn-linked-properties-list" style="background: var(--nav-active-bg); border: 1px solid var(--glass-border); border-radius: 10px; padding: 10px 14px; max-height: 120px; overflow-y: auto;">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              Type confirmation is not required, but confirming will immediately set the landlord and all associated properties to Inactive in the database.
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; border-top: 1px solid var(--divider-color); padding-top: 16px;">
+            <button type="button" class="btn-action-pill" style="padding: 10px 18px; font-size: 0.85rem;" onclick="closeDeactivationWarningModal()">Abort / Cancel</button>
+            <button type="button" class="btn-elevated-primary" id="btn-confirm-deactivate" style="background: #DC2626 !important; border-color: #B91C1C !important;" onclick="confirmExecuteLandlordDeactivation()">
+              ⚡ Confirm & Execute Database Cascade
+            </button>
           </div>
         </div>
       </div>
