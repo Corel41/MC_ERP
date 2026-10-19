@@ -787,13 +787,12 @@ const AppState = {
       }
 
       try {
-        if (!moduleCache[viewName]) {
-          const response = await fetch(`modules/${fileName}`);
-          if (!response.ok) throw new Error(`HTTP ${response.status} loading ${fileName}`);
-          moduleCache[viewName] = await response.text();
-        }
+        const response = await fetch(`modules/${fileName}?v=${Date.now()}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status} loading ${fileName}`);
+        const freshHtml = await response.text();
+        moduleCache[viewName] = freshHtml;
 
-        moduleContainer.innerHTML = moduleCache[viewName];
+        moduleContainer.innerHTML = freshHtml;
 
         // Ensure inner view-content container has active class
         const loadedView = moduleContainer.querySelector('.view-content');
