@@ -1836,72 +1836,12 @@ const AppState = {
       `).join('');
     }
 
-    /* 4. STANDALONE UNIT SUBMIT */
-    function handleStandaloneUnitSubmit(e) {
-      e.preventDefault();
-      const propId = document.getElementById('standalone-prop-select').value;
-      const prop = AppState.properties.find(p => p.id === propId) || AppState.properties[0];
-      const code = document.getElementById('unit-code').value;
-      const floor = document.getElementById('unit-floor').value || 'Ground';
-      const config = document.getElementById('unit-room-config').value;
-      const plinth = Number(document.getElementById('unit-plinth').value) || 0;
-      const rent = Number(document.getElementById('unit-baseline-rent').value) || 0;
-      const sc = Number(document.getElementById('unit-service-charge').value) || 0;
-      const meter = document.getElementById('unit-water-meter').value || 'N/A';
-
-      confirmAction(
-        `Are you sure you want to register Unit <strong>${code}</strong> (${config}, KES ${rent.toLocaleString()}/mo) under Property <strong>${prop.name}</strong> in the live database?`,
-        () => {
-          const newUnit = {
-            id: `UNIT-${AppState.units.length + 1}`,
-            propertyId: prop.id,
-            propertyName: prop.name,
-            code: code,
-            floor: floor,
-            config: config,
-            plinth: plinth,
-            rent: rent,
-            sc: sc,
-            meter: meter,
-            status: 'VACANT'
-          };
-
-          AppState.units.push(newUnit);
-          prop.unitsCount = (prop.unitsCount || 0) + 1;
-          renderUnitsTable();
-          renderPropertiesTable();
-          populateTenantDropdowns();
-          e.target.reset();
-          showToast(`✓ Unit ${newUnit.code} added to ${prop.name}`);
-        },
-        'Database Insert Confirmation',
-        'Register Unit'
-      );
-    }
-
     function renderUnitsTable() {
-      const filterElem = document.getElementById('filter-units-by-property');
-      const filterProp = filterElem ? filterElem.value : 'ALL';
-      const filtered = filterProp === 'ALL' || !filterProp
-        ? AppState.units
-        : AppState.units.filter(u => u.propertyId === filterProp);
-
+      // Standalone units table removed; retained as safe no-op for backward compatibility
       const tbody = document.getElementById('table-units-body');
       if (!tbody) return;
-      tbody.innerHTML = filtered.map(u => `
-        <tr>
-          <td><strong>${u.code}</strong></td>
-          <td>${u.propertyName}</td>
-          <td>${u.floor}</td>
-          <td>${u.config}</td>
-          <td>${u.plinth ? u.plinth + ' m²' : '—'}</td>
-          <td><strong>KES ${Number(u.rent).toLocaleString()}</strong></td>
-          <td>KES ${Number(u.sc).toLocaleString()}</td>
-          <td><code>${u.meter}</code></td>
-          <td><span class="badge-status" style="color: ${u.status==='OCCUPIED'?'var(--accent-secondary)':'var(--accent-amber)'};">${u.status}</span></td>
-        </tr>
-      `).join('');
     }
+
 
     /* 5. TENANT DETAILS & PROPERTY ASSIGNMENT (PROMATRIX LEGACY ONBOARDING) */
     function getNextTenantCode() {
@@ -2252,15 +2192,11 @@ const AppState = {
     }
 
     function populateDropdowns() {
-      // Standalone units property selector
-      const pSelect = document.getElementById('standalone-prop-select');
-      const pFilter = document.getElementById('filter-units-by-property');
       const mPropSelect = document.getElementById('mandate-property-select');
 
       const propOpts = AppState.properties.map(p => `<option value="${p.id}">${p.name} (${p.lr})</option>`).join('');
-      if (pSelect) pSelect.innerHTML = propOpts;
       if (mPropSelect) mPropSelect.innerHTML = propOpts;
-      if (pFilter) pFilter.innerHTML = `<option value="ALL">All Properties</option>${propOpts}`;
+
 
       // Unit Details Bulk property selector (formatted e.g. 'Elgon View - Elijah Chindia')
       const bulkPropSelect = document.getElementById('bulk-prop-select');

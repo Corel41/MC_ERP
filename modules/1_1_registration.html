@@ -18,17 +18,13 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
           <span>4. Property Payables</span>
         </button>
-        <button class="reg-tab-btn" data-reg-target="standalone-units">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="8" height="8" x="2" y="2" rx="2"/><rect width="8" height="8" x="14" y="2" rx="2"/><rect width="8" height="8" x="14" y="14" rx="2"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>
-          <span>5. Standalone Units</span>
-        </button>
         <button class="reg-tab-btn" data-reg-target="assignments">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>6. Tenant Details & Assignment</span>
+          <span>5. Tenant Details & Assignment</span>
         </button>
         <button class="reg-tab-btn" data-reg-target="bulk-units">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
-          <span>7. Unit Details Bulk</span>
+          <span>6. Unit Details Bulk</span>
         </button>
       </div>
 
@@ -566,103 +562,7 @@
         </div>
       </div>
 
-      <!-- 5. STANDALONE UNIT REGISTRATION -->
-      <div class="reg-panel" id="panel-standalone-units">
-        <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Standalone Unit Registration & Editing</h2>
-              <p>Add new units to existing properties with plinth dimensions, sub-metering serials, and baseline rates.</p>
-            </div>
-            <span class="live-pulse-badge">Post-Onboarding Units</span>
-          </div>
-
-          <form id="form-standalone-unit" onsubmit="handleStandaloneUnitSubmit(event)">
-            <div class="form-grid-3">
-              <div class="form-group span-full">
-                <label class="form-label">Select Target Property</label>
-                <select class="form-input" id="standalone-prop-select" required></select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Unit Code</label>
-                <input type="text" class="form-input" id="unit-code" required placeholder="e.g. Unit A-04 or Suite 201">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Floor Level</label>
-                <input type="text" class="form-input" id="unit-floor" placeholder="e.g. 2nd Floor">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Room Configuration</label>
-                <select class="form-input" id="unit-room-config">
-                  <option value="1_BEDROOM">1 Bedroom Apartment</option>
-                  <option value="2_BEDROOM">2 Bedroom Executive</option>
-                  <option value="3_BEDROOM">3 Bedroom Master Ensuite</option>
-                  <option value="BEDSITTER">Studio / Bedsitter</option>
-                  <option value="COMMERCIAL_OFFICE">Commercial Office Suite</option>
-                  <option value="RETAIL_SHOP">Ground Floor Retail Shop</option>
-                  <option value="WAREHOUSE_BAY">Industrial Warehouse Bay</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Plinth Area (Sq Metres / Sq Ft)</label>
-                <input type="number" step="0.01" class="form-input" id="unit-plinth" placeholder="e.g. 85.5">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Baseline Rent (KES / Month)</label>
-                <input type="number" step="0.01" class="form-input" id="unit-baseline-rent" required placeholder="e.g. 35000">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Service Charge (KES / Month)</label>
-                <input type="number" step="0.01" class="form-input" id="unit-service-charge" placeholder="e.g. 4500">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Water Sub-Meter Serial Number</label>
-                <input type="text" class="form-input" id="unit-water-meter" placeholder="e.g. WM-2024-0091">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Initial Water Reading (m³)</label>
-                <input type="number" step="0.01" class="form-input" id="unit-water-reading" placeholder="e.g. 142.50">
-              </div>
-              <div class="form-group">
-                <label class="form-label">KPLC Electricity Meter Number</label>
-                <input type="text" class="form-input" id="unit-elec-meter" placeholder="e.g. 04291829102">
-              </div>
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-              <button type="button" class="btn-action-pill" style="padding: 10px 18px;" onclick="confirmClearForm('form-standalone-unit')">✕ Clear Form</button>
-              <button type="submit" class="btn-elevated-primary">+ Add Standalone Unit</button>
-            </div>
-          </form>
-
-          <!-- Units Directory Table -->
-          <div style="margin-top: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h3 style="font-size: 1.05rem; font-weight: 700;">Units Inventory</h3>
-              <select class="pill-select" id="filter-units-by-property" onchange="renderUnitsTable()"></select>
-            </div>
-            <div class="builder-table-wrap">
-              <table class="builder-table">
-                <thead>
-                  <tr>
-                    <th>Unit Code</th>
-                    <th>Property</th>
-                    <th>Floor</th>
-                    <th>Configuration</th>
-                    <th>Plinth Area</th>
-                    <th>Base Rent</th>
-                    <th>Service Charge</th>
-                    <th>Water Meter</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="table-units-body"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 6. TENANT DETAILS & PROPERTY ASSIGNMENT (PROMATRIX LEGACY ONBOARDING) -->
+      <!-- 5. TENANT DETAILS & PROPERTY ASSIGNMENT (PROMATRIX LEGACY ONBOARDING) -->
       <div class="reg-panel" id="panel-assignments">
         <div class="glass-card clean-module-container" style="padding: 16px 20px;">
           
