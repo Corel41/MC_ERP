@@ -1051,6 +1051,145 @@
       border: 1px solid var(--glass-border);
     }
 
+    /* Sub-Module 1.2 Tenant Navigation Segment Tabs & Panels */
+    .tenant-nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--nav-active-bg);
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow-sm);
+    }
+
+    .tenant-tab-btn {
+      padding: 9px 18px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .tenant-tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .tenant-tab-btn.active {
+      background: var(--accent-primary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .tenant-panel { display: none; }
+    .tenant-panel.active {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    /* Modal for Receipting */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modal-card {
+      background: var(--bg-surface, var(--nav-active-bg));
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 28px;
+      max-width: 640px;
+      width: 100%;
+      box-shadow: var(--glass-shadow);
+      position: relative;
+    }
+
+    .modal-header-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--divider-color);
+      padding-bottom: 14px;
+    }
+
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--nav-active-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--accent-primary);
+    }
+
+    .stat-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .stat-pill {
+      flex: 1;
+      min-width: 180px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: var(--nav-active-bg);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .stat-pill-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .stat-pill-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
     @media (max-width: 1180px) {
       .form-grid-3 { grid-template-columns: repeat(2, 1fr); }
       .settings-grid { grid-template-columns: 1fr; }
@@ -1786,11 +1925,449 @@
 
     </div>
 
-    <!-- CLEAN PLACEHOLDERS FOR REMAINING SUB-MODULES -->
+    <!-- SUB-MODULE 1.2: TENANTS (LEASES, METERING, INVOICING, DOUBLE-ENTRY LEDGER) -->
     <div class="view-content" id="view-estate-tenants">
-      <div class="glass-card clean-module-container">
-        <h2>01. Estate Management — 1.2 Tenants</h2>
-        <p>Active Leases, Water Sub-Metering, Monthly Rent & Service Charge Ledgers.</p>
+
+      <!-- Navigation Segment Tabs for 1.2 Tenants -->
+      <div class="tenant-nav-tabs">
+        <button class="tenant-tab-btn active" data-tenant-target="leases">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>1. Active Leases & Onboarding</span>
+        </button>
+        <button class="tenant-tab-btn" data-tenant-target="metering">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="M2 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M12 22v-4"/><path d="m19.07 19.07-2.83-2.83"/><path d="M22 12h-4"/><path d="m19.07 4.93-2.83 2.83"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>2. Meter Readings Engine</span>
+        </button>
+        <button class="tenant-tab-btn" data-tenant-target="billing">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <span>3. Monthly Billing Run</span>
+        </button>
+        <button class="tenant-tab-btn" data-tenant-target="ledger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span>4. Tenant Ledger / Receipting</span>
+        </button>
+      </div>
+
+      <!-- 1. ACTIVE LEASES & ONBOARDING PANEL -->
+      <div class="tenant-panel active" id="panel-tenant-leases">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Tenant Lease Agreements & Unit Allocation</h2>
+              <p>Execute legally binding unit tenancies, configure baseline rent, service charge covenants, and security deposits.</p>
+            </div>
+            <span class="live-pulse-badge">PostgreSQL: uq_active_unit_lease (Double-Booking Exclusion)</span>
+          </div>
+
+          <form id="form-lease" onsubmit="handleLeaseSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Tenant</label>
+                <select class="form-input" id="lease-tenant-select" required>
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Assigned Unit</label>
+                <select class="form-input" id="lease-unit-select" required onchange="handleLeaseUnitSelect(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lease Start Date</label>
+                <input type="date" class="form-input" id="lease-start-date" required value="2026-10-01">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lease Expiry Date</label>
+                <input type="date" class="form-input" id="lease-end-date" value="2027-09-30">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Monthly Baseline Rent (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="lease-rent-amount" required placeholder="32000.00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Monthly Service Charge (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="lease-sc-amount" required placeholder="3500.00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Security Deposit Held (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="lease-deposit-amount" required placeholder="32000.00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Handover Water Meter Reading (m³)</label>
+                <input type="number" step="0.01" class="form-input" id="lease-handover-water" placeholder="e.g. 142.50">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Electricity Meter Serial / Account</label>
+                <input type="text" class="form-input" id="lease-electricity-meter" placeholder="e.g. 14190823901">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Execute Lease Agreement</button>
+            </div>
+          </form>
+
+          <!-- Directory Table of Active Leases -->
+          <div style="margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Active Lease Agreements</h3>
+              <span class="badge-status" id="lease-counter-badge" style="color: var(--accent-secondary);">2 Active Leases</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Tenant Name</th>
+                    <th>Unit & Property</th>
+                    <th>Rent (KES)</th>
+                    <th>Service Charge</th>
+                    <th>Deposit Held</th>
+                    <th>Lease Term</th>
+                    <th>Handover Water</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-leases-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. METER READINGS ENGINE PANEL -->
+      <div class="tenant-panel" id="panel-tenant-metering">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Utility Sub-Metering & Quick-Entry Engine</h2>
+              <p>Record monthly water and electricity sub-meter readings with automated volume consumption calculation and tariff rate billing.</p>
+            </div>
+            <span class="live-pulse-badge">Generated Column: consumption STORED</span>
+          </div>
+
+          <form id="form-meter-reading" onsubmit="handleMeterReadingSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Property & Unit</label>
+                <select class="form-input" id="meter-unit-select" required onchange="handleMeterUnitSelect(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Meter Type</label>
+                <select class="form-input" id="meter-type-select">
+                  <option value="Water">Water (m³ Sub-Meter)</option>
+                  <option value="Electricity">Electricity (kWh Sub-Meter)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Reading Date</label>
+                <input type="date" class="form-input" id="meter-reading-date" required value="2026-10-01">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Previous Reading</label>
+                <input type="number" step="0.01" class="form-input" id="meter-prev-reading" required value="0.00" oninput="calculateMeterConsumption()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Current Reading</label>
+                <input type="number" step="0.01" class="form-input" id="meter-curr-reading" required placeholder="e.g. 156.00" oninput="calculateMeterConsumption()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Computed Consumption</label>
+                <input type="number" step="0.01" class="form-input" id="meter-consumption" readonly value="0.00" style="font-weight: 700; color: var(--accent-primary);">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tariff Rate (KES / Unit)</label>
+                <input type="number" step="0.01" class="form-input" id="meter-tariff-rate" required value="150.00" oninput="calculateMeterConsumption()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Total Computed Bill (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="meter-total-bill" readonly value="0.00" style="font-weight: 800; color: var(--accent-secondary);">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Audit Note / Tag</label>
+                <input type="text" class="form-input" id="meter-audit-note" placeholder="Monthly Routine Cycle">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Record Utility Reading</button>
+            </div>
+          </form>
+
+          <!-- Readings History Table -->
+          <div style="margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Sub-Meter Reading Log</h3>
+              <span class="badge-status" style="color: var(--accent-secondary);">dbo_Bill_Readings Sync</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Unit & Property</th>
+                    <th>Meter Type</th>
+                    <th>Reading Date</th>
+                    <th>Previous</th>
+                    <th>Current</th>
+                    <th>Consumption</th>
+                    <th>Tariff</th>
+                    <th>Total Bill (KES)</th>
+                    <th>Billing Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="table-readings-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. MONTHLY BILLING RUN PANEL -->
+      <div class="tenant-panel" id="panel-tenant-billing">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Automated Monthly Billing & Invoicing Engine</h2>
+              <p>Generate consolidated 1st-of-month tenant invoices aggregating rent, service charges, utility sub-metering, and carried arrears.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_Tenant_Bills Invoicing Engine</span>
+          </div>
+
+          <!-- Billing Trigger Strip -->
+          <div style="background: var(--nav-active-bg); border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px;">
+            <div class="form-group" style="min-width: 140px;">
+              <label class="form-label">Billing Month</label>
+              <select class="form-input" id="bill-period-month">
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10" selected>October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width: 110px;">
+              <label class="form-label">Billing Year</label>
+              <select class="form-input" id="bill-period-year">
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width: 220px; flex: 1;">
+              <label class="form-label">Target Property</label>
+              <select class="form-input" id="bill-target-property">
+                <option value="ALL">All Properties (Consolidated Run)</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width: 160px;">
+              <label class="form-label">Invoice Due Date</label>
+              <input type="date" class="form-input" id="bill-due-date" value="2026-10-05">
+            </div>
+            <div>
+              <button type="button" class="btn-elevated-primary" onclick="executeMonthlyBillingRun()" style="height: 42px;">
+                ⚡ Execute Monthly Billing Run
+              </button>
+            </div>
+          </div>
+
+          <!-- Billing Stats Strip -->
+          <div class="stat-pill-group">
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Invoiced (October 2026)</span>
+              <span class="stat-pill-value" id="stat-total-invoiced" style="color: var(--accent-primary);">KES 120,025</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Collected / Settled</span>
+              <span class="stat-pill-value" id="stat-total-collected" style="color: var(--accent-secondary);">KES 37,525</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Outstanding Period Arrears</span>
+              <span class="stat-pill-value" id="stat-total-arrears" style="color: var(--accent-amber);">KES 82,500</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Invoices Issued</span>
+              <span class="stat-pill-value" id="stat-invoice-count">2 Invoices</span>
+            </div>
+          </div>
+
+          <!-- Invoices Directory Table -->
+          <div style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Generated Tenant Invoices</h3>
+              <span class="badge-status" style="color: var(--accent-secondary);">Auto-Synced to Ledger</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Invoice No.</th>
+                    <th>Period</th>
+                    <th>Tenant</th>
+                    <th>Unit & Property</th>
+                    <th>Rent</th>
+                    <th>Service Chg</th>
+                    <th>Water / Util</th>
+                    <th>Total Invoiced</th>
+                    <th>Due Date</th>
+                    <th>Payment Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="table-invoices-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. TENANT LEDGER / RECEIPTING PANEL -->
+      <div class="tenant-panel" id="panel-tenant-ledger">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Tenant Double-Entry Ledger & Statement of Account</h2>
+              <p>Searchable double-entry ledger detailing all debits (charges & invoices) and credits (M-Pesa C2B Paybill & bank receipts) with running balance reconciliation.</p>
+            </div>
+            <span class="live-pulse-badge">Double-Entry Financial Ledger</span>
+          </div>
+
+          <!-- Filter & Action Bar -->
+          <div style="background: var(--nav-active-bg); border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; flex: 1;">
+              <div class="form-group" style="min-width: 240px;">
+                <label class="form-label">Filter By Tenant Statement</label>
+                <select class="form-input" id="ledger-tenant-filter" onchange="renderLedgerTable()">
+                  <option value="ALL">All Tenants (Consolidated Ledger)</option>
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group" style="min-width: 200px;">
+                <label class="form-label">Search Reference / M-Pesa</label>
+                <input type="text" class="form-input" id="ledger-search-query" placeholder="Filter by Code or Ref..." oninput="renderLedgerTable()">
+              </div>
+            </div>
+            <button type="button" class="btn-elevated-primary" onclick="openReceiptModal()">
+              💳 Log Payment Receipt (M-Pesa / Bank)
+            </button>
+          </div>
+
+          <!-- Ledger Totals -->
+          <div class="stat-pill-group">
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Debits (Invoices / Charges)</span>
+              <span class="stat-pill-value" id="ledger-stat-debits" style="color: var(--accent-primary);">KES 120,025</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Credits (Receipts Settled)</span>
+              <span class="stat-pill-value" id="ledger-stat-credits" style="color: var(--accent-secondary);">KES 37,525</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Current Net Balance (Arrears)</span>
+              <span class="stat-pill-value" id="ledger-stat-balance" style="color: var(--accent-amber);">KES 82,500</span>
+            </div>
+          </div>
+
+          <!-- Ledger Statement Table -->
+          <div style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Double-Entry Ledger Statement</h3>
+              <span class="badge-status" style="color: var(--accent-secondary);">Immutable Audit Trail</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Ref / M-Pesa Code</th>
+                    <th>Tenant Name</th>
+                    <th>Unit</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Debit (Charges)</th>
+                    <th>Credit (Paid)</th>
+                    <th>Running Balance</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="table-ledger-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RECEIPTING MODAL FOR M-PESA C2B & BANK PAYMENTS -->
+    <div class="modal-overlay" id="modal-receipt">
+      <div class="modal-card">
+        <div class="modal-header-strip">
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 800;">Log Tenant Payment Receipt</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Post M-Pesa C2B Paybill, Bank Deposit or Cheque to Tenant Ledger with Instant Invoice Reconciliation.</p>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeReceiptModal()" title="Close">&times;</button>
+        </div>
+
+        <form id="form-receipt" onsubmit="handleReceiptSubmit(event)">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Payment Channel</label>
+              <select class="form-input" id="receipt-channel">
+                <option value="MPESA_C2B">Safaricom Daraja M-Pesa C2B Paybill</option>
+                <option value="BANK_DEPOSIT">Bank Transfer / KCB / Equity / Stanchart</option>
+                <option value="RTGS">RTGS Electronic Settlement</option>
+                <option value="CHEQUE">Banker's Cheque</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Transaction Reference / M-Pesa Code</label>
+              <input type="text" class="form-input" id="receipt-ref-no" required placeholder="e.g. QKJ8910238 or BNK-82910">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tenant</label>
+              <select class="form-input" id="receipt-tenant-select" required onchange="handleReceiptTenantSelect(this.value)">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Matching Active Lease / Unit</label>
+              <select class="form-input" id="receipt-lease-select" required>
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount Paid (KES)</label>
+              <input type="number" step="0.01" class="form-input" id="receipt-amount" required placeholder="32000.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Payment Date & Time</label>
+              <input type="datetime-local" class="form-input" id="receipt-datetime" required>
+            </div>
+            <div class="form-group span-full">
+              <label class="form-label">Invoice Allocation (Optional)</label>
+              <select class="form-input" id="receipt-invoice-select">
+                <option value="AUTO">Auto-Reconcile Oldest Unpaid Invoices</option>
+              </select>
+            </div>
+            <div class="form-group span-full">
+              <label class="form-label">Payment Description / Notes</label>
+              <input type="text" class="form-input" id="receipt-notes" placeholder="e.g. October 2026 Rent & Water settlement via M-Pesa">
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+            <button type="button" class="btn-action-pill" onclick="closeReceiptModal()" style="padding: 10px 18px;">Cancel</button>
+            <button type="submit" class="btn-elevated-primary">✓ Confirm & Post to Ledger</button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -2129,6 +2706,153 @@
           mri: true,
           manager: 'Alex Kamau',
           status: 'ACTIVE'
+        }
+      ],
+      activeTenantTab: 'leases',
+      leases: [
+        {
+          id: 'LSE-001',
+          tenantId: 'TEN-01',
+          tenantName: 'Grace Wanjiru Ndungu',
+          unitId: 'UNIT-01',
+          unitCode: 'A-01',
+          propertyName: 'Chania Falls View Courts',
+          startDate: '2026-02-01',
+          endDate: '2027-01-31',
+          rentAmount: 32000,
+          serviceCharge: 3500,
+          depositAmount: 32000,
+          handoverWater: 142.50,
+          meterSerial: 'WM-CFV-001',
+          status: 'Active'
+        },
+        {
+          id: 'LSE-002',
+          tenantId: 'TEN-02',
+          tenantName: 'Kevin Kiprop Patel',
+          unitId: 'UNIT-03',
+          unitCode: 'K-101',
+          propertyName: 'Kilimani Crest Executive Apartments',
+          startDate: '2026-04-01',
+          endDate: '2027-03-31',
+          rentAmount: 75000,
+          serviceCharge: 7500,
+          depositAmount: 75000,
+          handoverWater: 88.00,
+          meterSerial: 'WM-KIL-101',
+          status: 'Active'
+        }
+      ],
+      utilityReadings: [
+        {
+          id: 'UTR-001',
+          unitId: 'UNIT-01',
+          unitCode: 'A-01',
+          propertyName: 'Chania Falls View Courts',
+          meterType: 'Water',
+          readingDate: '2026-10-01',
+          previousReading: 142.50,
+          currentReading: 156.00,
+          consumption: 13.50,
+          tariffRate: 150.00,
+          totalAmount: 2025.00,
+          billedStatus: true
+        },
+        {
+          id: 'UTR-002',
+          unitId: 'UNIT-03',
+          unitCode: 'K-101',
+          propertyName: 'Kilimani Crest Executive Apartments',
+          meterType: 'Water',
+          readingDate: '2026-10-01',
+          previousReading: 88.00,
+          currentReading: 104.00,
+          consumption: 16.00,
+          tariffRate: 150.00,
+          totalAmount: 2400.00,
+          billedStatus: false
+        }
+      ],
+      invoices: [
+        {
+          id: 'INV-2026-10-001',
+          leaseId: 'LSE-001',
+          invoiceNumber: 'INV-2026-10-001',
+          tenantId: 'TEN-01',
+          tenantName: 'Grace Wanjiru Ndungu',
+          unitCode: 'A-01',
+          propertyName: 'Chania Falls View Courts',
+          periodMonth: 10,
+          periodYear: 2026,
+          rent: 32000,
+          serviceCharge: 3500,
+          utilities: 2025,
+          arrears: 0,
+          totalAmount: 37525,
+          dueDate: '2026-10-05',
+          status: 'Paid'
+        },
+        {
+          id: 'INV-2026-10-002',
+          leaseId: 'LSE-002',
+          invoiceNumber: 'INV-2026-10-002',
+          tenantId: 'TEN-02',
+          tenantName: 'Kevin Kiprop Patel',
+          unitCode: 'K-101',
+          propertyName: 'Kilimani Crest Executive Apartments',
+          periodMonth: 10,
+          periodYear: 2026,
+          rent: 75000,
+          serviceCharge: 7500,
+          utilities: 0,
+          arrears: 0,
+          totalAmount: 82500,
+          dueDate: '2026-10-05',
+          status: 'Unpaid'
+        }
+      ],
+      ledger: [
+        {
+          id: 'LED-001',
+          timestamp: '2026-10-01 08:00',
+          refNo: 'INV-2026-10-001',
+          tenantId: 'TEN-01',
+          tenantName: 'Grace Wanjiru Ndungu',
+          unitCode: 'A-01',
+          leaseId: 'LSE-001',
+          type: 'Invoice',
+          description: 'October 2026 Rent (KES 32k), Service Charge (KES 3.5k), Water (KES 2,025)',
+          debit: 37525,
+          credit: 0,
+          balanceAfter: 37525
+        },
+        {
+          id: 'LED-002',
+          timestamp: '2026-10-03 14:22',
+          refNo: 'MPX-SK981240',
+          tenantId: 'TEN-01',
+          tenantName: 'Grace Wanjiru Ndungu',
+          unitCode: 'A-01',
+          leaseId: 'LSE-001',
+          type: 'Payment',
+          description: 'Safaricom Daraja M-Pesa C2B Paybill Receipt — Ref: Grace Wanjiru',
+          debit: 0,
+          credit: 37525,
+          balanceAfter: 0
+        },
+        {
+          id: 'LED-003',
+          timestamp: '2026-10-01 08:00',
+          refNo: 'INV-2026-10-002',
+          tenantId: 'TEN-02',
+          tenantName: 'Kevin Kiprop Patel',
+          unitCode: 'K-101',
+          leaseId: 'LSE-002',
+          type: 'Invoice',
+          description: 'October 2026 Rent (KES 75k), Service Charge (KES 7.5k)',
+          debit: 82500,
+          credit: 0,
+          balanceAfter: 82500
         }
       ]
     };
@@ -2591,6 +3315,608 @@
       // Mandate landlord selector
       const mLlSelect = document.getElementById('mandate-landlord-select');
       mLlSelect.innerHTML = AppState.landlords.map(l => `<option value="${l.id}">${l.name} (${l.kraPin})</option>`).join('');
+
+      // Sub-Module 1.2 Tenant Dropdowns
+      populateTenantDropdowns();
+    }
+
+    /* SUB-MODULE 1.2: TENANTS LOGIC & INTERACTION ENGINES */
+
+    // Tab switching for 1.2 Tenants
+    function setupTenantTabs() {
+      const tenantTabBtns = document.querySelectorAll('.tenant-tab-btn');
+      tenantTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tenantTabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const target = btn.getAttribute('data-tenant-target');
+          AppState.activeTenantTab = target;
+          document.querySelectorAll('.tenant-panel').forEach(p => p.classList.remove('active'));
+          const targetPanel = document.getElementById(`panel-tenant-${target}`);
+          if (targetPanel) targetPanel.classList.add('active');
+        });
+      });
+    }
+
+    // Populate dropdowns for Sub-Module 1.2
+    function populateTenantDropdowns() {
+      // Lease tenant selector
+      const leaseTenantSel = document.getElementById('lease-tenant-select');
+      if (leaseTenantSel) {
+        leaseTenantSel.innerHTML = AppState.tenants.map(t => 
+          `<option value="${t.id}">${t.name} (${t.phone})</option>`
+        ).join('');
+      }
+
+      // Lease unit selector (with status indicators)
+      const leaseUnitSel = document.getElementById('lease-unit-select');
+      if (leaseUnitSel) {
+        leaseUnitSel.innerHTML = '<option value="">-- Choose Unit --</option>' + AppState.units.map(u => {
+          const isOccupied = AppState.leases.some(l => l.unitId === u.id && l.status === 'Active');
+          return `<option value="${u.id}">${u.propertyName} - ${u.code} (${u.config}) [${isOccupied ? 'OCCUPIED' : 'VACANT'}]</option>`;
+        }).join('');
+      }
+
+      // Meter unit selector
+      const meterUnitSel = document.getElementById('meter-unit-select');
+      if (meterUnitSel) {
+        meterUnitSel.innerHTML = AppState.units.map(u => 
+          `<option value="${u.id}">${u.propertyName} — Unit ${u.code}</option>`
+        ).join('');
+        if (AppState.units.length > 0) {
+          handleMeterUnitSelect(AppState.units[0].id);
+        }
+      }
+
+      // Billing target property
+      const billPropSel = document.getElementById('bill-target-property');
+      if (billPropSel) {
+        const propOpts = AppState.properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        billPropSel.innerHTML = `<option value="ALL">All Properties (Consolidated Run)</option>${propOpts}`;
+      }
+
+      // Ledger tenant filter
+      const ledgerTenantFilter = document.getElementById('ledger-tenant-filter');
+      if (ledgerTenantFilter) {
+        const tenantOpts = AppState.tenants.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+        ledgerTenantFilter.innerHTML = `<option value="ALL">All Tenants (Consolidated Ledger)</option>${tenantOpts}`;
+      }
+
+      // Receipt tenant selector
+      const receiptTenantSel = document.getElementById('receipt-tenant-select');
+      if (receiptTenantSel) {
+        receiptTenantSel.innerHTML = AppState.tenants.map(t => `<option value="${t.id}">${t.name} (${t.phone})</option>`).join('');
+        if (AppState.tenants.length > 0) {
+          handleReceiptTenantSelect(AppState.tenants[0].id);
+        }
+      }
+
+      // Set default receipt datetime to now
+      const receiptDatetime = document.getElementById('receipt-datetime');
+      if (receiptDatetime && !receiptDatetime.value) {
+        const now = new Date();
+        const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        receiptDatetime.value = iso;
+      }
+    }
+
+    // 1. LEASES ENGINE
+    function handleLeaseUnitSelect(unitId) {
+      if (!unitId) return;
+      const unit = AppState.units.find(u => u.id === unitId);
+      if (!unit) return;
+
+      const activeLease = AppState.leases.find(l => l.unitId === unitId && l.status === 'Active');
+      if (activeLease) {
+        showToast(`Warning: Unit ${unit.code} is currently occupied by ${activeLease.tenantName}.`);
+      }
+
+      document.getElementById('lease-rent-amount').value = unit.rent;
+      document.getElementById('lease-sc-amount').value = unit.sc;
+      document.getElementById('lease-deposit-amount').value = unit.rent;
+      document.getElementById('lease-electricity-meter').value = unit.meter ? `EM-${unit.code}` : '';
+      
+      const lastReading = AppState.utilityReadings
+        .filter(r => r.unitId === unitId && r.meterType === 'Water')
+        .sort((a, b) => new Date(b.readingDate) - new Date(a.readingDate))[0];
+      document.getElementById('lease-handover-water').value = lastReading ? lastReading.currentReading : 0.00;
+    }
+
+    function handleLeaseSubmit(e) {
+      e.preventDefault();
+      const tenantId = document.getElementById('lease-tenant-select').value;
+      const unitId = document.getElementById('lease-unit-select').value;
+      if (!unitId) {
+        showToast('Please select a valid unit.');
+        return;
+      }
+
+      const tenant = AppState.tenants.find(t => t.id === tenantId);
+      const unit = AppState.units.find(u => u.id === unitId);
+
+      // Check PostgreSQL UNIQUE EXCLUSION on unit_id WHERE status = 'Active'
+      const existingActiveLease = AppState.leases.find(l => l.unitId === unitId && l.status === 'Active');
+      if (existingActiveLease) {
+        showToast(`Exclusion Violation: Unit ${unit.code} already has an active lease (${existingActiveLease.tenantName}). Terminate the current lease first.`);
+        return;
+      }
+
+      const newLease = {
+        id: `LSE-${String(AppState.leases.length + 1).padStart(3, '0')}`,
+        tenantId: tenant.id,
+        tenantName: tenant.name,
+        unitId: unit.id,
+        unitCode: unit.code,
+        propertyName: unit.propertyName,
+        startDate: document.getElementById('lease-start-date').value,
+        endDate: document.getElementById('lease-end-date').value || 'Open-ended',
+        rentAmount: Number(document.getElementById('lease-rent-amount').value),
+        serviceCharge: Number(document.getElementById('lease-sc-amount').value),
+        depositAmount: Number(document.getElementById('lease-deposit-amount').value),
+        handoverWater: Number(document.getElementById('lease-handover-water').value) || 0,
+        meterSerial: document.getElementById('lease-electricity-meter').value || unit.meter || 'WM-SUB-01',
+        status: 'Active'
+      };
+
+      AppState.leases.push(newLease);
+      unit.status = 'OCCUPIED';
+
+      // Log initial handover reading if provided
+      if (newLease.handoverWater > 0) {
+        AppState.utilityReadings.push({
+          id: `UTR-${String(AppState.utilityReadings.length + 1).padStart(3, '0')}`,
+          unitId: unit.id,
+          unitCode: unit.code,
+          propertyName: unit.propertyName,
+          meterType: 'Water',
+          readingDate: newLease.startDate,
+          previousReading: newLease.handoverWater,
+          currentReading: newLease.handoverWater,
+          consumption: 0.00,
+          tariffRate: 150.00,
+          totalAmount: 0.00,
+          billedStatus: true
+        });
+      }
+
+      renderLeasesTable();
+      renderUnitsTable();
+      populateTenantDropdowns();
+      e.target.reset();
+      showToast(`Lease executed for ${tenant.name} at ${unit.code}`);
+    }
+
+    function renderLeasesTable() {
+      const tbody = document.getElementById('table-leases-body');
+      if (!tbody) return;
+      const counterBadge = document.getElementById('lease-counter-badge');
+      const activeCount = AppState.leases.filter(l => l.status === 'Active').length;
+      if (counterBadge) counterBadge.textContent = `${activeCount} Active Leases`;
+
+      tbody.innerHTML = AppState.leases.map(l => `
+        <tr>
+          <td><strong>${l.tenantName}</strong></td>
+          <td>${l.propertyName} • <span class="badge-status" style="font-size:0.75rem;">${l.unitCode}</span></td>
+          <td><strong>KES ${l.rentAmount.toLocaleString()}</strong></td>
+          <td>KES ${l.serviceCharge.toLocaleString()}</td>
+          <td>KES ${l.depositAmount.toLocaleString()}</td>
+          <td><span style="font-size:0.78rem;">${l.startDate} to ${l.endDate}</span></td>
+          <td>${l.handoverWater} m³</td>
+          <td><span class="badge-status" style="color: ${l.status === 'Active' ? 'var(--accent-secondary)' : 'var(--text-muted)'};">${l.status}</span></td>
+          <td>
+            ${l.status === 'Active' 
+              ? `<button class="btn-action-pill" onclick="terminateLease('${l.id}')" title="Terminate Lease">Terminate</button>` 
+              : `<span style="font-size:0.75rem; color:var(--text-muted);">Archived</span>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function terminateLease(leaseId) {
+      const lease = AppState.leases.find(l => l.id === leaseId);
+      if (!lease) return;
+      lease.status = 'Expired';
+      const unit = AppState.units.find(u => u.id === lease.unitId);
+      if (unit) unit.status = 'VACANT';
+      renderLeasesTable();
+      renderUnitsTable();
+      populateTenantDropdowns();
+      showToast(`Lease ${leaseId} terminated. Unit ${lease.unitCode} marked VACANT.`);
+    }
+
+    // 2. METERING ENGINE
+    function handleMeterUnitSelect(unitId) {
+      if (!unitId) return;
+      const lastReading = AppState.utilityReadings
+        .filter(r => r.unitId === unitId)
+        .sort((a, b) => new Date(b.readingDate) - new Date(a.readingDate))[0];
+
+      const prevEl = document.getElementById('meter-prev-reading');
+      if (prevEl) {
+        prevEl.value = lastReading ? lastReading.currentReading.toFixed(2) : '0.00';
+      }
+      calculateMeterConsumption();
+    }
+
+    function calculateMeterConsumption() {
+      const prev = parseFloat(document.getElementById('meter-prev-reading').value) || 0;
+      const curr = parseFloat(document.getElementById('meter-curr-reading').value) || 0;
+      const tariff = parseFloat(document.getElementById('meter-tariff-rate').value) || 150;
+      const consumption = Math.max(0, curr - prev);
+      const total = consumption * tariff;
+
+      const consEl = document.getElementById('meter-consumption');
+      const billEl = document.getElementById('meter-total-bill');
+      if (consEl) consEl.value = consumption.toFixed(2);
+      if (billEl) billEl.value = total.toFixed(2);
+    }
+
+    function handleMeterReadingSubmit(e) {
+      e.preventDefault();
+      const unitId = document.getElementById('meter-unit-select').value;
+      const unit = AppState.units.find(u => u.id === unitId) || AppState.units[0];
+      const prev = parseFloat(document.getElementById('meter-prev-reading').value) || 0;
+      const curr = parseFloat(document.getElementById('meter-curr-reading').value) || 0;
+      const tariff = parseFloat(document.getElementById('meter-tariff-rate').value) || 150;
+      const consumption = Math.max(0, curr - prev);
+      const total = consumption * tariff;
+
+      const newReading = {
+        id: `UTR-${String(AppState.utilityReadings.length + 1).padStart(3, '0')}`,
+        unitId: unit.id,
+        unitCode: unit.code,
+        propertyName: unit.propertyName,
+        meterType: document.getElementById('meter-type-select').value,
+        readingDate: document.getElementById('meter-reading-date').value,
+        previousReading: prev,
+        currentReading: curr,
+        consumption: consumption,
+        tariffRate: tariff,
+        totalAmount: total,
+        billedStatus: false
+      };
+
+      AppState.utilityReadings.unshift(newReading);
+      renderReadingsTable();
+      e.target.reset();
+      handleMeterUnitSelect(unit.id);
+      showToast(`Utility reading logged: ${consumption} m³ for Unit ${unit.code} (KES ${total.toLocaleString()})`);
+    }
+
+    function renderReadingsTable() {
+      const tbody = document.getElementById('table-readings-body');
+      if (!tbody) return;
+      tbody.innerHTML = AppState.utilityReadings.map(r => `
+        <tr>
+          <td><strong>${r.unitCode}</strong> • ${r.propertyName}</td>
+          <td>${r.meterType === 'Water' ? '💧 Water' : '⚡ Electricity'}</td>
+          <td>${r.readingDate}</td>
+          <td>${r.previousReading.toFixed(2)}</td>
+          <td><strong>${r.currentReading.toFixed(2)}</strong></td>
+          <td><span style="font-weight:700; color:var(--accent-primary);">${r.consumption.toFixed(2)}</span></td>
+          <td>KES ${r.tariffRate.toFixed(2)}</td>
+          <td><strong>KES ${r.totalAmount.toLocaleString()}</strong></td>
+          <td>
+            ${r.billedStatus 
+              ? `<span class="badge-status" style="color: var(--accent-secondary);">✓ Invoiced</span>` 
+              : `<span class="badge-status" style="color: var(--accent-amber);">Pending Billing</span>`}
+          </td>
+          <td>
+            ${!r.billedStatus ? `<button class="btn-action-pill" onclick="billSingleReading('${r.id}')">Bill Now</button>` : `<span style="font-size:0.75rem; color:var(--text-muted);">Billed</span>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function billSingleReading(readingId) {
+      const reading = AppState.utilityReadings.find(r => r.id === readingId);
+      if (!reading) return;
+      reading.billedStatus = true;
+      renderReadingsTable();
+      showToast(`Reading ${readingId} queued for upcoming invoice.`);
+    }
+
+    // 3. MONTHLY BILLING RUN ENGINE
+    function executeMonthlyBillingRun() {
+      const month = parseInt(document.getElementById('bill-period-month').value, 10);
+      const year = parseInt(document.getElementById('bill-period-year').value, 10);
+      const targetProp = document.getElementById('bill-target-property').value;
+      const dueDate = document.getElementById('bill-due-date').value || '2026-10-05';
+
+      let eligibleLeases = AppState.leases.filter(l => l.status === 'Active');
+      if (targetProp !== 'ALL') {
+        const matchingUnits = AppState.units.filter(u => u.propertyId === targetProp).map(u => u.id);
+        eligibleLeases = eligibleLeases.filter(l => matchingUnits.includes(l.unitId));
+      }
+
+      if (eligibleLeases.length === 0) {
+        showToast('No active leases found for the selected property filter.');
+        return;
+      }
+
+      let generatedCount = 0;
+      eligibleLeases.forEach(lease => {
+        // Check if invoice already exists for this lease and period
+        const exists = AppState.invoices.some(inv => inv.leaseId === lease.id && inv.periodMonth === month && inv.periodYear === year);
+        if (exists) return;
+
+        // Calculate unbilled utility readings
+        const unbilledReadings = AppState.utilityReadings.filter(r => r.unitId === lease.unitId && !r.billedStatus);
+        const utilitiesTotal = unbilledReadings.reduce((sum, r) => sum + r.totalAmount, 0);
+
+        // Mark readings as billed
+        unbilledReadings.forEach(r => r.billedStatus = true);
+
+        // Calculate arrears from ledger
+        const tenantLedger = AppState.ledger.filter(l => l.tenantId === lease.tenantId);
+        const totalDebits = tenantLedger.reduce((sum, l) => sum + l.debit, 0);
+        const totalCredits = tenantLedger.reduce((sum, l) => sum + l.credit, 0);
+        const arrears = Math.max(0, totalDebits - totalCredits);
+
+        const totalDue = lease.rentAmount + lease.serviceCharge + utilitiesTotal + arrears;
+        const invNum = `INV-${year}-${String(month).padStart(2, '0')}-${String(AppState.invoices.length + 1).padStart(3, '0')}`;
+
+        const invoice = {
+          id: invNum,
+          leaseId: lease.id,
+          invoiceNumber: invNum,
+          tenantId: lease.tenantId,
+          tenantName: lease.tenantName,
+          unitCode: lease.unitCode,
+          propertyName: lease.propertyName,
+          periodMonth: month,
+          periodYear: year,
+          rent: lease.rentAmount,
+          serviceCharge: lease.serviceCharge,
+          utilities: utilitiesTotal,
+          arrears: arrears,
+          totalAmount: totalDue,
+          dueDate: dueDate,
+          status: 'Unpaid'
+        };
+
+        AppState.invoices.unshift(invoice);
+
+        // Post debit to ledger
+        const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const runningBal = arrears + totalDue;
+        AppState.ledger.push({
+          id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+          timestamp: `${year}-${String(month).padStart(2, '0')}-01 08:00`,
+          refNo: invNum,
+          tenantId: lease.tenantId,
+          tenantName: lease.tenantName,
+          unitCode: lease.unitCode,
+          leaseId: lease.id,
+          type: 'Invoice',
+          description: `${monthNames[month]} ${year} Rent (KES ${lease.rentAmount.toLocaleString()}), SC (KES ${lease.serviceCharge.toLocaleString()})${utilitiesTotal > 0 ? `, Water (KES ${utilitiesTotal.toLocaleString()})` : ''}`,
+          debit: totalDue,
+          credit: 0,
+          balanceAfter: runningBal
+        });
+
+        generatedCount++;
+      });
+
+      renderInvoicesTable();
+      renderReadingsTable();
+      renderLedgerTable();
+      showToast(`Monthly Billing Run complete. Generated ${generatedCount} invoices.`);
+    }
+
+    function renderInvoicesTable() {
+      const tbody = document.getElementById('table-invoices-body');
+      if (!tbody) return;
+
+      const totalInvoiced = AppState.invoices.reduce((sum, i) => sum + i.totalAmount, 0);
+      const totalPaid = AppState.invoices.filter(i => i.status === 'Paid').reduce((sum, i) => sum + i.totalAmount, 0);
+      const totalArrears = totalInvoiced - totalPaid;
+
+      document.getElementById('stat-total-invoiced').textContent = `KES ${totalInvoiced.toLocaleString()}`;
+      document.getElementById('stat-total-collected').textContent = `KES ${totalPaid.toLocaleString()}`;
+      document.getElementById('stat-total-arrears').textContent = `KES ${totalArrears.toLocaleString()}`;
+      document.getElementById('stat-invoice-count').textContent = `${AppState.invoices.length} Invoices`;
+
+      const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      tbody.innerHTML = AppState.invoices.map(inv => `
+        <tr>
+          <td><strong>${inv.invoiceNumber}</strong></td>
+          <td>${monthNames[inv.periodMonth]} ${inv.periodYear}</td>
+          <td><strong>${inv.tenantName}</strong></td>
+          <td>${inv.propertyName} • ${inv.unitCode}</td>
+          <td>KES ${inv.rent.toLocaleString()}</td>
+          <td>KES ${inv.serviceCharge.toLocaleString()}</td>
+          <td>KES ${inv.utilities.toLocaleString()}</td>
+          <td><strong>KES ${inv.totalAmount.toLocaleString()}</strong></td>
+          <td><span style="font-size:0.78rem;">${inv.dueDate}</span></td>
+          <td>
+            <span class="badge-status" style="color: ${inv.status === 'Paid' ? 'var(--accent-secondary)' : inv.status === 'Partial' ? 'var(--accent-tertiary)' : 'var(--accent-amber)'};">
+              ${inv.status}
+            </span>
+          </td>
+          <td>
+            ${inv.status !== 'Paid' 
+              ? `<button class="btn-action-pill" onclick="openReceiptModal('${inv.tenantId}', '${inv.id}')">💳 Pay</button>` 
+              : `<span style="font-size:0.75rem; color:var(--accent-secondary);">✓ Settled</span>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 4. TENANT LEDGER & RECEIPTING ENGINE
+    function renderLedgerTable() {
+      const tbody = document.getElementById('table-ledger-body');
+      if (!tbody) return;
+
+      const filterTenant = document.getElementById('ledger-tenant-filter').value;
+      const query = (document.getElementById('ledger-search-query').value || '').toLowerCase().trim();
+
+      let entries = [...AppState.ledger];
+      if (filterTenant !== 'ALL') {
+        entries = entries.filter(e => e.tenantId === filterTenant);
+      }
+      if (query) {
+        entries = entries.filter(e => 
+          e.refNo.toLowerCase().includes(query) || 
+          e.tenantName.toLowerCase().includes(query) || 
+          e.description.toLowerCase().includes(query)
+        );
+      }
+
+      // Compute totals & running balances
+      let totalDebits = 0;
+      let totalCredits = 0;
+      let running = 0;
+
+      const computedEntries = entries.map(e => {
+        totalDebits += e.debit;
+        totalCredits += e.credit;
+        running += (e.debit - e.credit);
+        return { ...e, runningBalance: running };
+      });
+
+      document.getElementById('ledger-stat-debits').textContent = `KES ${totalDebits.toLocaleString()}`;
+      document.getElementById('ledger-stat-credits').textContent = `KES ${totalCredits.toLocaleString()}`;
+      document.getElementById('ledger-stat-balance').textContent = `KES ${Math.max(0, running).toLocaleString()}`;
+
+      tbody.innerHTML = computedEntries.map(e => `
+        <tr>
+          <td><span style="font-size:0.78rem;">${e.timestamp}</span></td>
+          <td><strong>${e.refNo}</strong></td>
+          <td>${e.tenantName}</td>
+          <td>${e.unitCode}</td>
+          <td>
+            <span class="badge-status" style="color: ${e.type === 'Payment' ? 'var(--accent-secondary)' : 'var(--accent-primary)'}; font-size: 0.72rem;">
+              ${e.type}
+            </span>
+          </td>
+          <td style="max-width: 240px; white-space: normal; font-size: 0.8rem;">${e.description}</td>
+          <td style="color: var(--accent-primary); font-weight: 600;">${e.debit > 0 ? `+KES ${e.debit.toLocaleString()}` : '—'}</td>
+          <td style="color: var(--accent-secondary); font-weight: 700;">${e.credit > 0 ? `-KES ${e.credit.toLocaleString()}` : '—'}</td>
+          <td><strong>KES ${e.runningBalance.toLocaleString()}</strong></td>
+          <td>
+            <button class="btn-action-pill" onclick="showToast('Audit details for ${e.refNo}')">Inspect</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Receipting Modal Handlers
+    function openReceiptModal(tenantId, invoiceId) {
+      const modal = document.getElementById('modal-receipt');
+      if (!modal) return;
+      modal.classList.add('active');
+
+      const tenantSel = document.getElementById('receipt-tenant-select');
+      if (tenantId && tenantSel) {
+        tenantSel.value = tenantId;
+        handleReceiptTenantSelect(tenantId);
+      } else if (tenantSel && AppState.tenants.length > 0) {
+        handleReceiptTenantSelect(tenantSel.value || AppState.tenants[0].id);
+      }
+
+      if (invoiceId) {
+        const inv = AppState.invoices.find(i => i.id === invoiceId);
+        if (inv) {
+          document.getElementById('receipt-amount').value = inv.totalAmount;
+          document.getElementById('receipt-notes').value = `Full settlement of ${inv.invoiceNumber} for ${inv.tenantName}`;
+        }
+      } else {
+        document.getElementById('receipt-amount').value = '';
+        document.getElementById('receipt-notes').value = '';
+      }
+
+      // Generate random sample M-Pesa receipt code
+      const randCode = 'MPX-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      document.getElementById('receipt-ref-no').value = randCode;
+    }
+
+    function closeReceiptModal() {
+      const modal = document.getElementById('modal-receipt');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function handleReceiptTenantSelect(tenantId) {
+      const leaseSel = document.getElementById('receipt-lease-select');
+      const invSel = document.getElementById('receipt-invoice-select');
+      if (!leaseSel) return;
+
+      const tenantLeases = AppState.leases.filter(l => l.tenantId === tenantId);
+      leaseSel.innerHTML = tenantLeases.map(l => 
+        `<option value="${l.id}">${l.propertyName} • Unit ${l.unitCode} (Rent: KES ${l.rentAmount.toLocaleString()})</option>`
+      ).join('');
+
+      if (invSel) {
+        const tenantInvoices = AppState.invoices.filter(i => i.tenantId === tenantId && i.status !== 'Paid');
+        invSel.innerHTML = `<option value="AUTO">Auto-Reconcile Oldest Outstanding</option>` + 
+          tenantInvoices.map(i => `<option value="${i.id}">${i.invoiceNumber} — KES ${i.totalAmount.toLocaleString()} (${i.status})</option>`).join('');
+      }
+    }
+
+    function handleReceiptSubmit(e) {
+      e.preventDefault();
+      const channel = document.getElementById('receipt-channel').value;
+      const refNo = document.getElementById('receipt-ref-no').value.trim();
+      const tenantId = document.getElementById('receipt-tenant-select').value;
+      const leaseId = document.getElementById('receipt-lease-select').value;
+      const amount = parseFloat(document.getElementById('receipt-amount').value) || 0;
+      const datetime = document.getElementById('receipt-datetime').value || new Date().toISOString();
+      const invTarget = document.getElementById('receipt-invoice-select').value;
+      const notes = document.getElementById('receipt-notes').value || 'Payment receipt posted to ledger';
+
+      const tenant = AppState.tenants.find(t => t.id === tenantId);
+      const lease = AppState.leases.find(l => l.id === leaseId);
+
+      // Add Credit entry to ledger
+      const channelLabels = {
+        MPESA_C2B: 'Safaricom Daraja M-Pesa C2B Paybill',
+        BANK_DEPOSIT: 'Direct Bank Deposit',
+        RTGS: 'RTGS Electronic Wire',
+        CHEQUE: "Banker's Cheque"
+      };
+
+      AppState.ledger.push({
+        id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+        timestamp: datetime.replace('T', ' '),
+        refNo: refNo,
+        tenantId: tenant.id,
+        tenantName: tenant.name,
+        unitCode: lease ? lease.unitCode : '—',
+        leaseId: lease ? lease.id : null,
+        type: 'Payment',
+        description: `${channelLabels[channel] || channel} — ${notes}`,
+        debit: 0,
+        credit: amount,
+        balanceAfter: 0
+      });
+
+      // Auto-reconcile invoices
+      let remainingCredit = amount;
+      let targetInvoices = [];
+      if (invTarget !== 'AUTO') {
+        const singleInv = AppState.invoices.find(i => i.id === invTarget);
+        if (singleInv) targetInvoices.push(singleInv);
+      } else {
+        targetInvoices = AppState.invoices.filter(i => i.tenantId === tenantId && i.status !== 'Paid');
+      }
+
+      targetInvoices.forEach(inv => {
+        if (remainingCredit <= 0) return;
+        if (remainingCredit >= inv.totalAmount) {
+          inv.status = 'Paid';
+          remainingCredit -= inv.totalAmount;
+        } else {
+          inv.status = 'Partial';
+          remainingCredit = 0;
+        }
+      });
+
+      closeReceiptModal();
+      renderLedgerTable();
+      renderInvoicesTable();
+      showToast(`Receipt ${refNo} (KES ${amount.toLocaleString()}) posted & reconciled.`);
     }
 
     function showToast(msg) {
@@ -2608,7 +3934,7 @@
       }, 3000);
     }
 
-    // Initialize Sub-Module 1.1 UI
+    // Initialize Sub-Module 1.1 & 1.2 UI
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'flowly';
     setTheme(savedTheme);
     renderLandlordsTable();
@@ -2619,6 +3945,13 @@
     renderUnitsTable();
     renderMandatesTable();
     populateDropdowns();
+
+    // 1.2 Tenants Initialization
+    setupTenantTabs();
+    renderLeasesTable();
+    renderReadingsTable();
+    renderInvoicesTable();
+    renderLedgerTable();
   </script>
 </body>
 </html>
