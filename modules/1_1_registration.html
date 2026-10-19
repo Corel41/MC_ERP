@@ -24,7 +24,7 @@
         </button>
         <button class="reg-tab-btn" data-reg-target="assignments">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>6. Property Assignment</span>
+          <span>6. Tenant Details & Assignment</span>
         </button>
         <button class="reg-tab-btn" data-reg-target="bulk-units">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
@@ -662,96 +662,190 @@
         </div>
       </div>
 
-      <!-- 5. PROPERTY ASSIGNMENT (MANAGEMENT MANDATES) -->
+      <!-- 6. TENANT DETAILS & PROPERTY ASSIGNMENT (PROMATRIX LEGACY ONBOARDING) -->
       <div class="reg-panel" id="panel-assignments">
-        <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Property Assignment & Management Mandate</h2>
-              <p>Formally link Landlords to Properties with commission percentages, 7.5% MRI Withholding status, and 16% agency VAT.</p>
-            </div>
-            <span class="live-pulse-badge">Mandate Execution</span>
+        <div class="glass-card clean-module-container" style="padding: 16px 20px;">
+          
+          <!-- Teal Header Tab matching ProMatrix screenshot image_7043c0.png -->
+          <div style="display: flex; gap: 4px; border-bottom: 2px solid #008080; margin-bottom: 16px;">
+            <div style="background: #008080; color: #FFFFFF; border-radius: 6px 6px 0 0; padding: 7px 22px; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.02em;">Tenant Details</div>
           </div>
 
-          <form id="form-mandate" onsubmit="handleMandateSubmit(event)">
-            <div class="form-grid-3">
-              <div class="form-group">
-                <label class="form-label">Registered Landlord</label>
-                <select class="form-input" id="mandate-landlord-select" required></select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Target Property</label>
-                <select class="form-input" id="mandate-property-select" required></select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Assigned Property Manager</label>
-                <input type="text" class="form-input" id="mandate-manager" required placeholder="e.g. Eng. Dennis Mugo (Branch Lead)">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Effective Start Date</label>
-                <input type="date" class="form-input" id="mandate-effective-date" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Expiry Date</label>
-                <input type="date" class="form-input" id="mandate-expiry-date">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Commission Model</label>
-                <select class="form-input" id="mandate-commission-type" onchange="toggleMandateCommissionType()">
-                  <option value="PERCENTAGE">Percentage of Gross Rent (%)</option>
-                  <option value="FIXED">Fixed Monthly Retainer (KES)</option>
+          <form id="form-tenant-assignment" onsubmit="handleTenantAssignSubmit(event)">
+            
+            <!-- Fieldset 1: Tenant Details (Top Row) -->
+            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+              <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Tenant Details</legend>
+              <div style="display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;">
+                <label for="tenant-assign-select" style="font-weight: 700; font-size: 0.86rem; color: #1F2937;">Select Tenant:</label>
+                <select id="tenant-assign-select" class="form-input" style="min-width: 340px; max-width: 480px; height: 32px; font-weight: 600;" onchange="handleTenantAssignSelect(this.value)">
+                  <option value="NEW">-Select Tenant / New Tenant-</option>
+                  <!-- Populated dynamically with registered tenants -->
                 </select>
               </div>
-              <div class="form-group" id="group-mandate-pct">
-                <label class="form-label">Agency Management Fee (%)</label>
-                <input type="number" step="0.1" class="form-input" id="mandate-fee-pct" placeholder="e.g. 8.5" value="8.5">
+            </fieldset>
+
+            <!-- Fieldset 2: Property Details -->
+            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+              <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Property Details</legend>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-property" style="font-weight: 700; font-size: 0.86rem; min-width: 80px; color: #1F2937;">Property:</label>
+                  <select id="tenant-assign-property" class="form-input" style="width: 100%; height: 32px;" onchange="handleTenantAssignPropertyChange(this.value)" required>
+                    <option value="">-Select Property-</option>
+                  </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-unit" style="font-weight: 700; font-size: 0.86rem; min-width: 50px; color: #1F2937;">Unit:</label>
+                  <select id="tenant-assign-unit" class="form-input" style="width: 100%; height: 32px;" required>
+                    <option value="">-Select Unit-</option>
+                  </select>
+                </div>
               </div>
-              <div class="form-group" id="group-mandate-fixed" style="display: none;">
-                <label class="form-label">Fixed Monthly Retainer (KES)</label>
-                <input type="number" step="0.01" class="form-input" id="mandate-fee-fixed" placeholder="e.g. 15000">
+            </fieldset>
+
+            <!-- Fieldset 3: Personal Details -->
+            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+              <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Personal Details</legend>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-code" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Tenant Code:</label>
+                  <input type="text" id="tenant-assign-code" class="form-input" readonly style="width: 100%; height: 32px; border: 2px solid #16A34A; background: #F0FDF4; font-weight: 800; color: #15803D; cursor: not-allowed;" placeholder="T001">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-name" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Tenant Name:</label>
+                  <input type="text" id="tenant-assign-name" class="form-input" required style="width: 100%; height: 32px; font-weight: 600;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-idno" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">ID.No.:</label>
+                  <input type="text" id="tenant-assign-idno" class="form-input" style="width: 100%; height: 32px;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-datein" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Date In:</label>
+                  <input type="date" id="tenant-assign-datein" class="form-input" style="width: 100%; height: 32px;" required>
+                </div>
               </div>
-              <div class="form-group span-full">
-                <label class="form-label">Disbursement Remittance Account</label>
-                <input type="text" class="form-input" id="mandate-disburse-acc" placeholder="e.g. KCB Bank Kenya — Acc: 1120948192 (Auto-derived from Landlord master)">
+            </fieldset>
+
+            <!-- Fieldset 4: Contact Details -->
+            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+              <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Contact Details</legend>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-tel" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Tel. No.:</label>
+                  <input type="text" id="tenant-assign-tel" class="form-input" style="width: 100%; height: 32px;" required>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-email" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">E-Mail:</label>
+                  <input type="email" id="tenant-assign-email" class="form-input" style="width: 100%; height: 32px;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-address" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Address:</label>
+                  <input type="text" id="tenant-assign-address" class="form-input" style="width: 100%; height: 32px;" placeholder="P.O. Box ...">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-postal" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Postal Code:</label>
+                  <select id="tenant-assign-postal" class="form-input" style="width: 100%; height: 32px;">
+                    <option value="">-Select Code-</option>
+                    <option value="00100 - GPO Nairobi">00100 - GPO Nairobi</option>
+                    <option value="00200 - City Square">00200 - City Square</option>
+                    <option value="01000 - Thika">01000 - Thika</option>
+                    <option value="80100 - Mombasa">80100 - Mombasa</option>
+                    <option value="40100 - Kisumu">40100 - Kisumu</option>
+                    <option value="30100 - Eldoret">30100 - Eldoret</option>
+                    <option value="20100 - Nakuru">20100 - Nakuru</option>
+                    <option value="10100 - Nyeri">10100 - Nyeri</option>
+                    <option value="60200 - Meru">60200 - Meru</option>
+                    <option value="90100 - Machakos">90100 - Machakos</option>
+                  </select>
+                </div>
               </div>
-              <div class="form-group span-full" style="display: flex; gap: 28px; margin-top: 4px;">
-                <label class="form-checkbox-label">
-                  <input type="checkbox" id="mandate-vat-applicable" checked>
-                  <span>16% VAT Applicable on Management Fee</span>
-                </label>
-                <label class="form-checkbox-label">
-                  <input type="checkbox" id="mandate-mri-applicable" checked>
-                  <span>7.5% Residential Monthly Rental Income (MRI) Tax Withheld</span>
-                </label>
+            </fieldset>
+
+            <!-- Fieldset 5: Work Place -->
+            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+              <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Work Place</legend>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-workplace" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Work Place:</label>
+                  <input type="text" id="tenant-assign-workplace" class="form-input" style="width: 100%; height: 32px;" placeholder="Company / Organization">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-workcontacts" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Work Contacts:</label>
+                  <input type="text" id="tenant-assign-workcontacts" class="form-input" style="width: 100%; height: 32px;" placeholder="Office Phone / HR">
+                </div>
               </div>
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-              <button type="button" class="btn-action-pill" style="padding: 10px 18px;" onclick="confirmClearForm('form-mandate')">✕ Clear Form</button>
-              <button type="submit" class="btn-elevated-primary">+ Execute Management Mandate</button>
+            </fieldset>
+
+            <!-- Fieldset 6: Next of Kin Details -->
+            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 18px; background: #FFFFFF;">
+              <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Next of Kin Details</legend>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-kin" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Next of Kin:</label>
+                  <input type="text" id="tenant-assign-kin" class="form-input" style="width: 100%; height: 32px;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-kin-contacts" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Kin Contacts:</label>
+                  <input type="text" id="tenant-assign-kin-contacts" class="form-input" style="width: 100%; height: 32px;" placeholder="Phone Number">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-rel" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Relationship:</label>
+                  <select id="tenant-assign-rel" class="form-input" style="width: 100%; height: 32px;">
+                    <option value="">-Select Relationship-</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Parent">Parent</option>
+                    <option value="Child">Child</option>
+                    <option value="Sibling">Sibling</option>
+                    <option value="Relative">Relative</option>
+                    <option value="Friend">Friend</option>
+                    <option value="Colleague">Colleague</option>
+                  </select>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <label for="tenant-assign-status" style="font-weight: 700; font-size: 0.86rem; min-width: 95px; color: #1F2937;">Status:</label>
+                  <input type="checkbox" id="tenant-assign-status" checked style="width: 18px; height: 18px; accent-color: #008080; cursor: pointer;">
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Action Footer matching image_7043c0.png: Orange Clear & Orange Save -->
+            <div style="display: flex; justify-content: space-around; align-items: center; max-width: 600px; margin: 16px auto 8px auto;">
+              <button type="button" id="btn-clear-tenant-assign" onclick="clearTenantAssignForm()" style="background: #F97316; color: #FFFFFF; font-weight: 700; font-size: 0.92rem; border: 1px solid #EA580C; border-radius: 4px; padding: 7px 46px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.15);" onmouseover="this.style.background='#EA580C'" onmouseout="this.style.background='#F97316'">
+                Clear
+              </button>
+              <button type="submit" id="btn-save-tenant-assign" style="background: #F97316; color: #FFFFFF; font-weight: 700; font-size: 0.92rem; border: 1px solid #EA580C; border-radius: 4px; padding: 7px 50px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.15);" onmouseover="this.style.background='#EA580C'" onmouseout="this.style.background='#F97316'">
+                Save
+              </button>
             </div>
           </form>
 
-          <!-- Mandates Directory Table -->
-          <div style="margin-top: 20px;">
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Active Management Mandates</h3>
+          <!-- Active Tenant Unit Assignments Directory Table -->
+          <div style="margin-top: 26px; border-top: 1px solid #E5E7EB; padding-top: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3 style="font-size: 1rem; font-weight: 700; color: #1F2937; margin: 0;">Active Tenant Unit Assignments & Occupancies</h3>
+              <span id="assign-summary-badge" class="badge-status" style="font-weight: 700; background: #008080; color: #FFFFFF;">2 Leases</span>
+            </div>
             <div class="builder-table-wrap">
               <table class="builder-table">
                 <thead>
                   <tr>
-                    <th>Landlord</th>
+                    <th>Tenant Code</th>
+                    <th>Tenant Name</th>
                     <th>Property Assigned</th>
-                    <th>Effective - Expiry</th>
-                    <th>Commission Terms</th>
-                    <th>16% VAT</th>
-                    <th>7.5% MRI Tax</th>
-                    <th>Property Manager</th>
+                    <th>Unit Code</th>
+                    <th>Date In (Commencement)</th>
+                    <th>Monthly Rent</th>
+                    <th>Contact Phone</th>
                     <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
-                <tbody id="table-mandates-body"></tbody>
+                <tbody id="table-tenant-assignments-body"></tbody>
               </table>
             </div>
           </div>
+
         </div>
       </div>
 

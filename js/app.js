@@ -47,21 +47,43 @@ const AppState = {
       tenants: [
         {
           id: 'TEN-01',
+          tenantCode: 'T001',
           name: 'Grace Wanjiru Ndungu',
           idPassport: '31984210',
+          idNumber: '31984210',
           phone: '0712345678',
+          telNo: '0712345678',
+          email: 'grace.ndungu@pwc.com',
+          address: 'P.O. Box 45012-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
           kraPin: 'A010948192K',
+          workplace: 'PwC Kenya, Delta Corner Westlands',
+          workContacts: '+254202855000',
           emergency: 'John Ndungu (0722998877)',
-          workplace: 'PwC Kenya, Delta Corner Westlands'
+          emergencyContactName: 'John Ndungu',
+          emergencyContactPhone: '0722998877',
+          emergencyRelationship: 'Spouse',
+          isActive: true
         },
         {
           id: 'TEN-02',
+          tenantCode: 'T002',
           name: 'Kevin Kiprop Patel',
           idPassport: '28491022',
+          idNumber: '28491022',
           phone: '0720112233',
+          telNo: '0720112233',
+          email: 'kevin.patel@kpmg.co.ke',
+          address: 'P.O. Box 40612-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
           kraPin: 'A009182910M',
+          workplace: 'KPMG Kenya, ABC Place Waiyaki Way',
+          workContacts: '+254202806000',
           emergency: 'Mary Patel (0722334455)',
-          workplace: 'KPMG Kenya, ABC Place Waiyaki Way'
+          emergencyContactName: 'Mary Patel',
+          emergencyContactPhone: '0722334455',
+          emergencyRelationship: 'Parent',
+          isActive: true
         }
       ],
       properties: [
@@ -831,7 +853,8 @@ const AppState = {
           renderBuilderPayables();
           renderPropertiesTable();
           renderUnitsTable();
-          renderMandatesTable();
+          initTenantAssignTab();
+          renderTenantAssignmentsTable();
           initBulkUnitsTab();
           initPropertyPayablesTab();
           if (AppState.activeRegTab) {
@@ -1880,90 +1903,352 @@ const AppState = {
       `).join('');
     }
 
-    /* 5. PROPERTY ASSIGNMENT (MANDATE) SUBMIT */
-    function toggleMandateCommissionType() {
-      const typeElem = document.getElementById('mandate-commission-type');
-      if (!typeElem) return;
-      const isPct = typeElem.value === 'PERCENTAGE';
-      const grpPct = document.getElementById('group-mandate-pct');
-      const grpFixed = document.getElementById('group-mandate-fixed');
-      if (grpPct) grpPct.style.display = isPct ? 'flex' : 'none';
-      if (grpFixed) grpFixed.style.display = isPct ? 'none' : 'flex';
+    /* 5. TENANT DETAILS & PROPERTY ASSIGNMENT (PROMATRIX LEGACY ONBOARDING) */
+    function getNextTenantCode() {
+      const nums = AppState.tenants
+        .map(t => t.tenantCode || t.id || '')
+        .filter(c => /^T\d+$/i.test(c))
+        .map(c => parseInt(c.replace(/^T/i, ''), 10))
+        .filter(n => !isNaN(n));
+      const nextNum = nums.length > 0 ? Math.max(...nums) + 1 : (AppState.tenants.length + 1);
+      return 'T' + String(nextNum).padStart(3, '0');
     }
 
-    function handleMandateSubmit(e) {
-      e.preventDefault();
-      const llId = document.getElementById('mandate-landlord-select').value;
-      const propId = document.getElementById('mandate-property-select').value;
-      const landlord = AppState.landlords.find(l => l.id === llId) || AppState.landlords[0];
-      const property = AppState.properties.find(p => p.id === propId) || AppState.properties[0];
+    function initTenantAssignTab() {
+      populateTenantAssignDropdowns();
+      const codeInput = document.getElementById('tenant-assign-code');
+      if (codeInput && (!codeInput.value || codeInput.value === 'T001')) {
+        codeInput.value = getNextTenantCode();
+      }
+      const dateInInput = document.getElementById('tenant-assign-datein');
+      if (dateInInput && !dateInInput.value) {
+        dateInInput.value = new Date().toISOString().split('T')[0];
+      }
+      renderTenantAssignmentsTable();
+    }
 
-      const commTypeElem = document.getElementById('mandate-commission-type');
-      const commissionType = commTypeElem ? commTypeElem.value : 'PERCENTAGE';
-      const feePct = commissionType === 'PERCENTAGE' ? Number(document.getElementById('mandate-fee-pct').value || 0) : 0;
-      const feeFixed = commissionType === 'FIXED' ? Number(document.getElementById('mandate-fee-fixed').value || 0) : 0;
-      const effective = document.getElementById('mandate-effective-date').value;
-      const expiry = document.getElementById('mandate-expiry-date').value || 'Open-ended';
-      const vat = document.getElementById('mandate-vat-applicable').checked;
-      const mri = document.getElementById('mandate-mri-applicable').checked;
-      const manager = document.getElementById('mandate-manager').value;
+    function populateTenantAssignDropdowns() {
+      // 1. Populate Tenant Selector
+      const tSelect = document.getElementById('tenant-assign-select');
+      if (tSelect) {
+        const currentVal = tSelect.value || 'NEW';
+        tSelect.innerHTML = `<option value="NEW">-Select Tenant / New Tenant-</option>` +
+          AppState.tenants.map(t => `<option value="${t.id}">${t.tenantCode || t.id} - ${t.name}</option>`).join('');
+        tSelect.value = currentVal;
+      }
+
+      // 2. Populate Property Selector
+      const pSelect = document.getElementById('tenant-assign-property');
+      if (pSelect) {
+        const currentProp = pSelect.value;
+        pSelect.innerHTML = `<option value="">-Select Property-</option>` +
+          AppState.properties.map(p => `<option value="${p.id}">${p.propertyIdCode || p.id} - ${p.name}</option>`).join('');
+        if (currentProp) pSelect.value = currentProp;
+      }
+    }
+
+    function handleTenantAssignPropertyChange(propId) {
+      const uSelect = document.getElementById('tenant-assign-unit');
+      if (!uSelect) return;
+
+      if (!propId) {
+        uSelect.innerHTML = `<option value="">-Select Unit-</option>`;
+        return;
+      }
+
+      const matchingUnits = AppState.units.filter(u => u.propertyId === propId);
+      uSelect.innerHTML = `<option value="">-Select Unit-</option>` +
+        matchingUnits.map(u => `<option value="${u.id}">${u.code} (${u.status} - KES ${Number(u.rent || 0).toLocaleString()}/mo)</option>`).join('');
+    }
+
+    function handleTenantAssignSelect(tenantId) {
+      const form = document.getElementById('form-tenant-assignment');
+      if (!form) return;
+
+      if (!tenantId || tenantId === 'NEW') {
+        clearTenantAssignForm(false);
+        return;
+      }
+
+      const tenant = AppState.tenants.find(t => t.id === tenantId);
+      if (!tenant) return;
+
+      // Populate personal & contact details
+      const codeInput = document.getElementById('tenant-assign-code');
+      if (codeInput) codeInput.value = tenant.tenantCode || tenant.id;
+
+      const nameInput = document.getElementById('tenant-assign-name');
+      if (nameInput) nameInput.value = tenant.name || '';
+
+      const idInput = document.getElementById('tenant-assign-idno');
+      if (idInput) idInput.value = tenant.idPassport || tenant.idNumber || '';
+
+      const telInput = document.getElementById('tenant-assign-tel');
+      if (telInput) telInput.value = tenant.phone || tenant.telNo || '';
+
+      const emailInput = document.getElementById('tenant-assign-email');
+      if (emailInput) emailInput.value = tenant.email || '';
+
+      const addrInput = document.getElementById('tenant-assign-address');
+      if (addrInput) addrInput.value = tenant.address || '';
+
+      const postalInput = document.getElementById('tenant-assign-postal');
+      if (postalInput) postalInput.value = tenant.postalCode || '';
+
+      const workInput = document.getElementById('tenant-assign-workplace');
+      if (workInput) workInput.value = tenant.workplace || '';
+
+      const workContactsInput = document.getElementById('tenant-assign-workcontacts');
+      if (workContactsInput) workContactsInput.value = tenant.workContacts || '';
+
+      const kinInput = document.getElementById('tenant-assign-kin');
+      if (kinInput) kinInput.value = tenant.emergencyContactName || (tenant.emergency ? tenant.emergency.split(' (')[0] : '');
+
+      const kinContactsInput = document.getElementById('tenant-assign-kin-contacts');
+      if (kinContactsInput) {
+        const phone = tenant.emergencyContactPhone || (tenant.emergency && tenant.emergency.includes('(') ? tenant.emergency.split('(')[1].replace(')', '') : '');
+        kinContactsInput.value = phone;
+      }
+
+      const relInput = document.getElementById('tenant-assign-rel');
+      if (relInput) relInput.value = tenant.emergencyRelationship || '';
+
+      const statusInput = document.getElementById('tenant-assign-status');
+      if (statusInput) statusInput.checked = tenant.isActive !== false;
+
+      // Find if tenant has an active lease
+      const activeLease = AppState.leases.find(l => l.tenantId === tenant.id && l.status === 'Active');
+      if (activeLease) {
+        const unit = AppState.units.find(u => u.id === activeLease.unitId);
+        if (unit) {
+          const pSelect = document.getElementById('tenant-assign-property');
+          if (pSelect) {
+            pSelect.value = unit.propertyId;
+            handleTenantAssignPropertyChange(unit.propertyId);
+          }
+          const uSelect = document.getElementById('tenant-assign-unit');
+          if (uSelect) uSelect.value = unit.id;
+        }
+        const dateInput = document.getElementById('tenant-assign-datein');
+        if (dateInput) dateInput.value = activeLease.startDate;
+      } else {
+        const dateInput = document.getElementById('tenant-assign-datein');
+        if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+      }
+
+      showToast(`Loaded Tenant [${tenant.tenantCode || tenant.id}] ${tenant.name}`);
+    }
+
+    function clearTenantAssignForm(promptConfirm = true) {
+      const resetAction = () => {
+        const form = document.getElementById('form-tenant-assignment');
+        if (form) form.reset();
+
+        const tSelect = document.getElementById('tenant-assign-select');
+        if (tSelect) tSelect.value = 'NEW';
+
+        const pSelect = document.getElementById('tenant-assign-property');
+        if (pSelect) pSelect.value = '';
+
+        const uSelect = document.getElementById('tenant-assign-unit');
+        if (uSelect) uSelect.innerHTML = `<option value="">-Select Unit-</option>`;
+
+        const codeInput = document.getElementById('tenant-assign-code');
+        if (codeInput) codeInput.value = getNextTenantCode();
+
+        const dateInput = document.getElementById('tenant-assign-datein');
+        if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+        const statusInput = document.getElementById('tenant-assign-status');
+        if (statusInput) statusInput.checked = true;
+
+        showToast('Tenant Details form cleared for new onboarding.');
+      };
+
+      if (promptConfirm) {
+        confirmAction(
+          'Are you sure you want to clear the Tenant Details form fields?',
+          resetAction,
+          'Clear Form Confirmation',
+          'Clear Form'
+        );
+      } else {
+        resetAction();
+      }
+    }
+
+    function handleTenantAssignSubmit(e) {
+      e.preventDefault();
+
+      const tenantSel = document.getElementById('tenant-assign-select').value;
+      const propId = document.getElementById('tenant-assign-property').value;
+      const unitId = document.getElementById('tenant-assign-unit').value;
+      const code = document.getElementById('tenant-assign-code').value.trim() || getNextTenantCode();
+      const name = document.getElementById('tenant-assign-name').value.trim();
+      const idno = document.getElementById('tenant-assign-idno').value.trim();
+      const dateIn = document.getElementById('tenant-assign-datein').value;
+      const tel = document.getElementById('tenant-assign-tel').value.trim();
+      const email = document.getElementById('tenant-assign-email').value.trim();
+      const address = document.getElementById('tenant-assign-address').value.trim();
+      const postal = document.getElementById('tenant-assign-postal').value;
+      const workplace = document.getElementById('tenant-assign-workplace').value.trim();
+      const workcontacts = document.getElementById('tenant-assign-workcontacts').value.trim();
+      const kin = document.getElementById('tenant-assign-kin').value.trim();
+      const kincontacts = document.getElementById('tenant-assign-kin-contacts').value.trim();
+      const rel = document.getElementById('tenant-assign-rel').value;
+      const status = document.getElementById('tenant-assign-status').checked;
+
+      if (!propId || !unitId || !name || !dateIn) {
+        showToast('Please select Property, Unit, enter Tenant Name and Date In.');
+        return;
+      }
+
+      const prop = AppState.properties.find(p => p.id === propId);
+      const unit = AppState.units.find(u => u.id === unitId);
+      const isNew = (!tenantSel || tenantSel === 'NEW');
 
       confirmAction(
-        `Are you sure you want to execute and commit Management Mandate for Property <strong>${property.name}</strong> assigned to Landlord <strong>${landlord.name}</strong> (${commissionType === 'FIXED' ? `KES ${feeFixed.toLocaleString()} Fixed` : `${feePct}% Fee`})?`,
+        `Are you sure you want to ${isNew ? 'register New Tenant <strong>[' + code + '] ' + name + '</strong> and bind active lease' : 'update Tenant <strong>' + name + '</strong> and bind lease'} to Unit <strong>${unit ? unit.code : ''}</strong> at <strong>${prop ? prop.name : ''}</strong> effective <strong>${dateIn}</strong>?`,
         () => {
-          const newMandate = {
-            id: `MND-${String(AppState.mandates.length + 1).padStart(2, '0')}`,
-            landlordId: landlord.id,
-            landlordName: landlord.name,
-            propertyId: property.id,
-            propertyName: property.name,
-            effective: effective,
-            expiry: expiry,
-            commissionType,
-            feePct,
-            feeFixed,
-            vat: vat,
-            mri: mri,
-            manager: manager,
-            status: 'ACTIVE'
-          };
+          let tenantId = tenantSel;
 
-          // Link property to landlord directly
-          property.landlordId = landlord.id;
+          if (isNew) {
+            tenantId = `TEN-${String(AppState.tenants.length + 1).padStart(2, '0')}`;
+            const newTenant = {
+              id: tenantId,
+              tenantCode: code,
+              name: name,
+              idPassport: idno,
+              idNumber: idno,
+              phone: tel,
+              telNo: tel,
+              email: email,
+              address: address,
+              postalCode: postal,
+              kraPin: 'P0' + Math.floor(10000000 + Math.random() * 90000000) + 'K',
+              workplace: workplace,
+              workContacts: workcontacts,
+              emergency: `${kin} (${kincontacts})`,
+              emergencyContactName: kin,
+              emergencyContactPhone: kincontacts,
+              emergencyRelationship: rel,
+              isActive: status
+            };
+            AppState.tenants.push(newTenant);
+          } else {
+            const existingTenant = AppState.tenants.find(t => t.id === tenantSel);
+            if (existingTenant) {
+              existingTenant.tenantCode = code || existingTenant.tenantCode;
+              existingTenant.name = name;
+              existingTenant.idPassport = idno;
+              existingTenant.idNumber = idno;
+              existingTenant.phone = tel;
+              existingTenant.telNo = tel;
+              existingTenant.email = email;
+              existingTenant.address = address;
+              existingTenant.postalCode = postal;
+              existingTenant.workplace = workplace;
+              existingTenant.workContacts = workcontacts;
+              existingTenant.emergency = `${kin} (${kincontacts})`;
+              existingTenant.emergencyContactName = kin;
+              existingTenant.emergencyContactPhone = kincontacts;
+              existingTenant.emergencyRelationship = rel;
+              existingTenant.isActive = status;
+            }
+          }
 
-          AppState.mandates.push(newMandate);
-          renderMandatesTable();
-          renderLandlordPortfolioTable();
-          e.target.reset();
-          toggleMandateCommissionType();
-          showToast(`✓ Management Mandate executed for ${property.name}`);
+          // Mark selected unit as OCCUPIED
+          if (unit) {
+            unit.status = 'OCCUPIED';
+          }
+
+          // Create or update active lease binding tenant to Property and Unit on dateIn
+          let lease = AppState.leases.find(l => l.tenantId === tenantId && l.unitId === unitId && l.status === 'Active');
+          if (!lease) {
+            const newLeaseId = `LSE-${String(AppState.leases.length + 1).padStart(3, '0')}`;
+            const endDateObj = new Date(dateIn);
+            endDateObj.setFullYear(endDateObj.getFullYear() + 1);
+            lease = {
+              id: newLeaseId,
+              tenantId: tenantId,
+              tenantName: name,
+              unitId: unitId,
+              unitCode: unit ? unit.code : '—',
+              propertyName: prop ? prop.name : '—',
+              startDate: dateIn,
+              endDate: endDateObj.toISOString().split('T')[0],
+              rentAmount: unit ? (Number(unit.rent) || 30000) : 30000,
+              serviceCharge: unit ? (Number(unit.sc) || 3500) : 3500,
+              depositAmount: unit ? (Number(unit.rent) || 30000) : 30000,
+              handoverWater: 0,
+              meterSerial: unit ? (unit.meter || 'N/A') : 'N/A',
+              status: 'Active'
+            };
+            AppState.leases.push(lease);
+          } else {
+            lease.startDate = dateIn;
+            lease.tenantName = name;
+          }
+
+          // Re-render components across the application
+          renderTenantsTable();
+          renderUnitsTable();
+          renderLeasesTable();
+          populateTenantDropdowns();
+          populateTenantAssignDropdowns();
+          renderTenantAssignmentsTable();
+
+          showToast(`✓ Tenant [${code}] ${name} successfully assigned to Unit ${unit ? unit.code : ''}!`);
+          clearTenantAssignForm(false);
         },
-        'Mandate Execution Confirmation',
-        'Execute Mandate'
+        'Tenant Onboarding & Assignment Confirmation',
+        'Save & Bind Lease'
       );
     }
 
-    function renderMandatesTable() {
-      const tbody = document.getElementById('table-mandates-body');
+    function renderTenantAssignmentsTable() {
+      const tbody = document.getElementById('table-tenant-assignments-body');
+      const badge = document.getElementById('assign-summary-badge');
       if (!tbody) return;
-      tbody.innerHTML = AppState.mandates.map(m => {
-        const commText = m.commissionType === 'FIXED'
-          ? `<strong>KES ${Number(m.feeFixed || 0).toLocaleString()}</strong> <small>(Fixed/Mo)</small>`
-          : `<strong>${m.feePct}%</strong> <small>(Gross Rent)</small>`;
+
+      const activeLeases = AppState.leases.filter(l => l.status === 'Active');
+      if (badge) badge.textContent = `${activeLeases.length} Active Leases`;
+
+      tbody.innerHTML = activeLeases.map(l => {
+        const tenant = AppState.tenants.find(t => t.id === l.tenantId);
+        const code = tenant ? (tenant.tenantCode || tenant.id) : '—';
+        const phone = tenant ? (tenant.phone || tenant.telNo || '—') : '—';
 
         return `
           <tr>
-            <td><strong>${m.landlordName}</strong></td>
-            <td>${m.propertyName}</td>
-            <td>${m.effective} to ${m.expiry}</td>
-            <td>${commText}</td>
-            <td>${m.vat ? '<span style="color: var(--accent-secondary);">✓ 16% VAT</span>' : 'Exempt'}</td>
-            <td>${m.mri ? '<span style="color: var(--accent-secondary);">✓ 7.5% MRI</span>' : 'Exempt'}</td>
-            <td>${m.manager}</td>
-            <td><span class="badge-status" style="color: var(--accent-secondary);">${m.status}</span></td>
+            <td><span class="badge-status" style="font-family: monospace; font-weight: 800; background: #008080; color: #FFFFFF;">${code}</span></td>
+            <td><strong>${l.tenantName}</strong></td>
+            <td>${l.propertyName}</td>
+            <td><span class="badge-status" style="font-weight: 700;">${l.unitCode}</span></td>
+            <td>${l.startDate}</td>
+            <td><strong>KES ${Number(l.rentAmount).toLocaleString()}</strong></td>
+            <td>${phone}</td>
+            <td><span class="badge-status" style="color: var(--accent-secondary); font-weight: 700;">● Active</span></td>
+            <td>
+              <button type="button" class="btn-action-pill" style="color: #008080; border-color: #008080; font-weight: 700;" onclick="editTenantAssignment('${l.tenantId}')">Edit / Reload</button>
+            </td>
           </tr>
         `;
       }).join('');
+    }
+
+    function editTenantAssignment(tenantId) {
+      const assignTabBtn = document.querySelector('[data-reg-target="assignments"]');
+      if (assignTabBtn) assignTabBtn.click();
+
+      const tSelect = document.getElementById('tenant-assign-select');
+      if (tSelect) {
+        tSelect.value = tenantId;
+        handleTenantAssignSelect(tenantId);
+      }
+
+      const form = document.getElementById('form-tenant-assignment');
+      if (form) form.scrollIntoView({ behavior: 'smooth' });
     }
 
     function populateDropdowns() {
@@ -1998,6 +2283,9 @@ const AppState = {
       // Mandate landlord selector
       const mLlSelect = document.getElementById('mandate-landlord-select');
       if (mLlSelect) mLlSelect.innerHTML = AppState.landlords.map(l => `<option value="${l.id}">${l.name} (${l.kraPin})</option>`).join('');
+
+      // Sub-Module 1.1 Tenant Details & Assignment Dropdowns
+      populateTenantAssignDropdowns();
 
       // Sub-Module 1.2 Tenant Dropdowns
       populateTenantDropdowns();
