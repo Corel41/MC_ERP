@@ -1099,6 +1099,54 @@
       animation: fadeIn 0.2s ease;
     }
 
+    /* Sub-Module 1.3 Landlord Navigation Segment Tabs & Panels */
+    .landlord-nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--nav-active-bg);
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow-sm);
+    }
+
+    .landlord-tab-btn {
+      padding: 9px 18px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .landlord-tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .landlord-tab-btn.active {
+      background: var(--accent-primary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .landlord-panel { display: none; }
+    .landlord-panel.active {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.2s ease;
+    }
+
     /* Modal for Receipting */
     .modal-overlay {
       position: fixed;
@@ -2371,10 +2419,303 @@
       </div>
     </div>
 
+    <!-- SUB-MODULE 1.3: LANDLORDS (PORTFOLIO, STATEMENTS ENGINE, REMITTANCE & PAYOUT QUEUE) -->
     <div class="view-content" id="view-estate-landlords">
-      <div class="glass-card clean-module-container">
-        <h2>01. Estate Management — 1.3 Landlords</h2>
-        <p>Management Mandates, Agency Commission, 7.5% MRI Tax, and Net Remittances.</p>
+
+      <!-- Navigation Segment Tabs for 1.3 Landlords -->
+      <div class="landlord-nav-tabs">
+        <button class="landlord-tab-btn active" data-landlord-target="portfolio">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>1. Portfolio & Mandates</span>
+        </button>
+        <button class="landlord-tab-btn" data-landlord-target="statements">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span>2. Monthly Statements Engine</span>
+        </button>
+        <button class="landlord-tab-btn" data-landlord-target="payouts">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <span>3. Remittance & Payout Queue</span>
+        </button>
+      </div>
+
+      <!-- 1. PORTFOLIO & MANDATES PANEL -->
+      <div class="landlord-panel active" id="panel-landlord-portfolio">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Landlord Asset Portfolio & Management Mandates</h2>
+              <p>Overview of active properties managed per landlord, contractual agency commission percentages, 16% agency VAT covenants, and statutory KRA 7.5% MRI tax withholding.</p>
+            </div>
+            <span class="live-pulse-badge">Mandate Statutory Guard: 16% VAT & 7.5% MRI</span>
+          </div>
+
+          <!-- Portfolio Directory Table -->
+          <div style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Managed Property Portfolios</h3>
+              <span class="badge-status" id="portfolio-count-badge" style="color: var(--accent-secondary);">2 Active Mandates</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Landlord Name & Entity</th>
+                    <th>Managed Property & LR No.</th>
+                    <th>Units Managed</th>
+                    <th>Agency Fee %</th>
+                    <th>16% VAT</th>
+                    <th>7.5% MRI Tax</th>
+                    <th>Property Manager</th>
+                    <th>Remittance Target</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-landlord-portfolio-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. MONTHLY STATEMENTS ENGINE PANEL -->
+      <div class="landlord-panel" id="panel-landlord-statements">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Landlord Monthly Statement & Net Remittance Engine</h2>
+              <p>Calculate monthly net remittance per property by deducting agreed agency commissions, 16% agency VAT, approved maintenance/repair costs, and statutory 7.5% MRI withholding tax.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_Landlord_Payments / Pro_PayToLLComm Sync</span>
+          </div>
+
+          <!-- Statement Calculator Form -->
+          <form id="form-landlord-statement" onsubmit="handleStatementSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Landlord</label>
+                <select class="form-input" id="stmt-landlord-select" required onchange="handleStmtLandlordChange(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Managed Property</label>
+                <select class="form-input" id="stmt-property-select" required onchange="handleStmtPropertyChange(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Statement Period</label>
+                <div style="display: flex; gap: 8px;">
+                  <select class="form-input" id="stmt-period-month" style="flex: 1;" onchange="calculateStatementNet()">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10" selected>October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                  </select>
+                  <select class="form-input" id="stmt-period-year" style="width: 100px;">
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Gross Rent Collected (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="stmt-gross-rent" required value="32000.00" oninput="calculateStatementNet()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Contractual Agency Fee %</label>
+                <input type="number" step="0.1" class="form-input" id="stmt-fee-pct" readonly value="8.5" style="color: var(--accent-primary); font-weight: 700;">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Agency Commission Amount (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="stmt-comm-amount" readonly value="2720.00" style="color: var(--accent-primary); font-weight: 700;">
+              </div>
+              <div class="form-group">
+                <label class="form-label">16% VAT on Commission (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="stmt-vat-amount" readonly value="435.20" style="color: var(--text-muted);">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Maintenance / LPO Deductions (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="stmt-maintenance-deductions" value="0.00" oninput="calculateStatementNet()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">7.5% KRA MRI Withholding Tax (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="stmt-mri-tax" readonly value="2400.00" style="color: var(--accent-amber); font-weight: 700;">
+              </div>
+              <div class="form-group span-full" style="background: var(--nav-active-bg); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.04em;">Net Payable Remittance to Landlord</div>
+                  <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent-secondary);" id="stmt-net-payable-display">KES 26,444.80</div>
+                  <input type="hidden" id="stmt-net-payable" value="26444.80">
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                  <select class="form-input" id="stmt-initial-status" style="width: 140px;">
+                    <option value="Approved">Approved</option>
+                    <option value="Draft">Draft</option>
+                  </select>
+                  <button type="submit" class="btn-elevated-primary">⚡ Generate Statement</button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <!-- Statements History Table -->
+          <div style="margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Issued Landlord Statements</h3>
+              <span class="badge-status" style="color: var(--accent-secondary);">Net Payout Verified</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Statement Ref</th>
+                    <th>Period</th>
+                    <th>Landlord Name</th>
+                    <th>Property</th>
+                    <th>Gross Collected</th>
+                    <th>Commission (-)</th>
+                    <th>VAT (-)</th>
+                    <th>Maintenance (-)</th>
+                    <th>KRA MRI (-)</th>
+                    <th>Net Payout</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-statements-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. REMITTANCE & PAYOUT QUEUE PANEL -->
+      <div class="landlord-panel" id="panel-landlord-payouts">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Landlord Remittance & Electronic Payout Queue</h2>
+              <p>Authorize and disburse net rental proceeds to property owners via Bank EFT / RTGS or Safaricom Daraja M-Pesa B2C Bulk Mobile Disbursements.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_Pro_LandlordRemittanceExport</span>
+          </div>
+
+          <!-- Summary Metric Counters -->
+          <div class="stat-pill-group">
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Gross Rent Managed</span>
+              <span class="stat-pill-value" id="landlord-stat-gross" style="color: var(--accent-primary);">KES 107,000.00</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Agency Commission & VAT Retained</span>
+              <span class="stat-pill-value" id="landlord-stat-commission" style="color: var(--accent-secondary);">KES 10,115.20</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">KRA 7.5% MRI Tax Withheld</span>
+              <span class="stat-pill-value" id="landlord-stat-mri" style="color: var(--accent-amber);">KES 8,025.00</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Net Landlord Proceeds Disbursed</span>
+              <span class="stat-pill-value" id="landlord-stat-net" style="color: var(--accent-tertiary);">KES 88,859.80</span>
+            </div>
+          </div>
+
+          <!-- Payout Queue Table -->
+          <div style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Electronic Remittance Dispatch Queue</h3>
+              <span class="badge-status" style="color: var(--accent-secondary);">Direct B2C / Bank Routing</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Statement No.</th>
+                    <th>Period</th>
+                    <th>Landlord Name</th>
+                    <th>Target Property</th>
+                    <th>Remittance Destination</th>
+                    <th>Net Amount Due</th>
+                    <th>Payout Status</th>
+                    <th>Disbursement Ref</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-landlord-payouts-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- LANDLORD PAYOUT MODAL (BANK EFT / M-PESA B2C) -->
+    <div class="modal-overlay" id="modal-landlord-payout">
+      <div class="modal-card">
+        <div class="modal-header-strip">
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 800;">Execute Landlord Remittance Payout</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Record Bank Transfer EFT Reference or Safaricom M-Pesa B2C Transaction Code.</p>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeLandlordPayoutModal()" title="Close">&times;</button>
+        </div>
+
+        <form id="form-landlord-payout" onsubmit="handleLandlordPayoutSubmit(event)">
+          <div class="form-grid-2">
+            <div class="form-group span-full" style="background: var(--nav-active-bg); padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border);">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Beneficiary & Target Statement</div>
+              <div style="font-size: 1.05rem; font-weight: 800; margin-top: 2px;" id="payout-modal-landlord-name">Mugo Investments Ltd</div>
+              <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 2px;" id="payout-modal-remit-info">KCB Bank Kenya • Thika Section 9 • Acc: 1120948192</div>
+              <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-secondary); margin-top: 6px;" id="payout-modal-amount-due">KES 26,444.80</div>
+              <input type="hidden" id="payout-modal-statement-id">
+              <input type="hidden" id="payout-modal-amount">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Disbursement Channel</label>
+              <select class="form-input" id="payout-method-select">
+                <option value="Bank Transfer">Bank Transfer (EFT / RTGS)</option>
+                <option value="M-Pesa B2C">Safaricom M-Pesa B2C Mobile Payout</option>
+                <option value="Cheque">Corporate Banker's Cheque</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Transaction Reference / EFT Code</label>
+              <input type="text" class="form-input" id="payout-ref-input" required placeholder="e.g. EFT-KCB-982102 or B2C-SK9102">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Disbursement Date</label>
+              <input type="date" class="form-input" id="payout-date-input" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Authorizing Officer</label>
+              <input type="text" class="form-input" id="payout-authorizer-input" readonly value="Metrocosmo Finance Executive">
+            </div>
+
+            <div class="form-group span-full">
+              <label class="form-label">Payout Remittance Notes</label>
+              <input type="text" class="form-input" id="payout-notes-input" placeholder="e.g. October 2026 Net Rental Proceeds Disbursed via KCB EFT">
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+            <button type="button" class="btn-action-pill" onclick="closeLandlordPayoutModal()" style="padding: 10px 18px;">Cancel</button>
+            <button type="submit" class="btn-elevated-primary">✓ Confirm & Authorize Payout</button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -2853,6 +3194,63 @@
           debit: 82500,
           credit: 0,
           balanceAfter: 82500
+        }
+      ],
+      activeLandlordTab: 'portfolio',
+      landlordStatements: [
+        {
+          id: 'STM-2026-10-001',
+          landlordId: 'LL-01',
+          landlordName: 'Mugo Investments Ltd',
+          propertyId: 'PROP-01',
+          propertyName: 'Chania Falls View Courts',
+          periodMonth: 10,
+          periodYear: 2026,
+          grossRent: 32000.00,
+          commPct: 8.5,
+          commAmount: 2720.00,
+          vatAmount: 435.20,
+          maintenance: 0.00,
+          mriTax: 2400.00,
+          netPayable: 26444.80,
+          status: 'Paid',
+          remitMethod: 'Bank Transfer (KCB)',
+          remitDetails: 'KCB Bank Kenya • Thika Section 9 • Acc: 1120948192',
+          payoutRef: 'EFT-KCB-982012',
+          payoutDate: '2026-10-06'
+        },
+        {
+          id: 'STM-2026-10-002',
+          landlordId: 'LL-02',
+          landlordName: 'Dr. Sarah Simba',
+          propertyId: 'PROP-02',
+          propertyName: 'Kilimani Crest Executive Apartments',
+          periodMonth: 10,
+          periodYear: 2026,
+          grossRent: 75000.00,
+          commPct: 8.0,
+          commAmount: 6000.00,
+          vatAmount: 960.00,
+          maintenance: 0.00,
+          mriTax: 5625.00,
+          netPayable: 62415.00,
+          status: 'Approved',
+          remitMethod: 'Bank Transfer (Stanchart)',
+          remitDetails: 'Standard Chartered • Kenyatta Ave • Acc: 01002938102',
+          payoutRef: null,
+          payoutDate: null
+        }
+      ],
+      landlordPayouts: [
+        {
+          id: 'PAY-001',
+          statementId: 'STM-2026-10-001',
+          landlordName: 'Mugo Investments Ltd',
+          method: 'Bank Transfer',
+          refNo: 'EFT-KCB-982012',
+          amount: 26444.80,
+          date: '2026-10-06',
+          notes: 'October 2026 Net Rental Proceeds Disbursed via KCB EFT'
         }
       ]
     };
@@ -3919,6 +4317,374 @@
       showToast(`Receipt ${refNo} (KES ${amount.toLocaleString()}) posted & reconciled.`);
     }
 
+    /* SUB-MODULE 1.3: LANDLORDS LOGIC & INTERACTION ENGINES */
+
+    // Tab switching for 1.3 Landlords
+    function setupLandlordTabs() {
+      const landlordTabBtns = document.querySelectorAll('.landlord-tab-btn');
+      landlordTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          landlordTabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const target = btn.getAttribute('data-landlord-target');
+          AppState.activeLandlordTab = target;
+          document.querySelectorAll('.landlord-panel').forEach(p => p.classList.remove('active'));
+          const targetPanel = document.getElementById(`panel-landlord-${target}`);
+          if (targetPanel) targetPanel.classList.add('active');
+        });
+      });
+    }
+
+    // Populate Landlord Dropdowns
+    function populateLandlordDropdowns() {
+      const stmtLlSel = document.getElementById('stmt-landlord-select');
+      if (stmtLlSel) {
+        stmtLlSel.innerHTML = AppState.landlords.map(l => 
+          `<option value="${l.id}">${l.name} (${l.kraPin})</option>`
+        ).join('');
+        if (AppState.landlords.length > 0) {
+          handleStmtLandlordChange(AppState.landlords[0].id);
+        }
+      }
+
+      // Default payout date in modal to today
+      const payoutDateInput = document.getElementById('payout-date-input');
+      if (payoutDateInput && !payoutDateInput.value) {
+        payoutDateInput.value = new Date().toISOString().slice(0, 10);
+      }
+    }
+
+    function handleStmtLandlordChange(landlordId) {
+      const landlord = AppState.landlords.find(l => l.id === landlordId);
+      if (!landlord) return;
+
+      const stmtPropSel = document.getElementById('stmt-property-select');
+      if (!stmtPropSel) return;
+
+      // Find mandates for this landlord
+      const landlordMandates = AppState.mandates.filter(m => m.landlordName === landlord.name);
+      const matchingProps = AppState.properties.filter(p => landlordMandates.some(m => m.propertyName === p.name));
+
+      stmtPropSel.innerHTML = matchingProps.map(p => 
+        `<option value="${p.id}">${p.name} (${p.lr})</option>`
+      ).join('');
+
+      if (matchingProps.length > 0) {
+        handleStmtPropertyChange(matchingProps[0].id);
+      } else {
+        stmtPropSel.innerHTML = AppState.properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        if (AppState.properties.length > 0) {
+          handleStmtPropertyChange(AppState.properties[0].id);
+        }
+      }
+    }
+
+    function handleStmtPropertyChange(propertyId) {
+      const landlordId = document.getElementById('stmt-landlord-select').value;
+      const landlord = AppState.landlords.find(l => l.id === landlordId);
+      const property = AppState.properties.find(p => p.id === propertyId);
+      if (!property || !landlord) return;
+
+      // Find mandate
+      const mandate = AppState.mandates.find(m => m.landlordName === landlord.name && m.propertyName === property.name) || AppState.mandates[0];
+      if (mandate) {
+        document.getElementById('stmt-fee-pct').value = mandate.feePct;
+      }
+
+      // Compute gross rent from active leases for this property
+      const propUnits = AppState.units.filter(u => u.propertyId === property.id).map(u => u.id);
+      const activeLeases = AppState.leases.filter(l => propUnits.includes(l.unitId) && l.status === 'Active');
+      const totalRent = activeLeases.reduce((sum, l) => sum + l.rentAmount, 0);
+
+      document.getElementById('stmt-gross-rent').value = totalRent > 0 ? totalRent.toFixed(2) : "32000.00";
+      calculateStatementNet();
+    }
+
+    function calculateStatementNet() {
+      const gross = parseFloat(document.getElementById('stmt-gross-rent').value) || 0;
+      const feePct = parseFloat(document.getElementById('stmt-fee-pct').value) || 8.5;
+      const maint = parseFloat(document.getElementById('stmt-maintenance-deductions').value) || 0;
+
+      const landlordId = document.getElementById('stmt-landlord-select').value;
+      const propertyId = document.getElementById('stmt-property-select').value;
+      const landlord = AppState.landlords.find(l => l.id === landlordId);
+      const property = AppState.properties.find(p => p.id === propertyId);
+
+      const mandate = (landlord && property) 
+        ? AppState.mandates.find(m => m.landlordName === landlord.name && m.propertyName === property.name) 
+        : null;
+
+      const applyVat = mandate ? mandate.vat : true;
+      const applyMri = mandate ? mandate.mri : true;
+
+      const comm = gross * (feePct / 100);
+      const vat = applyVat ? (comm * 0.16) : 0;
+      const mri = applyMri ? (gross * 0.075) : 0;
+      const net = Math.max(0, gross - comm - vat - maint - mri);
+
+      document.getElementById('stmt-comm-amount').value = comm.toFixed(2);
+      document.getElementById('stmt-vat-amount').value = vat.toFixed(2);
+      document.getElementById('stmt-mri-tax').value = mri.toFixed(2);
+      document.getElementById('stmt-net-payable-display').textContent = `KES ${net.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('stmt-net-payable').value = net.toFixed(2);
+    }
+
+    function handleStatementSubmit(e) {
+      e.preventDefault();
+      const landlordId = document.getElementById('stmt-landlord-select').value;
+      const propertyId = document.getElementById('stmt-property-select').value;
+      const landlord = AppState.landlords.find(l => l.id === landlordId);
+      const property = AppState.properties.find(p => p.id === propertyId);
+
+      const month = parseInt(document.getElementById('stmt-period-month').value, 10);
+      const year = parseInt(document.getElementById('stmt-period-year').value, 10);
+      const gross = parseFloat(document.getElementById('stmt-gross-rent').value) || 0;
+      const feePct = parseFloat(document.getElementById('stmt-fee-pct').value) || 0;
+      const comm = parseFloat(document.getElementById('stmt-comm-amount').value) || 0;
+      const vat = parseFloat(document.getElementById('stmt-vat-amount').value) || 0;
+      const maint = parseFloat(document.getElementById('stmt-maintenance-deductions').value) || 0;
+      const mri = parseFloat(document.getElementById('stmt-mri-tax').value) || 0;
+      const net = parseFloat(document.getElementById('stmt-net-payable').value) || 0;
+      const status = document.getElementById('stmt-initial-status').value || 'Approved';
+
+      const remitDetails = landlord.remitMethod === 'BANK'
+        ? `${landlord.bank} • ${landlord.branch} • Acc: ${landlord.accNo}`
+        : `M-Pesa B2C Mobile • ${landlord.phone}`;
+
+      const stmtId = `STM-${year}-${String(month).padStart(2, '0')}-${String(AppState.landlordStatements.length + 1).padStart(3, '0')}`;
+
+      const newStatement = {
+        id: stmtId,
+        landlordId: landlord.id,
+        landlordName: landlord.name,
+        propertyId: property.id,
+        propertyName: property.name,
+        periodMonth: month,
+        periodYear: year,
+        grossRent: gross,
+        commPct: feePct,
+        commAmount: comm,
+        vatAmount: vat,
+        maintenance: maint,
+        mriTax: mri,
+        netPayable: net,
+        status: status,
+        remitMethod: landlord.remitMethod === 'BANK' ? `Bank Transfer (${landlord.bank})` : 'M-Pesa B2C',
+        remitDetails: remitDetails,
+        payoutRef: null,
+        payoutDate: null
+      };
+
+      AppState.landlordStatements.unshift(newStatement);
+      renderLandlordStatementsTable();
+      renderLandlordPayoutQueueTable();
+      showToast(`Statement ${stmtId} generated for ${landlord.name} (Net: KES ${net.toLocaleString()})`);
+    }
+
+    function renderLandlordPortfolioTable() {
+      const tbody = document.getElementById('table-landlord-portfolio-body');
+      if (!tbody) return;
+
+      const badge = document.getElementById('portfolio-count-badge');
+      if (badge) badge.textContent = `${AppState.mandates.length} Active Mandates`;
+
+      tbody.innerHTML = AppState.mandates.map(m => {
+        const landlord = AppState.landlords.find(l => l.name === m.landlordName) || AppState.landlords[0];
+        const property = AppState.properties.find(p => p.name === m.propertyName) || AppState.properties[0];
+        const unitsCount = AppState.units.filter(u => u.propertyName === m.propertyName).length;
+
+        const remitText = landlord.remitMethod === 'BANK' 
+          ? `🏦 ${landlord.bank} (${landlord.accNo})`
+          : `📱 M-Pesa B2C (${landlord.phone})`;
+
+        return `
+          <tr>
+            <td>
+              <strong>${m.landlordName}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${landlord.entityType} • ${landlord.kraPin}</div>
+            </td>
+            <td>
+              <strong>${m.propertyName}</strong>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${property ? property.lr : 'N/A'}</div>
+            </td>
+            <td><span class="badge-status" style="font-size:0.75rem;">${unitsCount} Units</span></td>
+            <td><strong>${m.feePct}%</strong></td>
+            <td>${m.vat ? '<span style="color: var(--accent-secondary); font-weight: 700;">✓ 16% VAT</span>' : 'Exempt'}</td>
+            <td>${m.mri ? '<span style="color: var(--accent-amber); font-weight: 700;">✓ 7.5% MRI</span>' : 'Exempt'}</td>
+            <td>${m.manager}</td>
+            <td style="font-size:0.78rem;">${remitText}</td>
+            <td>
+              <button class="btn-action-pill" onclick="prepareQuickStatement('${landlord.id}', '${property ? property.id : ''}')">Generate</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function prepareQuickStatement(landlordId, propertyId) {
+      const stmtTabBtn = document.querySelector('[data-landlord-target="statements"]');
+      if (stmtTabBtn) stmtTabBtn.click();
+
+      const llSel = document.getElementById('stmt-landlord-select');
+      if (llSel && landlordId) {
+        llSel.value = landlordId;
+        handleStmtLandlordChange(landlordId);
+      }
+      if (propertyId) {
+        const propSel = document.getElementById('stmt-property-select');
+        if (propSel) {
+          propSel.value = propertyId;
+          handleStmtPropertyChange(propertyId);
+        }
+      }
+      showToast('Landlord and property terms loaded for statement calculation.');
+    }
+
+    function renderLandlordStatementsTable() {
+      const tbody = document.getElementById('table-statements-body');
+      if (!tbody) return;
+
+      const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      tbody.innerHTML = AppState.landlordStatements.map(s => `
+        <tr>
+          <td><strong>${s.id}</strong></td>
+          <td>${monthNames[s.periodMonth]} ${s.periodYear}</td>
+          <td><strong>${s.landlordName}</strong></td>
+          <td>${s.propertyName}</td>
+          <td>KES ${s.grossRent.toLocaleString()}</td>
+          <td style="color: var(--accent-primary);">-KES ${s.commAmount.toLocaleString()}</td>
+          <td style="color: var(--text-muted);">-KES ${s.vatAmount.toLocaleString()}</td>
+          <td>${s.maintenance > 0 ? `-KES ${s.maintenance.toLocaleString()}` : '0.00'}</td>
+          <td style="color: var(--accent-amber);">-KES ${s.mriTax.toLocaleString()}</td>
+          <td><strong style="color: var(--accent-secondary);">KES ${s.netPayable.toLocaleString()}</strong></td>
+          <td>
+            <span class="badge-status" style="color: ${s.status === 'Paid' ? 'var(--accent-secondary)' : s.status === 'Approved' ? 'var(--accent-tertiary)' : 'var(--text-muted)'};">
+              ${s.status}
+            </span>
+          </td>
+          <td>
+            ${s.status !== 'Paid' 
+              ? `<button class="btn-action-pill" onclick="openLandlordPayoutModal('${s.id}')">💳 Payout</button>` 
+              : `<span style="font-size:0.75rem; color:var(--accent-secondary);">✓ Disbursed</span>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderLandlordPayoutQueueTable() {
+      const tbody = document.getElementById('table-landlord-payouts-body');
+      if (!tbody) return;
+
+      const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      // Update stat pills
+      const totalGross = AppState.landlordStatements.reduce((sum, s) => sum + s.grossRent, 0);
+      const totalCommVat = AppState.landlordStatements.reduce((sum, s) => sum + s.commAmount + s.vatAmount, 0);
+      const totalMri = AppState.landlordStatements.reduce((sum, s) => sum + s.mriTax, 0);
+      const totalNetDisbursed = AppState.landlordStatements.filter(s => s.status === 'Paid').reduce((sum, s) => sum + s.netPayable, 0);
+
+      const grossEl = document.getElementById('landlord-stat-gross');
+      const commEl = document.getElementById('landlord-stat-commission');
+      const mriEl = document.getElementById('landlord-stat-mri');
+      const netEl = document.getElementById('landlord-stat-net');
+
+      if (grossEl) grossEl.textContent = `KES ${totalGross.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
+      if (commEl) commEl.textContent = `KES ${totalCommVat.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
+      if (mriEl) mriEl.textContent = `KES ${totalMri.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
+      if (netEl) netEl.textContent = `KES ${totalNetDisbursed.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
+
+      tbody.innerHTML = AppState.landlordStatements.map(s => `
+        <tr>
+          <td><strong>${s.id}</strong></td>
+          <td>${monthNames[s.periodMonth]} ${s.periodYear}</td>
+          <td><strong>${s.landlordName}</strong></td>
+          <td>${s.propertyName}</td>
+          <td style="font-size:0.8rem;">${s.remitDetails}</td>
+          <td><strong style="color: var(--accent-secondary); font-size: 0.95rem;">KES ${s.netPayable.toLocaleString()}</strong></td>
+          <td>
+            <span class="badge-status" style="color: ${s.status === 'Paid' ? 'var(--accent-secondary)' : 'var(--accent-amber)'};">
+              ${s.status === 'Paid' ? 'Settled' : 'Pending Payout'}
+            </span>
+          </td>
+          <td>
+            ${s.payoutRef ? `<span style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">${s.payoutRef}</span>` : '—'}
+          </td>
+          <td>
+            ${s.status !== 'Paid' 
+              ? `<button class="btn-elevated-primary" style="padding: 6px 14px; font-size:0.75rem;" onclick="openLandlordPayoutModal('${s.id}')">💳 Mark as Paid</button>`
+              : `<span style="font-size:0.75rem; color:var(--text-muted);">${s.payoutDate}</span>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Landlord Payout Modal Handlers
+    function openLandlordPayoutModal(statementId) {
+      const statement = AppState.landlordStatements.find(s => s.id === statementId);
+      if (!statement) return;
+
+      const modal = document.getElementById('modal-landlord-payout');
+      if (!modal) return;
+      modal.classList.add('active');
+
+      document.getElementById('payout-modal-landlord-name').textContent = statement.landlordName;
+      document.getElementById('payout-modal-remit-info').textContent = statement.remitDetails;
+      document.getElementById('payout-modal-amount-due').textContent = `KES ${statement.netPayable.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
+      document.getElementById('payout-modal-statement-id').value = statement.id;
+      document.getElementById('payout-modal-amount').value = statement.netPayable;
+
+      const channelSel = document.getElementById('payout-method-select');
+      if (statement.remitMethod.includes('M-Pesa')) {
+        channelSel.value = 'M-Pesa B2C';
+        document.getElementById('payout-ref-input').value = 'B2C-S' + Math.random().toString(36).substring(2, 7).toUpperCase();
+      } else {
+        channelSel.value = 'Bank Transfer';
+        document.getElementById('payout-ref-input').value = 'EFT-KCB-' + Math.floor(100000 + Math.random() * 900000);
+      }
+
+      document.getElementById('payout-date-input').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('payout-notes-input').value = `Remittance payout for statement ${statement.id} to ${statement.landlordName}`;
+    }
+
+    function closeLandlordPayoutModal() {
+      const modal = document.getElementById('modal-landlord-payout');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function handleLandlordPayoutSubmit(e) {
+      e.preventDefault();
+      const statementId = document.getElementById('payout-modal-statement-id').value;
+      const statement = AppState.landlordStatements.find(s => s.id === statementId);
+      if (!statement) return;
+
+      const method = document.getElementById('payout-method-select').value;
+      const refNo = document.getElementById('payout-ref-input').value.trim();
+      const date = document.getElementById('payout-date-input').value || new Date().toISOString().slice(0, 10);
+      const notes = document.getElementById('payout-notes-input').value || 'Landlord remittance disbursed';
+
+      statement.status = 'Paid';
+      statement.payoutRef = refNo;
+      statement.payoutDate = date;
+
+      AppState.landlordPayouts.push({
+        id: `PAY-${String(AppState.landlordPayouts.length + 1).padStart(3, '0')}`,
+        statementId: statement.id,
+        landlordName: statement.landlordName,
+        method: method,
+        refNo: refNo,
+        amount: statement.netPayable,
+        date: date,
+        notes: notes
+      });
+
+      closeLandlordPayoutModal();
+      renderLandlordStatementsTable();
+      renderLandlordPayoutQueueTable();
+      showToast(`Payout recorded: KES ${statement.netPayable.toLocaleString()} disbursed to ${statement.landlordName} (Ref: ${refNo})`);
+    }
+
     function showToast(msg) {
       const bubble = document.createElement('div');
       bubble.className = 'toast-bubble';
@@ -3952,6 +4718,13 @@
     renderReadingsTable();
     renderInvoicesTable();
     renderLedgerTable();
+
+    // 1.3 Landlords Initialization
+    setupLandlordTabs();
+    populateLandlordDropdowns();
+    renderLandlordPortfolioTable();
+    renderLandlordStatementsTable();
+    renderLandlordPayoutQueueTable();
   </script>
 </body>
 </html>
