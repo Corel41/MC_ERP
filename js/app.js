@@ -4,6 +4,21 @@ const AppState = {
       sidebarCollapsed: false,
       activeView: 'estate-reg',
       activeRegTab: 'landlords',
+      companyProfile: {
+        companyName: 'METROCOSMO LTD - THIKA',
+        slogan: '',
+        address1: '40656',
+        address2: 'Hughes Building, 7th Floor',
+        postalCode: '00100',
+        cityTown: 'Nairobi',
+        phone: '020 2244218, 0723 422555',
+        nhifNo: '',
+        nssfNo: '',
+        pinNo: '',
+        email: 'info@metrocosmo.com',
+        logoUrl: '',
+        tempLogoBase64: null
+      },
       landlords: [
         {
           id: 'LL-01',
@@ -742,7 +757,10 @@ const AppState = {
       'mod-admin': '04_admin.html',
       'mod-finance': '05_finance.html',
       'mod-operations': '06_operations.html',
-      'settings': '07_settings.html'
+      'settings': '07_settings.html',
+      'admin-setup': '08_admin.html',
+      '08_admin': '08_admin.html',
+      '8_admin': '08_admin.html'
     };
 
     const moduleCache = {};
@@ -902,6 +920,12 @@ const AppState = {
 
         case 'settings':
           setupSettingsThemeCards();
+          break;
+
+        case 'admin-setup':
+        case '08_admin':
+        case '8_admin':
+          initAdminCompanySetup();
           break;
 
         default:
@@ -4601,6 +4625,124 @@ const AppState = {
         setTimeout(() => bubble.remove(), 250);
       }, 3000);
     }
+
+    /* ==========================================================================
+       08. ADMIN — COMPANY INFORMATION & SETUP (image_713764.png)
+       ========================================================================== */
+    function initAdminCompanySetup() {
+      const cp = AppState.companyProfile;
+      if (!cp) return;
+
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val !== undefined && val !== null ? val : '';
+      };
+
+      setVal('company-name', cp.companyName);
+      setVal('company-slogan', cp.slogan);
+      setVal('company-address1', cp.address1);
+      setVal('company-address2', cp.address2);
+      setVal('company-postal-code', cp.postalCode);
+      setVal('company-city', cp.cityTown);
+      setVal('company-phone', cp.phone);
+      setVal('company-nhif', cp.nhifNo);
+      setVal('company-nssf', cp.nssfNo);
+      setVal('company-pin', cp.pinNo);
+      setVal('company-email', cp.email);
+
+      const logoImg = document.getElementById('company-logo-preview');
+      const logoHolder = document.getElementById('company-logo-placeholder');
+      const currentLogo = cp.tempLogoBase64 || cp.logoUrl;
+
+      if (currentLogo && logoImg) {
+        logoImg.src = currentLogo;
+        logoImg.style.display = 'block';
+        if (logoHolder) logoHolder.style.display = 'none';
+      } else {
+        if (logoImg) logoImg.style.display = 'none';
+        if (logoHolder) logoHolder.style.display = 'block';
+      }
+    }
+
+    function handleCompanyLogoPreview(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const result = e.target.result;
+        AppState.companyProfile.tempLogoBase64 = result;
+        const logoImg = document.getElementById('company-logo-preview');
+        const logoHolder = document.getElementById('company-logo-placeholder');
+        if (logoImg) {
+          logoImg.src = result;
+          logoImg.style.display = 'block';
+        }
+        if (logoHolder) {
+          logoHolder.style.display = 'none';
+        }
+        showToast('✓ Logo preview loaded');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleCompanyProfileSubmit(e) {
+      if (e) e.preventDefault();
+
+      const getVal = (id) => (document.getElementById(id)?.value || '').trim();
+      const cName = getVal('company-name');
+      const cSlogan = getVal('company-slogan');
+      const cAddr1 = getVal('company-address1');
+      const cAddr2 = getVal('company-address2');
+      const cPostCode = getVal('company-postal-code');
+      const cCity = getVal('company-city');
+      const cPhone = getVal('company-phone');
+      const cNhif = getVal('company-nhif');
+      const cNssf = getVal('company-nssf');
+      const cPin = getVal('company-pin');
+      const cEmail = getVal('company-email');
+      const logoData = AppState.companyProfile.tempLogoBase64 || AppState.companyProfile.logoUrl || '';
+
+      if (!cName) {
+        showToast('⚠ Company Name is required');
+        return;
+      }
+
+      confirmAction(
+        `Are you sure you want to commit and save the Company Profile for <strong>${cName}</strong> to the central enterprise database?`,
+        () => {
+          AppState.companyProfile = {
+            companyName: cName,
+            slogan: cSlogan,
+            address1: cAddr1,
+            address2: cAddr2,
+            postalCode: cPostCode,
+            cityTown: cCity,
+            phone: cPhone,
+            nhifNo: cNhif,
+            nssfNo: cNssf,
+            pinNo: cPin,
+            email: cEmail,
+            logoUrl: logoData,
+            tempLogoBase64: logoData
+          };
+
+          // Also update executive user badge or header brand if desired
+          const userFullname = document.querySelector('.user-fullname');
+          if (userFullname && cName) {
+            userFullname.textContent = cName.split(' - ')[0] || cName;
+          }
+
+          showToast(`✓ Company Profile for "${cName}" saved successfully!`);
+        },
+        'Database Execution Warning',
+        'Save Profile'
+      );
+    }
+
+    window.initAdminCompanySetup = initAdminCompanySetup;
+    window.handleCompanyLogoPreview = handleCompanyLogoPreview;
+    window.handleCompanyProfileSubmit = handleCompanyProfileSubmit;
 
     // Initialize Theme and Load Active Module
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'developer';
