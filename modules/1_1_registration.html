@@ -254,12 +254,6 @@
       <!-- 3. PROPERTY REGISTRATION (MULTI-SEGMENT WORKFLOW) -->
       <div class="reg-panel" id="panel-properties">
         <div class="glass-card clean-module-container">
-          <!-- Sub-Tab Strip matching ProMatrix reference image -->
-          <div style="display: flex; gap: 4px; border-bottom: 2px solid #008080; margin-bottom: 16px;">
-            <button type="button" class="prop-sub-tab-btn active" id="btn-subtab-prop-details" onclick="switchPropSubTab('details')" style="background: #008080; color: #FFFFFF; border: 1px solid #008080; border-bottom: none; border-radius: 6px 6px 0 0; padding: 7px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">Property Details</button>
-            <button type="button" class="prop-sub-tab-btn" id="btn-subtab-prop-payables" onclick="switchPropSubTab('payables')" style="background: #E5E7EB; color: #374151; border: 1px solid #D1D5DB; border-bottom: none; border-radius: 6px 6px 0 0; padding: 7px 18px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Property Payables</button>
-          </div>
-
           <form id="form-property" onsubmit="handlePropertySubmit(event)">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
               <h3 style="font-size: 1rem; font-weight: 700; margin: 0;">Step 1: ProMatrix Core Property Master Attributes</h3>
@@ -500,10 +494,12 @@
       <div class="reg-panel" id="panel-property-payables">
         <div class="glass-card clean-module-container" style="padding: 16px 20px;">
           
-          <!-- Sub-Tab Strip matching ProMatrix reference image -->
-          <div style="display: flex; gap: 4px; border-bottom: 2px solid #008080; margin-bottom: 16px;">
-            <button type="button" class="prop-sub-tab-btn" onclick="switchPropSubTab('details')" style="background: #E5E7EB; color: #374151; border: 1px solid #D1D5DB; border-bottom: none; border-radius: 6px 6px 0 0; padding: 7px 18px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Property Details</button>
-            <button type="button" class="prop-sub-tab-btn active" onclick="switchPropSubTab('payables')" style="background: #008080; color: #FFFFFF; border: 1px solid #008080; border-bottom: none; border-radius: 6px 6px 0 0; padding: 7px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">Property Payables</button>
+          <div class="module-header-strip" style="margin-bottom: 16px;">
+            <div class="module-title-box">
+              <h2>Property Payables Configuration Matrix</h2>
+              <p>Configure property-specific charges, rates, priority waterfall hierarchy, and overpayment surplus routing.</p>
+            </div>
+            <span class="live-pulse-badge">ProMatrix Matrix</span>
           </div>
 
           <!-- Outer Fieldset: Property Payables -->

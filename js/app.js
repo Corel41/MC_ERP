@@ -4,7 +4,6 @@ const AppState = {
       sidebarCollapsed: false,
       activeView: 'estate-reg',
       activeRegTab: 'landlords',
-      activePropSubTab: 'details',
       landlords: [
         {
           id: 'LL-01',
@@ -2304,42 +2303,14 @@ const AppState = {
     /* SUB-MODULE 1.1 (PART 4): PROPERTY PAYABLES MATRIX & WATERFALL ENGINE */
     let activePayablePropertyId = null;
 
-    // Sub-tab switcher between "Property Details" and "Property Payables"
+    // Switch between top-level Property Registration and Property Payables tabs
     function switchPropSubTab(target) {
-      AppState.activePropSubTab = target;
-      
-      const detailsBtns = [
-        document.getElementById('btn-subtab-prop-details'),
-        document.querySelector('#panel-property-payables .prop-sub-tab-btn:nth-child(1)')
-      ];
-      const payablesBtns = [
-        document.getElementById('btn-subtab-prop-payables'),
-        document.querySelector('#panel-property-payables .prop-sub-tab-btn:nth-child(2)')
-      ];
-
       if (target === 'details') {
         const propTabBtn = document.querySelector('[data-reg-target="properties"]');
         if (propTabBtn) propTabBtn.click();
-        detailsBtns.forEach(b => { if (b) { b.style.background = '#008080'; b.style.color = '#FFFFFF'; b.style.borderColor = '#008080'; b.style.fontWeight = '700'; } });
-        payablesBtns.forEach(b => { if (b) { b.style.background = '#E5E7EB'; b.style.color = '#374151'; b.style.borderColor = '#D1D5DB'; b.style.fontWeight = '600'; } });
       } else {
         const payablesTabBtn = document.querySelector('[data-reg-target="property-payables"]');
         if (payablesTabBtn) payablesTabBtn.click();
-        detailsBtns.forEach(b => { if (b) { b.style.background = '#E5E7EB'; b.style.color = '#374151'; b.style.borderColor = '#D1D5DB'; b.style.fontWeight = '600'; } });
-        payablesBtns.forEach(b => { if (b) { b.style.background = '#008080'; b.style.color = '#FFFFFF'; b.style.borderColor = '#008080'; b.style.fontWeight = '700'; } });
-        
-        // If a property was being edited, sync it to payables property selector
-        if (editingPropertyId) {
-          activePayablePropertyId = editingPropertyId;
-          const pSel = document.getElementById('payable-prop-select');
-          if (pSel) pSel.value = editingPropertyId;
-          handlePayablePropChange(editingPropertyId);
-        } else if (!activePayablePropertyId && AppState.properties.length > 0) {
-          activePayablePropertyId = AppState.properties[0].id;
-          const pSel = document.getElementById('payable-prop-select');
-          if (pSel) pSel.value = activePayablePropertyId;
-          handlePayablePropChange(activePayablePropertyId);
-        }
       }
     }
 
@@ -2373,7 +2344,8 @@ const AppState = {
       }
 
       activePayablePropertyId = propId;
-      switchPropSubTab('payables');
+      const payablesTabBtn = document.querySelector('[data-reg-target="property-payables"]');
+      if (payablesTabBtn) payablesTabBtn.click();
 
       const pSel = document.getElementById('payable-prop-select');
       if (pSel) pSel.value = propId;
