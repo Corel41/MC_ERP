@@ -14,17 +14,21 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           <span>3. Property Registration</span>
         </button>
+        <button class="reg-tab-btn" data-reg-target="property-payables">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <span>4. Property Payables</span>
+        </button>
         <button class="reg-tab-btn" data-reg-target="standalone-units">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="8" height="8" x="2" y="2" rx="2"/><rect width="8" height="8" x="14" y="2" rx="2"/><rect width="8" height="8" x="14" y="14" rx="2"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>
-          <span>4. Standalone Units</span>
+          <span>5. Standalone Units</span>
         </button>
         <button class="reg-tab-btn" data-reg-target="assignments">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>5. Property Assignment</span>
+          <span>6. Property Assignment</span>
         </button>
         <button class="reg-tab-btn" data-reg-target="bulk-units">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
-          <span>6. Unit Details Bulk</span>
+          <span>7. Unit Details Bulk</span>
         </button>
       </div>
 
@@ -250,12 +254,10 @@
       <!-- 3. PROPERTY REGISTRATION (MULTI-SEGMENT WORKFLOW) -->
       <div class="reg-panel" id="panel-properties">
         <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Property Onboarding Workflow</h2>
-              <p>Primary registration with inline units builder and pre-configured property payables.</p>
-            </div>
-            <span class="live-pulse-badge">Multi-Segment Onboarding</span>
+          <!-- Sub-Tab Strip matching ProMatrix reference image -->
+          <div style="display: flex; gap: 4px; border-bottom: 2px solid #008080; margin-bottom: 16px;">
+            <button type="button" class="prop-sub-tab-btn active" id="btn-subtab-prop-details" onclick="switchPropSubTab('details')" style="background: #008080; color: #FFFFFF; border: 1px solid #008080; border-bottom: none; border-radius: 6px 6px 0 0; padding: 7px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">Property Details</button>
+            <button type="button" class="prop-sub-tab-btn" id="btn-subtab-prop-payables" onclick="switchPropSubTab('payables')" style="background: #E5E7EB; color: #374151; border: 1px solid #D1D5DB; border-bottom: none; border-radius: 6px 6px 0 0; padding: 7px 18px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Property Payables</button>
           </div>
 
           <form id="form-property" onsubmit="handlePropertySubmit(event)">
@@ -494,7 +496,81 @@
         </div>
       </div>
 
-      <!-- 4. STANDALONE UNIT REGISTRATION -->
+      <!-- 4. PROPERTY PAYABLES CONFIGURATION MATRIX (LEGACY PROMATRIX LAYOUT) -->
+      <div class="reg-panel" id="panel-property-payables">
+        <div class="glass-card clean-module-container" style="padding: 16px 20px;">
+          
+          <!-- Sub-Tab Strip matching ProMatrix reference image -->
+          <div style="display: flex; gap: 4px; border-bottom: 2px solid #008080; margin-bottom: 16px;">
+            <button type="button" class="prop-sub-tab-btn" onclick="switchPropSubTab('details')" style="background: #E5E7EB; color: #374151; border: 1px solid #D1D5DB; border-bottom: none; border-radius: 6px 6px 0 0; padding: 7px 18px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Property Details</button>
+            <button type="button" class="prop-sub-tab-btn active" onclick="switchPropSubTab('payables')" style="background: #008080; color: #FFFFFF; border: 1px solid #008080; border-bottom: none; border-radius: 6px 6px 0 0; padding: 7px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">Property Payables</button>
+          </div>
+
+          <!-- Outer Fieldset: Property Payables -->
+          <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 18px 16px; margin-bottom: 18px; background: #FFFFFF;">
+            <legend style="color: #EA580C; font-weight: 700; font-size: 0.88rem; padding: 0 8px;">Property Payables</legend>
+
+            <!-- Top Control Bar: Select Property & Orange Save Payables Matrix Button -->
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <label for="payable-prop-select" style="font-weight: 700; font-size: 0.86rem; color: #1F2937; white-space: nowrap;">Select Property:</label>
+                <select id="payable-prop-select" class="form-input" style="min-width: 280px; max-width: 400px; height: 32px; padding: 4px 10px; font-size: 0.85rem; border: 1px solid #D1D5DB; border-radius: 4px; background: #FFFFFF; font-weight: 600;" onchange="handlePayablePropChange(this.value)">
+                  <!-- Dynamically populated with options like '-Select-' and onboarded properties -->
+                </select>
+                <button type="button" id="btn-save-payables-matrix" style="background: #F97316; color: #FFFFFF; font-weight: 700; font-size: 0.85rem; border: 1px solid #EA580C; border-radius: 4px; padding: 6px 22px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12);" onmouseover="this.style.background='#EA580C'" onmouseout="this.style.background='#F97316'" onclick="handleSavePayablesMatrix()">
+                  Save Payables Matrix
+                </button>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" class="btn-action-pill" style="height: 32px; font-size: 0.8rem; font-weight: 700; color: #008080; border-color: #008080;" onclick="openWaterfallModal()">
+                  ⚡ Priority & Overpayment Waterfall Rules
+                </button>
+                <button type="button" class="btn-action-pill" style="height: 32px; font-size: 0.8rem;" onclick="resetPayablesToCatalogDefaults()" title="Reset matrix to standard ProMatrix charges">
+                  ⟳ Reset Defaults
+                </button>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Inner Fieldset: Applicable Property Payables Table Section -->
+          <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 16px 16px; background: #FFFFFF;">
+            <legend style="color: #EA580C; font-weight: 700; font-size: 0.88rem; padding: 0 8px;">Applicable Property Payables</legend>
+
+            <div class="builder-table-wrap" style="overflow-x: auto; max-height: 640px; border: 1px solid #D1D5DB; border-radius: 4px;">
+              <table id="table-property-payables" class="builder-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem; white-space: nowrap;">
+                <thead style="position: sticky; top: 0; z-index: 5;">
+                  <tr style="background: #374151; color: #FFFFFF;">
+                    <th style="width: 40px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">#</th>
+                    <th style="width: 65px; padding: 6px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Code</th>
+                    <th style="min-width: 180px; padding: 6px 8px; text-align: left; border-right: 1px solid #4B5563; font-weight: 700;">Description</th>
+                    <th style="width: 90px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">Compulsory</th>
+                    <th style="width: 90px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">Refundable</th>
+                    <th style="width: 90px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">Agent Hold</th>
+                    <th style="width: 110px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">Commissionable</th>
+                    <th style="width: 90px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">Percentage</th>
+                    <th style="width: 90px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">Recurring</th>
+                    <th style="width: 100px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">Fixed Amount</th>
+                    <th style="width: 120px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">Rate(% on Rent)</th>
+                    <th style="width: 70px; padding: 6px 8px; text-align: center; border-right: 1px solid #4B5563; font-weight: 700;">Status</th>
+                    <th style="width: 90px; padding: 6px 8px; text-align: center; font-weight: 700;">Priority</th>
+                  </tr>
+                </thead>
+                <tbody id="property-payables-tbody">
+                  <!-- Dynamically populated with the 19 standard ProMatrix payables -->
+                </tbody>
+              </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.8rem; color: #6B7280;">
+              <span id="payables-summary-footer">19 Standard Payables Configured</span>
+              <span>ProMatrix Legacy Architecture • Property Payables Matrix</span>
+            </div>
+          </fieldset>
+
+        </div>
+      </div>
+
+      <!-- 5. STANDALONE UNIT REGISTRATION -->
       <div class="reg-panel" id="panel-standalone-units">
         <div class="glass-card clean-module-container">
           <div class="module-header-strip">
@@ -737,6 +813,91 @@
             </div>
           </fieldset>
 
+        </div>
+      </div>
+
+      <!-- PAYMENT ALLOCATION WATERFALL & OVERPAYMENT ROUTING MODAL -->
+      <div class="modal-overlay" id="modal-waterfall-config">
+        <div class="modal-card" style="max-width: 760px; border-left: 6px solid #008080;">
+          <div class="modal-header-strip">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.5rem;">⚡</span>
+              <div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: #008080; margin: 0;">Payment Allocation Waterfall & Overpayment Routing</h3>
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin: 2px 0 0 0;">ProMatrix Legacy Engine: Priority Liquidation Waterfall & Tenant Surplus Routing</p>
+              </div>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeWaterfallModal()">✕</button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px; font-size: 0.86rem; line-height: 1.5;">
+            
+            <!-- Overpayment Policy Selection Box -->
+            <div style="background: #F0FDFA; border: 1px solid #99F6E4; border-radius: 8px; padding: 14px 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <strong style="color: #0F766E; font-size: 0.92rem; display: block;">Overpayment & Surplus Routing Account</strong>
+                  <span style="font-size: 0.78rem; color: #475569;">When tenant payment exceeds all outstanding liabilities, route surplus automatically:</span>
+                </div>
+                <select id="waterfall-overpayment-routing" class="form-input" style="min-width: 240px; height: 34px; font-weight: 700; border-color: #0D9488; background: #FFFFFF; font-size: 0.84rem;">
+                  <option value="ADVANCE_RENT" selected>Advance Rent Credit (Default - Carries forward)</option>
+                  <option value="DEPOSIT_REPLENISHMENT">Replenish Rent Deposit (If underfunded)</option>
+                  <option value="UNALLOCATED_CREDIT">Unallocated Suspense Ledger Credit</option>
+                  <option value="LANDLORD_WALLET">Direct Landlord Remittance Surplus</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Priority Hierarchy Visualizer -->
+            <div>
+              <label class="form-label" style="font-weight: 700; color: #374151; margin-bottom: 6px; display: block;">Waterfall Liquidation Sequence (Ascending Priority Order):</label>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+                <div style="border: 1px solid #FED7AA; background: #FFF7ED; border-radius: 6px; padding: 10px;">
+                  <strong style="color: #C2410C; font-size: 0.8rem; display: block; margin-bottom: 4px;">Tier 1: Penalties & Surcharges (Priority 10-25)</strong>
+                  <div style="font-size: 0.75rem; color: #431407;">011 Unpaid Cheques, 035 Penalty, 018 Auction Fees, 016 Recovery Charges</div>
+                </div>
+                <div style="border: 1px solid #BAE6FD; background: #F0F9FF; border-radius: 6px; padding: 10px;">
+                  <strong style="color: #0369A1; font-size: 0.8rem; display: block; margin-bottom: 4px;">Tier 2: Primary Rent & Services (Priority 30-70)</strong>
+                  <div style="font-size: 0.75rem; color: #082F49;">001 Rent, 009 Service Charge, 002 Water, 003 Elec, 017 Garbage, 015 Security</div>
+                </div>
+                <div style="border: 1px solid #DDD6FE; background: #F5F3FF; border-radius: 6px; padding: 10px;">
+                  <strong style="color: #6D28D9; font-size: 0.8rem; display: block; margin-bottom: 4px;">Tier 3: Move-In & Ancillary Fees (Priority 75-95)</strong>
+                  <div style="font-size: 0.75rem; color: #2E1065;">008 Tenancy Agrmt, 010 Letting Fee, 013 Branch, 019 Shifting, 021 Goodwill</div>
+                </div>
+                <div style="border: 1px solid #BBF7D0; background: #F0FDF4; border-radius: 6px; padding: 10px;">
+                  <strong style="color: #15803D; font-size: 0.8rem; display: block; margin-bottom: 4px;">Tier 4: Deposit Pools (Priority 100-120)</strong>
+                  <div style="font-size: 0.75rem; color: #052E16;">004 Rent Deposit, 005 Water Deposit, 006 Electricity Deposit</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Waterfall Simulation Engine -->
+            <div style="border: 1px solid #E5E7EB; border-radius: 8px; padding: 12px 14px; background: #F9FAFB;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                <strong style="font-size: 0.85rem; color: #1F2937;">Interactive Waterfall Simulator</strong>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <span style="font-size: 0.8rem; color: #4B5563;">Simulate Receipt (KES):</span>
+                  <input type="number" id="sim-receipt-amount" value="50000" step="1000" style="width: 120px; height: 28px; padding: 2px 6px; font-weight: 700; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 0.82rem; text-align: right;">
+                  <button type="button" class="btn-action-pill" style="height: 28px; font-size: 0.78rem; font-weight: 700; background: #008080; color: #FFFFFF; border-color: #008080;" onclick="runWaterfallSimulation()">
+                    ▶ Simulate
+                  </button>
+                </div>
+              </div>
+
+              <!-- Simulation Output Matrix -->
+              <div id="sim-waterfall-output" style="max-height: 180px; overflow-y: auto; border: 1px solid #E5E7EB; border-radius: 4px; background: #FFFFFF; font-size: 0.78rem;">
+                <div style="padding: 12px; color: #6B7280; text-align: center;">Click "Simulate" to execute the test allocation against outstanding property payables.</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 18px; border-top: 1px solid #E5E7EB; padding-top: 14px;">
+            <button type="button" class="btn-action-pill" style="padding: 8px 18px; font-size: 0.85rem;" onclick="closeWaterfallModal()">Close</button>
+            <button type="button" class="btn-elevated-primary" style="background: #008080 !important; border-color: #006666 !important;" onclick="saveWaterfallSettings()">
+              💾 Save Waterfall Rules
+            </button>
+          </div>
         </div>
       </div>
 

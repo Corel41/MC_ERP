@@ -4,6 +4,7 @@ const AppState = {
       sidebarCollapsed: false,
       activeView: 'estate-reg',
       activeRegTab: 'landlords',
+      activePropSubTab: 'details',
       landlords: [
         {
           id: 'LL-01',
@@ -205,6 +206,75 @@ const AppState = {
           status: 'ACTIVE'
         }
       ],
+      masterPayables: [
+        { code: '001', description: 'Rent', isCompulsory: true, isRefundable: false, isAgentHold: false, isCommissionable: true, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 10 },
+        { code: '002', description: 'Water Bill', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 20 },
+        { code: '003', description: 'Electricity Bill', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 20 },
+        { code: '004', description: 'Rent Deposit', isCompulsory: true, isRefundable: false, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 30 },
+        { code: '005', description: 'Water Deposit', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 30 },
+        { code: '006', description: 'Electricity Deposit', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 30 },
+        { code: '009', description: 'Service Charge', isCompulsory: true, isRefundable: false, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 15 },
+        { code: 'VAT', description: 'VAT', isCompulsory: false, isRefundable: false, isAgentHold: false, isCommissionable: false, isPercentage: true, isRecurring: false, isFixedAmount: true, rateOnRent: 16.00, status: true, priority: 25 },
+        { code: '011', description: 'Unpaid Cheque Charges', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 5 },
+        { code: '035', description: 'Penalty', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: true, isRecurring: false, isFixedAmount: false, rateOnRent: 10.00, status: true, priority: 5 },
+        { code: '008', description: 'Tenancy Agreement', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 40 },
+        { code: '015', description: 'Security', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 18 },
+        { code: '016', description: 'Recovery Charges', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 5 },
+        { code: '017', description: 'Garbage', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 19 },
+        { code: '010', description: 'Letting Fee', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 45 },
+        { code: '018', description: 'Auction Fees', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 5 },
+        { code: '013', description: 'Branch', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 50 },
+        { code: '019', description: 'Shifting Fee', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 50 },
+        { code: '021', description: 'Goodwill', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 60 }
+      ],
+      propertyPayablesConfig: {
+        'PROP-01': [
+          { code: '001', description: 'Rent', isCompulsory: true, isRefundable: false, isAgentHold: false, isCommissionable: true, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 10 },
+          { code: '002', description: 'Water Bill', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 20 },
+          { code: '003', description: 'Electricity Bill', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 20 },
+          { code: '004', description: 'Rent Deposit', isCompulsory: true, isRefundable: false, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 30 },
+          { code: '005', description: 'Water Deposit', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 30 },
+          { code: '006', description: 'Electricity Deposit', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 30 },
+          { code: '009', description: 'Service Charge', isCompulsory: true, isRefundable: false, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 15 },
+          { code: 'VAT', description: 'VAT', isCompulsory: false, isRefundable: false, isAgentHold: false, isCommissionable: false, isPercentage: true, isRecurring: false, isFixedAmount: true, rateOnRent: 16.00, status: true, priority: 25 },
+          { code: '011', description: 'Unpaid Cheque Charges', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 5 },
+          { code: '035', description: 'Penalty', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: true, isRecurring: false, isFixedAmount: false, rateOnRent: 10.00, status: true, priority: 5 },
+          { code: '008', description: 'Tenancy Agreement', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 40 },
+          { code: '015', description: 'Security', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 18 },
+          { code: '016', description: 'Recovery Charges', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 5 },
+          { code: '017', description: 'Garbage', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 19 },
+          { code: '010', description: 'Letting Fee', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 45 },
+          { code: '018', description: 'Auction Fees', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 5 },
+          { code: '013', description: 'Branch', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 50 },
+          { code: '019', description: 'Shifting Fee', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 50 },
+          { code: '021', description: 'Goodwill', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 60 }
+        ],
+        'PROP-02': [
+          { code: '001', description: 'Rent', isCompulsory: true, isRefundable: false, isAgentHold: false, isCommissionable: true, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 10 },
+          { code: '002', description: 'Water Bill', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 20 },
+          { code: '003', description: 'Electricity Bill', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 20 },
+          { code: '004', description: 'Rent Deposit', isCompulsory: true, isRefundable: false, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 30 },
+          { code: '005', description: 'Water Deposit', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 30 },
+          { code: '006', description: 'Electricity Deposit', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 30 },
+          { code: '009', description: 'Service Charge', isCompulsory: true, isRefundable: false, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 15 },
+          { code: 'VAT', description: 'VAT', isCompulsory: false, isRefundable: false, isAgentHold: false, isCommissionable: false, isPercentage: true, isRecurring: false, isFixedAmount: true, rateOnRent: 16.00, status: true, priority: 25 },
+          { code: '011', description: 'Unpaid Cheque Charges', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 5 },
+          { code: '035', description: 'Penalty', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: true, isRecurring: false, isFixedAmount: false, rateOnRent: 10.00, status: true, priority: 5 },
+          { code: '008', description: 'Tenancy Agreement', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 40 },
+          { code: '015', description: 'Security', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 18 },
+          { code: '016', description: 'Recovery Charges', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 5 },
+          { code: '017', description: 'Garbage', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: true, isFixedAmount: true, rateOnRent: 0.00, status: true, priority: 19 },
+          { code: '010', description: 'Letting Fee', isCompulsory: false, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 45 },
+          { code: '018', description: 'Auction Fees', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 5 },
+          { code: '013', description: 'Branch', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 50 },
+          { code: '019', description: 'Shifting Fee', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 50 },
+          { code: '021', description: 'Goodwill', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 60 }
+        ]
+      },
+      propertyWaterfallRules: {
+        'PROP-01': { overpaymentRouting: 'ADVANCE_RENT' },
+        'PROP-02': { overpaymentRouting: 'ADVANCE_RENT' }
+      },
       activeTenantTab: 'leases',
       leases: [
         {
@@ -764,6 +834,7 @@ const AppState = {
           renderUnitsTable();
           renderMandatesTable();
           initBulkUnitsTab();
+          initPropertyPayablesTab();
           if (AppState.activeRegTab) {
             const btn = document.querySelector(`[data-reg-target="${AppState.activeRegTab}"]`);
             if (btn) btn.click();
@@ -1735,6 +1806,7 @@ const AppState = {
           <td>
             <div style="display: flex; gap: 6px;">
               <button type="button" class="btn-action-pill" style="color: var(--accent-primary); border-color: var(--accent-primary);" onclick="editProperty('${p.id}')">Edit</button>
+              <button type="button" class="btn-action-pill" style="color: #008080; border-color: #008080; font-weight: 700;" onclick="openPropertyPayables('${p.id}')">⚙️ Payables</button>
               <button type="button" class="btn-action-pill" style="color: #EA580C; border-color: #EA580C; font-weight: 700;" onclick="openBulkUnitEditor('${p.id}')">⚡ Unit Details Bulk</button>
             </div>
           </td>
@@ -2227,6 +2299,390 @@ const AppState = {
         'Database Execution Warning',
         'Save Details'
       );
+    }
+
+    /* SUB-MODULE 1.1 (PART 4): PROPERTY PAYABLES MATRIX & WATERFALL ENGINE */
+    let activePayablePropertyId = null;
+
+    // Sub-tab switcher between "Property Details" and "Property Payables"
+    function switchPropSubTab(target) {
+      AppState.activePropSubTab = target;
+      
+      const detailsBtns = [
+        document.getElementById('btn-subtab-prop-details'),
+        document.querySelector('#panel-property-payables .prop-sub-tab-btn:nth-child(1)')
+      ];
+      const payablesBtns = [
+        document.getElementById('btn-subtab-prop-payables'),
+        document.querySelector('#panel-property-payables .prop-sub-tab-btn:nth-child(2)')
+      ];
+
+      if (target === 'details') {
+        const propTabBtn = document.querySelector('[data-reg-target="properties"]');
+        if (propTabBtn) propTabBtn.click();
+        detailsBtns.forEach(b => { if (b) { b.style.background = '#008080'; b.style.color = '#FFFFFF'; b.style.borderColor = '#008080'; b.style.fontWeight = '700'; } });
+        payablesBtns.forEach(b => { if (b) { b.style.background = '#E5E7EB'; b.style.color = '#374151'; b.style.borderColor = '#D1D5DB'; b.style.fontWeight = '600'; } });
+      } else {
+        const payablesTabBtn = document.querySelector('[data-reg-target="property-payables"]');
+        if (payablesTabBtn) payablesTabBtn.click();
+        detailsBtns.forEach(b => { if (b) { b.style.background = '#E5E7EB'; b.style.color = '#374151'; b.style.borderColor = '#D1D5DB'; b.style.fontWeight = '600'; } });
+        payablesBtns.forEach(b => { if (b) { b.style.background = '#008080'; b.style.color = '#FFFFFF'; b.style.borderColor = '#008080'; b.style.fontWeight = '700'; } });
+        
+        // If a property was being edited, sync it to payables property selector
+        if (editingPropertyId) {
+          activePayablePropertyId = editingPropertyId;
+          const pSel = document.getElementById('payable-prop-select');
+          if (pSel) pSel.value = editingPropertyId;
+          handlePayablePropChange(editingPropertyId);
+        } else if (!activePayablePropertyId && AppState.properties.length > 0) {
+          activePayablePropertyId = AppState.properties[0].id;
+          const pSel = document.getElementById('payable-prop-select');
+          if (pSel) pSel.value = activePayablePropertyId;
+          handlePayablePropChange(activePayablePropertyId);
+        }
+      }
+    }
+
+    function initPropertyPayablesTab() {
+      const pSel = document.getElementById('payable-prop-select');
+      if (!pSel) return;
+
+      pSel.innerHTML = `
+        <option value="">-- Select Property --</option>
+        ${AppState.properties.map(p => `<option value="${p.id}">${p.propertyIdCode || p.id} - ${p.name}</option>`).join('')}
+      `;
+
+      if (!activePayablePropertyId && AppState.properties.length > 0) {
+        activePayablePropertyId = AppState.properties[0].id;
+      }
+
+      if (activePayablePropertyId) {
+        pSel.value = activePayablePropertyId;
+        handlePayablePropChange(activePayablePropertyId);
+      } else {
+        renderPropertyPayablesTable();
+      }
+    }
+
+    function openPropertyPayables(propId) {
+      const currentView = AppState.currentView || 'estate-reg';
+      if (currentView !== 'estate-reg') {
+        switchView('estate-reg', '01. Estate Management - 1.1 Registration');
+        setTimeout(() => openPropertyPayables(propId), 150);
+        return;
+      }
+
+      activePayablePropertyId = propId;
+      switchPropSubTab('payables');
+
+      const pSel = document.getElementById('payable-prop-select');
+      if (pSel) pSel.value = propId;
+
+      handlePayablePropChange(propId);
+      const prop = AppState.properties.find(p => p.id === propId);
+      showToast(`⚙️ Configured Payables Matrix for "${prop ? prop.name : propId}"`);
+    }
+
+    function handlePayablePropChange(propId) {
+      activePayablePropertyId = propId;
+      if (!propId) {
+        renderPropertyPayablesTable();
+        return;
+      }
+
+      // If this property has no matrix configured yet, seed with deep copy of masterPayables
+      if (!AppState.propertyPayablesConfig[propId]) {
+        AppState.propertyPayablesConfig[propId] = AppState.masterPayables.map(p => ({ ...p }));
+      }
+      if (!AppState.propertyWaterfallRules[propId]) {
+        AppState.propertyWaterfallRules[propId] = { overpaymentRouting: 'ADVANCE_RENT' };
+      }
+
+      renderPropertyPayablesTable();
+    }
+
+    function renderPropertyPayablesTable() {
+      const tbody = document.getElementById('property-payables-tbody');
+      const footer = document.getElementById('payables-summary-footer');
+      if (!tbody) return;
+
+      if (!activePayablePropertyId) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="13" style="text-align: center; padding: 32px 16px; color: #6B7280;">
+              <em>Please select a property from the dropdown above to view or configure its payables matrix.</em>
+            </td>
+          </tr>
+        `;
+        if (footer) footer.textContent = 'No property selected';
+        return;
+      }
+
+      const rows = AppState.propertyPayablesConfig[activePayablePropertyId] || AppState.masterPayables;
+      const activeCount = rows.filter(r => r.status).length;
+
+      tbody.innerHTML = rows.map((r, idx) => {
+        const bg = idx % 2 === 0 ? '#FFFFFF' : '#F9FAFB';
+        return `
+          <tr style="background: ${bg}; border-bottom: 1px solid #E5E7EB;">
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB; font-weight: 700; color: #6B7280;">${idx + 1}</td>
+            <td style="padding: 6px 8px; border-right: 1px solid #E5E7EB; font-weight: 800; font-family: monospace; color: #1F2937;">${r.code}</td>
+            <td style="padding: 6px 8px; border-right: 1px solid #E5E7EB; font-weight: 600; color: #111827;">${r.description}</td>
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" ${r.isCompulsory ? 'checked' : ''} onchange="updatePayableRow('${r.code}', 'isCompulsory', this.checked)">
+            </td>
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" ${r.isRefundable ? 'checked' : ''} onchange="updatePayableRow('${r.code}', 'isRefundable', this.checked)">
+            </td>
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" ${r.isAgentHold ? 'checked' : ''} onchange="updatePayableRow('${r.code}', 'isAgentHold', this.checked)">
+            </td>
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" ${r.isCommissionable ? 'checked' : ''} onchange="updatePayableRow('${r.code}', 'isCommissionable', this.checked)">
+            </td>
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" ${r.isPercentage ? 'checked' : ''} onchange="updatePayableRow('${r.code}', 'isPercentage', this.checked)">
+            </td>
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" ${r.isRecurring ? 'checked' : ''} onchange="updatePayableRow('${r.code}', 'isRecurring', this.checked)">
+            </td>
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" ${r.isFixedAmount ? 'checked' : ''} onchange="updatePayableRow('${r.code}', 'isFixedAmount', this.checked)">
+            </td>
+            <td style="text-align: center; padding: 4px 6px; border-right: 1px solid #E5E7EB;">
+              <input type="number" step="0.01" min="0" max="100" value="${r.rateOnRent !== undefined ? r.rateOnRent : 0}" style="width: 70px; height: 26px; font-size: 0.82rem; text-align: right; padding: 2px 4px; border: 1px solid #D1D5DB; border-radius: 3px;" onchange="updatePayableRow('${r.code}', 'rateOnRent', parseFloat(this.value)||0)">
+            </td>
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" ${r.status !== false ? 'checked' : ''} onchange="updatePayableRow('${r.code}', 'status', this.checked)">
+            </td>
+            <td style="text-align: center; padding: 4px 6px;">
+              <input type="number" min="1" max="999" value="${r.priority || 50}" style="width: 55px; height: 26px; font-size: 0.82rem; text-align: center; padding: 2px 4px; border: 1px solid #D1D5DB; border-radius: 3px; font-weight: 700; color: #008080;" onchange="updatePayableRow('${r.code}', 'priority', parseInt(this.value, 10)||50)">
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (footer) {
+        footer.innerHTML = `<strong>${activeCount}</strong> of <strong>${rows.length}</strong> Payables Active for Property <strong>${activePayablePropertyId}</strong>`;
+      }
+    }
+
+    function updatePayableRow(code, field, value) {
+      if (!activePayablePropertyId) return;
+      if (!AppState.propertyPayablesConfig[activePayablePropertyId]) {
+        AppState.propertyPayablesConfig[activePayablePropertyId] = AppState.masterPayables.map(p => ({ ...p }));
+      }
+      const item = AppState.propertyPayablesConfig[activePayablePropertyId].find(p => p.code === code);
+      if (item) {
+        item[field] = value;
+      }
+    }
+
+    function resetPayablesToCatalogDefaults() {
+      if (!activePayablePropertyId) {
+        showToast('Please select a property first.');
+        return;
+      }
+      const prop = AppState.properties.find(p => p.id === activePayablePropertyId);
+      confirmAction(
+        `Are you sure you want to reset all payable settings for <strong>${prop ? prop.name : activePayablePropertyId}</strong> back to the ProMatrix standard master catalog defaults?`,
+        () => {
+          AppState.propertyPayablesConfig[activePayablePropertyId] = AppState.masterPayables.map(p => ({ ...p }));
+          renderPropertyPayablesTable();
+          showToast(`✓ Reset payables matrix to ProMatrix defaults for ${prop ? prop.name : activePayablePropertyId}`);
+        },
+        'Reset Defaults Confirmation',
+        'Reset to Defaults',
+        true
+      );
+    }
+
+    function handleSavePayablesMatrix() {
+      if (!activePayablePropertyId) {
+        showToast('Please select a property to save.');
+        return;
+      }
+
+      const prop = AppState.properties.find(p => p.id === activePayablePropertyId);
+      const propName = prop ? prop.name : activePayablePropertyId;
+      const matrix = AppState.propertyPayablesConfig[activePayablePropertyId] || AppState.masterPayables;
+      const activeCount = matrix.filter(r => r.status).length;
+
+      confirmAction(
+        `Are you sure you want to commit the Property Payables Matrix configuration (<strong>${activeCount} active charges</strong>) for <strong>[${prop ? prop.propertyIdCode || prop.id : ''}] ${propName}</strong> to the live multi-tenant database?`,
+        () => {
+          // Update property payables count
+          if (prop) {
+            prop.payablesCount = activeCount;
+          }
+          renderPropertiesTable();
+          renderPropertyPayablesTable();
+          showToast(`✓ Property Payables Matrix successfully committed for "${propName}"!`);
+        },
+        'Database Execution Warning',
+        'Commit Matrix'
+      );
+    }
+
+    // Modal Waterfall Handlers
+    function openWaterfallModal() {
+      const modal = document.getElementById('modal-waterfall-config');
+      if (!modal) return;
+
+      const routingSel = document.getElementById('waterfall-overpayment-routing');
+      if (routingSel && activePayablePropertyId && AppState.propertyWaterfallRules[activePayablePropertyId]) {
+        routingSel.value = AppState.propertyWaterfallRules[activePayablePropertyId].overpaymentRouting || 'ADVANCE_RENT';
+      }
+
+      modal.classList.add('active');
+      runWaterfallSimulation();
+    }
+
+    function closeWaterfallModal() {
+      const modal = document.getElementById('modal-waterfall-config');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function saveWaterfallSettings() {
+      if (!activePayablePropertyId) {
+        showToast('Please select a property first.');
+        return;
+      }
+
+      const routing = document.getElementById('waterfall-overpayment-routing').value;
+      const prop = AppState.properties.find(p => p.id === activePayablePropertyId);
+
+      confirmAction(
+        `Commit waterfall rules and set overpayment routing to <strong>${routing}</strong> for Property <strong>${prop ? prop.name : activePayablePropertyId}</strong>?`,
+        () => {
+          if (!AppState.propertyWaterfallRules[activePayablePropertyId]) {
+            AppState.propertyWaterfallRules[activePayablePropertyId] = {};
+          }
+          AppState.propertyWaterfallRules[activePayablePropertyId].overpaymentRouting = routing;
+          closeWaterfallModal();
+          showToast(`✓ Waterfall rules and overpayment routing updated for "${prop ? prop.name : activePayablePropertyId}".`);
+        },
+        'Database Configuration Warning',
+        'Save Waterfall Rules'
+      );
+    }
+
+    // Interactive Waterfall Simulation
+    function runWaterfallSimulation() {
+      const outputEl = document.getElementById('sim-waterfall-output');
+      const amountInput = document.getElementById('sim-receipt-amount');
+      if (!outputEl || !amountInput) return;
+
+      const simAmount = parseFloat(amountInput.value) || 0;
+      const propId = activePayablePropertyId || (AppState.properties[0] ? AppState.properties[0].id : 'PROP-01');
+      const routing = (AppState.propertyWaterfallRules[propId] && AppState.propertyWaterfallRules[propId].overpaymentRouting) || 'ADVANCE_RENT';
+
+      // Mock pending tenant liabilities
+      const pendingDebits = [
+        { code: '035', description: 'Late Payment Penalty', amount: 3500 },
+        { code: '011', description: 'Unpaid Cheque Charges', amount: 2000 },
+        { code: '001', description: 'Rent (Current Month)', amount: 32000 },
+        { code: '009', description: 'Service Charge', amount: 3500 },
+        { code: '002', description: 'Water Bill Reading', amount: 2025 },
+        { code: '017', description: 'Garbage Collection', amount: 500 }
+      ];
+
+      const result = allocatePaymentWaterfall(propId, simAmount, pendingDebits);
+
+      outputEl.innerHTML = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.78rem;">
+          <thead>
+            <tr style="background: #F3F4F6; color: #374151; border-bottom: 1px solid #D1D5DB;">
+              <th style="padding: 4px 6px; text-align: center;">Priority</th>
+              <th style="padding: 4px 6px; text-align: left;">Payable</th>
+              <th style="padding: 4px 6px; text-align: right;">Owed</th>
+              <th style="padding: 4px 6px; text-align: right;">Allocated</th>
+              <th style="padding: 4px 6px; text-align: right;">Balance</th>
+              <th style="padding: 4px 6px; text-align: center;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${result.allocations.map(a => `
+              <tr style="border-bottom: 1px solid #F3F4F6;">
+                <td style="padding: 4px 6px; text-align: center; font-weight: 700; color: #008080;">${a.priority}</td>
+                <td style="padding: 4px 6px;"><strong>[${a.code}]</strong> ${a.description}</td>
+                <td style="padding: 4px 6px; text-align: right;">KES ${a.owed.toLocaleString()}</td>
+                <td style="padding: 4px 6px; text-align: right; color: #15803D; font-weight: 700;">+KES ${a.allocated.toLocaleString()}</td>
+                <td style="padding: 4px 6px; text-align: right;">KES ${a.balance.toLocaleString()}</td>
+                <td style="padding: 4px 6px; text-align: center;">
+                  <span style="font-size: 0.7rem; font-weight: 700; color: ${a.status === 'FULL' ? '#15803D' : a.status === 'PARTIAL' ? '#EA580C' : '#9CA3AF'};">
+                    ${a.status}
+                  </span>
+                </td>
+              </tr>
+            `).join('')}
+            ${result.surplus > 0 ? `
+              <tr style="background: #F0FDF4; font-weight: 700; border-top: 2px solid #86EFAC;">
+                <td style="padding: 6px; text-align: center;">⚡</td>
+                <td style="padding: 6px;" colspan="2">Surplus Routed to: <u>${routing}</u></td>
+                <td style="padding: 6px; text-align: right; color: #15803D;">+KES ${result.surplus.toLocaleString()}</td>
+                <td style="padding: 6px; text-align: right;">KES 0</td>
+                <td style="padding: 6px; text-align: center; color: #15803D;">ADVANCE</td>
+              </tr>
+            ` : ''}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ProMatrix Waterfall Allocation Algorithm
+    function allocatePaymentWaterfall(propId, totalAmount, pendingItems) {
+      const config = AppState.propertyPayablesConfig[propId] || AppState.masterPayables;
+      const routing = (AppState.propertyWaterfallRules[propId] && AppState.propertyWaterfallRules[propId].overpaymentRouting) || 'ADVANCE_RENT';
+
+      // Attach priority from config to each item
+      const enriched = (pendingItems || []).map(item => {
+        const cfg = config.find(c => c.code === item.code);
+        return {
+          ...item,
+          priority: cfg ? (cfg.priority || 50) : 50
+        };
+      });
+
+      // Sort ascending by priority (1 is highest priority, liquidated first)
+      enriched.sort((a, b) => a.priority - b.priority);
+
+      let unallocated = totalAmount;
+      const allocations = [];
+
+      for (const item of enriched) {
+        const owed = item.amount || 0;
+        let allocated = 0;
+        let balance = owed;
+
+        if (unallocated > 0) {
+          if (unallocated >= owed) {
+            allocated = owed;
+            unallocated -= owed;
+            balance = 0;
+          } else {
+            allocated = unallocated;
+            balance = owed - unallocated;
+            unallocated = 0;
+          }
+        }
+
+        allocations.push({
+          code: item.code,
+          description: item.description,
+          priority: item.priority,
+          owed: owed,
+          allocated: allocated,
+          balance: balance,
+          status: balance === 0 && owed > 0 ? 'FULL' : allocated > 0 ? 'PARTIAL' : 'UNPAID'
+        });
+      }
+
+      return {
+        allocations: allocations,
+        surplus: Math.max(0, unallocated),
+        overpaymentRouting: routing
+      };
     }
 
     /* SUB-MODULE 1.2: TENANTS LOGIC & INTERACTION ENGINES */
@@ -2865,10 +3321,39 @@ const AppState = {
             }
           });
 
+          // ProMatrix Waterfall Overpayment Routing for excess receipts
+          if (remainingCredit > 0) {
+            const tenantProp = lease ? AppState.properties.find(p => p.name === lease.propertyName) : null;
+            const propId = tenantProp ? tenantProp.id : (AppState.properties[0] ? AppState.properties[0].id : 'PROP-01');
+            const routing = (AppState.propertyWaterfallRules[propId] && AppState.propertyWaterfallRules[propId].overpaymentRouting) || 'ADVANCE_RENT';
+            const routingLabels = {
+              ADVANCE_RENT: 'Advance Rent Credit',
+              DEPOSIT_REPLENISHMENT: 'Deposit Replenishment',
+              UNALLOCATED_CREDIT: 'Unallocated Suspense Credit',
+              LANDLORD_WALLET: 'Direct Landlord Surplus'
+            };
+            const label = routingLabels[routing] || routing;
+
+            AppState.ledger.push({
+              id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+              timestamp: datetime.replace('T', ' '),
+              refNo: `${refNo}-SURPLUS`,
+              tenantId: tenant.id,
+              tenantName: tenant.name,
+              unitCode: lease ? lease.unitCode : '—',
+              leaseId: lease ? lease.id : null,
+              type: 'Overpayment Credit',
+              description: `Waterfall Surplus: KES ${remainingCredit.toLocaleString()} routed to ${label}`,
+              debit: 0,
+              credit: remainingCredit,
+              balanceAfter: -remainingCredit
+            });
+          }
+
           closeReceiptModal();
           renderLedgerTable();
           renderInvoicesTable();
-          showToast(`✓ Receipt ${refNo} (KES ${amount.toLocaleString()}) posted & reconciled.`);
+          showToast(`✓ Receipt ${refNo} (KES ${amount.toLocaleString()}) posted & reconciled via waterfall.`);
         },
         'Financial Receipting Confirmation',
         'Post Receipt to Ledger'
