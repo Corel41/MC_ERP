@@ -201,6 +201,38 @@
 
   <div class="toast-tray" id="toast-tray"></div>
 
+  <!-- GLOBAL CONFIRMATION INTERCEPTOR MODAL -->
+  <div class="modal-overlay" id="modal-global-confirm" style="z-index: 2000;">
+    <div class="modal-card" style="max-width: 540px; border-left: 6px solid #F59E0B;">
+      <div class="modal-header-strip">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.5rem;" id="global-confirm-icon">⚠️</span>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;" id="global-confirm-title">Database Execution Warning</h3>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 2px 0 0 0;">Transaction Confirmation Interceptor</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeGlobalConfirmModal()">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88rem; line-height: 1.5;">
+        <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px; color: var(--text-primary);" id="global-confirm-box">
+          <p id="global-confirm-msg" style="margin: 0; font-weight: 500;">Are you sure you want to proceed with this operation?</p>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted);">
+          This action will immediately execute database writes and commit changes to the multi-tenant ledger.
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; border-top: 1px solid var(--divider-color); padding-top: 16px;">
+        <button type="button" class="btn-action-pill" style="padding: 9px 18px; font-size: 0.85rem;" onclick="closeGlobalConfirmModal()">Cancel / Abort</button>
+        <button type="button" class="btn-elevated-primary" id="global-confirm-execute-btn" style="background: var(--accent-primary); border-color: var(--accent-primary);" onclick="executeGlobalConfirmedAction()">
+          Confirm & Execute
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
 </body>
 </html>

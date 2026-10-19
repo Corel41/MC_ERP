@@ -127,8 +127,10 @@
                 <input type="tel" class="form-input" id="landlord-mpesa-phone" placeholder="e.g. 0722000111">
               </div>
             </div>
-            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
-              <button type="submit" class="btn-elevated-primary">+ Register Landlord</button>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+              <button type="button" class="btn-action-pill" id="btn-cancel-landlord-edit" style="display: none; padding: 10px 18px;" onclick="cancelLandlordEdit()">✕ Cancel Edit</button>
+              <button type="button" class="btn-action-pill" style="padding: 10px 18px;" onclick="confirmClearForm('form-landlord')">✕ Clear Form</button>
+              <button type="submit" class="btn-elevated-primary" id="btn-submit-landlord">+ Register Landlord</button>
             </div>
           </form>
 
@@ -213,7 +215,8 @@
                 <input type="text" class="form-input" id="tenant-workplace" placeholder="e.g. Senior Auditor, PwC Kenya, Delta Corner Tower A, Westlands">
               </div>
             </div>
-            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+              <button type="button" class="btn-action-pill" style="padding: 10px 18px;" onclick="confirmClearForm('form-tenant')">✕ Clear Form</button>
               <button type="submit" class="btn-elevated-primary">+ Register Tenant</button>
             </div>
           </form>
@@ -252,8 +255,16 @@
           </div>
 
           <form id="form-property" onsubmit="handlePropertySubmit(event)">
-            <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 12px;">Step 1: Primary Property Attributes</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1rem; font-weight: 700; margin: 0;">Step 1: ProMatrix Core Property Master Attributes</h3>
+              <span class="live-pulse-badge" id="prop-code-badge" style="font-weight: 700;">ID: P003</span>
+            </div>
+
             <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Property Code (Auto-Generated)</label>
+                <input type="text" class="form-input" id="prop-code" readonly style="background: rgba(0, 0, 0, 0.04); font-weight: 700; cursor: not-allowed;" value="P003">
+              </div>
               <div class="form-group">
                 <label class="form-label">Property Name</label>
                 <input type="text" class="form-input" id="prop-name" required placeholder="e.g. Chania Falls View Courts">
@@ -261,6 +272,17 @@
               <div class="form-group">
                 <label class="form-label">LR Number (Land Registration)</label>
                 <input type="text" class="form-input" id="prop-lr" required placeholder="e.g. THIKA/MUNICIPALITY/BLOCK 4/182">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Office Branch</label>
+                <select class="form-input" id="prop-branch">
+                  <option value="Thika Branch">Thika Branch</option>
+                  <option value="Nairobi Head Office">Nairobi Head Office</option>
+                  <option value="Mombasa Branch">Mombasa Branch</option>
+                  <option value="Nakuru Branch">Nakuru Branch</option>
+                  <option value="Kisumu Branch">Kisumu Branch</option>
+                </select>
               </div>
               <div class="form-group">
                 <label class="form-label">Property Type</label>
@@ -281,6 +303,7 @@
                   <option value="Nakuru">Nakuru County</option>
                 </select>
               </div>
+
               <div class="form-group">
                 <label class="form-label">Sub-County / Location</label>
                 <input type="text" class="form-input" id="prop-subcounty" placeholder="e.g. Section 9, Thika">
@@ -290,12 +313,91 @@
                 <input type="text" class="form-input" id="prop-paybill-prefix" required placeholder="e.g. CFV">
               </div>
               <div class="form-group">
+                <label class="form-label">Total Plinth Area (Sq. Ft.)</label>
+                <input type="number" step="0.01" class="form-input" id="prop-total-sqft" placeholder="e.g. 28500.00">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Total Number of Units</label>
+                <input type="number" class="form-input" id="prop-no-of-units" placeholder="e.g. 12" value="4">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Remittance Type Model</label>
+                <select class="form-input" id="prop-remittance-type">
+                  <option value="Collected">Collected (Remit only tenant collected receipts)</option>
+                  <option value="Expected">Expected (Remit contractual rental roll)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mode of Billing</label>
+                <select class="form-input" id="prop-mode-of-billing">
+                  <option value="Monthly in Advance">Monthly in Advance</option>
+                  <option value="Monthly in Arrears">Monthly in Arrears</option>
+                  <option value="Quarterly in Advance">Quarterly in Advance</option>
+                  <option value="Semi-Annually in Advance">Semi-Annually in Advance</option>
+                  <option value="Annually in Advance">Annually in Advance</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Contract / Mandate Date</label>
+                <input type="date" class="form-input" id="prop-contract-date" value="2026-01-01">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Payment Date / Schedule</label>
+                <input type="text" class="form-input" id="prop-payment-date" placeholder="e.g. 5th of every month" value="5th of every month">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Property Portfolio Officer</label>
+                <input type="text" class="form-input" id="prop-officer" placeholder="e.g. Eng. Dennis Mugo (Branch Lead)" value="Eng. Dennis Mugo">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Parking Spaces Allocated</label>
+                <input type="number" class="form-input" id="prop-parking-spaces" placeholder="e.g. 16" value="12">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Price per Parking Space (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="prop-price-per-parking" placeholder="e.g. 3500.00" value="3500.00">
+              </div>
+              <div class="form-group">
                 <label class="form-label">Caretaker Name</label>
                 <input type="text" class="form-input" id="prop-caretaker-name" placeholder="e.g. Samuel Mwangi">
               </div>
+
               <div class="form-group">
                 <label class="form-label">Caretaker Phone</label>
                 <input type="tel" class="form-input" id="prop-caretaker-phone" placeholder="e.g. 0722445566">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Remittance Bank Name</label>
+                <select class="form-input" id="prop-bank-name">
+                  <option value="KCB Bank Kenya">KCB Bank Kenya</option>
+                  <option value="Equity Bank Kenya">Equity Bank Kenya</option>
+                  <option value="Standard Chartered Kenya">Standard Chartered Kenya</option>
+                  <option value="NCBA Bank Kenya">NCBA Bank Kenya</option>
+                  <option value="Co-operative Bank">Co-operative Bank</option>
+                  <option value="Absa Bank Kenya">Absa Bank Kenya</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Remittance Bank Branch</label>
+                <input type="text" class="form-input" id="prop-bank-branch" placeholder="e.g. Thika Section 9">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Remittance Bank Account No.</label>
+                <input type="text" class="form-input" id="prop-bank-account-no" placeholder="e.g. 1120948192">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Remittance Account Holder Name</label>
+                <input type="text" class="form-input" id="prop-bank-account-name" placeholder="e.g. Chania Falls View Collection Acc">
+              </div>
+              <div class="form-group" style="justify-content: center; padding-top: 18px;">
+                <label class="form-checkbox-label">
+                  <input type="checkbox" id="prop-payable-to-ll">
+                  <span>Payable directly to Landlord Bank Account</span>
+                </label>
               </div>
             </div>
 
@@ -355,8 +457,10 @@
               </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
-              <button type="submit" class="btn-elevated-primary">+ Complete Property Onboarding</button>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+              <button type="button" class="btn-action-pill" id="btn-cancel-prop-edit" style="display: none; padding: 10px 18px;" onclick="cancelPropertyEdit()">✕ Cancel Edit</button>
+              <button type="button" class="btn-action-pill" style="padding: 10px 18px;" onclick="confirmClearForm('form-property')">✕ Clear Form</button>
+              <button type="submit" class="btn-elevated-primary" id="btn-submit-property">+ Complete Property Onboarding</button>
             </div>
           </form>
 
@@ -367,14 +471,16 @@
               <table class="builder-table">
                 <thead>
                   <tr>
+                    <th>Code</th>
                     <th>Property Name</th>
                     <th>LR Number</th>
-                    <th>Type</th>
-                    <th>Location</th>
-                    <th>Prefix</th>
-                    <th>Units Configured</th>
-                    <th>Payables Configured</th>
+                    <th>Branch & Type</th>
+                    <th>Units & Area</th>
+                    <th>Remittance Model</th>
+                    <th>Billing Mode</th>
+                    <th>Officer & Caretaker</th>
                     <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody id="table-properties-body"></tbody>
@@ -446,7 +552,8 @@
                 <input type="text" class="form-input" id="unit-elec-meter" placeholder="e.g. 04291829102">
               </div>
             </div>
-            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+              <button type="button" class="btn-action-pill" style="padding: 10px 18px;" onclick="confirmClearForm('form-standalone-unit')">✕ Clear Form</button>
               <button type="submit" class="btn-elevated-primary">+ Add Standalone Unit</button>
             </div>
           </form>
@@ -542,7 +649,8 @@
                 </label>
               </div>
             </div>
-            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+              <button type="button" class="btn-action-pill" style="padding: 10px 18px;" onclick="confirmClearForm('form-mandate')">✕ Clear Form</button>
               <button type="submit" class="btn-elevated-primary">+ Execute Management Mandate</button>
             </div>
           </form>

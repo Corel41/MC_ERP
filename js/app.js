@@ -67,6 +67,7 @@ const AppState = {
       properties: [
         {
           id: 'PROP-01',
+          propertyIdCode: 'P001',
           landlordId: 'LL-01',
           name: 'Chania Falls View Courts',
           lr: 'THIKA/MUNICIPALITY/BLOCK 4/182',
@@ -74,13 +75,31 @@ const AppState = {
           county: 'Kiambu',
           subCounty: 'Section 9, Thika',
           prefix: 'CFV',
+          officeBranch: 'Thika Branch',
+          totalSqFt: 28500,
+          noOfUnits: 4,
+          remittanceType: 'Collected',
+          bankName: 'KCB Bank Kenya',
+          bankBranch: 'Thika Section 9',
+          bankAccountNo: '1120948192',
+          bankAccountName: 'Chania Falls View Courts Collection',
+          paymentDate: '5th of every month',
+          parkingSpaces: 12,
+          pricePerParking: 3500,
+          contractDate: '2026-01-01',
+          modeOfBilling: 'Monthly in Advance',
+          propertyOfficer: 'Eng. Dennis Mugo',
+          payableToLlAccount: false,
           caretaker: 'Samuel Mwangi (0722445566)',
+          caretakerName: 'Samuel Mwangi',
+          caretakerPhone: '0722445566',
           unitsCount: 4,
           payablesCount: 3,
           isActive: true
         },
         {
           id: 'PROP-02',
+          propertyIdCode: 'P002',
           landlordId: 'LL-02',
           name: 'Kilimani Crest Executive Apartments',
           lr: 'NAIROBI/BLOCK 33/502',
@@ -88,7 +107,24 @@ const AppState = {
           county: 'Nairobi',
           subCounty: 'Kilimani, Nairobi',
           prefix: 'KIL',
+          officeBranch: 'Nairobi Head Office',
+          totalSqFt: 18000,
+          noOfUnits: 2,
+          remittanceType: 'Expected',
+          bankName: 'Standard Chartered',
+          bankBranch: 'Kenyatta Ave',
+          bankAccountNo: '01002938102',
+          bankAccountName: 'Kilimani Crest Escrow',
+          paymentDate: '10th of every month',
+          parkingSpaces: 8,
+          pricePerParking: 5000,
+          contractDate: '2026-03-01',
+          modeOfBilling: 'Monthly in Advance',
+          propertyOfficer: 'Alex Kamau',
+          payableToLlAccount: false,
           caretaker: 'Joseph Mutua (0721887766)',
+          caretakerName: 'Joseph Mutua',
+          caretakerPhone: '0721887766',
           unitsCount: 2,
           payablesCount: 2,
           isActive: true
@@ -719,6 +755,7 @@ const AppState = {
           setupRegistrationTabs();
           populateDropdowns();
           updateNextLandlordCodeDisplay();
+          updateNextPropertyCodeDisplay();
           renderLandlordsTable();
           renderTenantsTable();
           renderBuilderUnits();
@@ -778,6 +815,86 @@ const AppState = {
       }
     }
 
+    /* ==========================================================================
+       GLOBAL TRANSACTION INTERCEPTOR & CONFIRMATION WARNING MODAL
+       ========================================================================== */
+    let pendingGlobalConfirmCallback = null;
+
+    function confirmAction(message, callback, title = 'Database Execution Warning', confirmBtnText = 'Confirm & Execute', isDanger = false) {
+      pendingGlobalConfirmCallback = callback;
+      const modal = document.getElementById('modal-global-confirm');
+      if (!modal) {
+        if (window.confirm(message)) {
+          if (typeof callback === 'function') callback();
+        }
+        return;
+      }
+
+      const titleElem = document.getElementById('global-confirm-title');
+      const msgElem = document.getElementById('global-confirm-msg');
+      const btnElem = document.getElementById('global-confirm-execute-btn');
+      const iconElem = document.getElementById('global-confirm-icon');
+      const cardElem = modal.querySelector('.modal-card');
+
+      if (titleElem) titleElem.textContent = title;
+      if (msgElem) msgElem.innerHTML = message;
+      if (btnElem) {
+        btnElem.textContent = confirmBtnText;
+        if (isDanger) {
+          btnElem.style.background = '#DC2626';
+          btnElem.style.borderColor = '#B91C1C';
+        } else {
+          btnElem.style.background = 'var(--accent-primary)';
+          btnElem.style.borderColor = 'var(--accent-primary)';
+        }
+      }
+      if (cardElem) {
+        cardElem.style.borderLeft = isDanger ? '6px solid #EF4444' : '6px solid #F59E0B';
+      }
+      if (iconElem) {
+        iconElem.textContent = isDanger ? '🚨' : '⚠️';
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeGlobalConfirmModal() {
+      pendingGlobalConfirmCallback = null;
+      const modal = document.getElementById('modal-global-confirm');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function executeGlobalConfirmedAction() {
+      const cb = pendingGlobalConfirmCallback;
+      closeGlobalConfirmModal();
+      if (typeof cb === 'function') {
+        cb();
+      }
+    }
+
+    function confirmClearForm(formId) {
+      confirmAction(
+        'Are you sure you want to clear all entered fields in this form? Unsaved input will be reset.',
+        () => {
+          const form = document.getElementById(formId);
+          if (form) form.reset();
+          if (formId === 'form-landlord') {
+            if (editingLandlordId) cancelLandlordEdit();
+            updateNextLandlordCodeDisplay();
+            toggleLandlordEntityFields();
+            toggleLandlordRemitFields();
+          } else if (formId === 'form-property') {
+            if (editingPropertyId) cancelPropertyEdit();
+            updateNextPropertyCodeDisplay();
+          }
+          showToast('Form fields cleared.');
+        },
+        'Clear Form Warning',
+        'Clear Form',
+        true
+      );
+    }
+
     /* LANDLORD CODE GENERATOR & HELPERS */
     function getNextLandlordCode() {
       const existingNums = (AppState.landlords || [])
@@ -792,8 +909,30 @@ const AppState = {
 
     function updateNextLandlordCodeDisplay() {
       const codeInput = document.getElementById('landlord-code');
-      if (codeInput) {
+      if (codeInput && !editingLandlordId) {
         codeInput.value = getNextLandlordCode();
+      }
+    }
+
+    /* PROPERTY CODE GENERATOR & HELPERS */
+    function getNextPropertyCode() {
+      const existingNums = (AppState.properties || [])
+        .map(p => {
+          const match = (p.propertyIdCode || '').match(/^P(\d+)$/i);
+          return match ? parseInt(match[1], 10) : 0;
+        })
+        .filter(n => !isNaN(n));
+      const maxNum = existingNums.length > 0 ? Math.max(...existingNums) : 0;
+      return `P${String(maxNum + 1).padStart(3, '0')}`;
+    }
+
+    function updateNextPropertyCodeDisplay() {
+      const codeInput = document.getElementById('prop-code');
+      const badgeElem = document.getElementById('prop-code-badge');
+      if (!editingPropertyId) {
+        const nextCode = getNextPropertyCode();
+        if (codeInput) codeInput.value = nextCode;
+        if (badgeElem) badgeElem.textContent = `ID: ${nextCode}`;
       }
     }
 
@@ -820,43 +959,204 @@ const AppState = {
       document.getElementById('group-ll-mpesa-b2c').style.display = isBank ? 'none' : 'flex';
     }
 
+    /* LANDLORD EDIT MODE & SUBMIT */
+    let editingLandlordId = null;
+
+    function editLandlord(landlordId) {
+      const ll = AppState.landlords.find(l => l.id === landlordId);
+      if (!ll) return;
+
+      editingLandlordId = landlordId;
+
+      // Ensure Landlords tab is active
+      const llTabBtn = document.querySelector('[data-reg-target="landlords"]');
+      if (llTabBtn) llTabBtn.click();
+
+      // Populate form fields
+      const codeElem = document.getElementById('landlord-code');
+      if (codeElem) codeElem.value = ll.landlordCode || ll.id;
+
+      const entityElem = document.getElementById('landlord-entity-type');
+      if (entityElem) entityElem.value = ll.entityType;
+      toggleLandlordEntityFields();
+
+      if (ll.entityType === 'CORPORATE') {
+        const compElem = document.getElementById('landlord-company-name');
+        if (compElem) compElem.value = ll.name;
+      } else {
+        const nameParts = (ll.name || '').trim().split(' ');
+        const firstElem = document.getElementById('landlord-first-name');
+        const midElem = document.getElementById('landlord-middle-name');
+        const lastElem = document.getElementById('landlord-last-name');
+        if (firstElem) firstElem.value = nameParts[0] || '';
+        if (midElem) midElem.value = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : '';
+        if (lastElem) lastElem.value = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
+      }
+
+      const idRegElem = document.getElementById('landlord-id-reg');
+      if (idRegElem) idRegElem.value = ll.idReg || '';
+
+      const kraElem = document.getElementById('landlord-kra-pin');
+      if (kraElem) kraElem.value = ll.kraPin || '';
+
+      const postalElem = document.getElementById('landlord-postal-code');
+      if (postalElem) postalElem.value = ll.postalCode || '';
+
+      const phoneElem = document.getElementById('landlord-phone');
+      if (phoneElem) phoneElem.value = ll.phone || '';
+
+      const emailElem = document.getElementById('landlord-email');
+      if (emailElem) emailElem.value = ll.email || '';
+
+      const nokNameElem = document.getElementById('landlord-next-of-kin-name');
+      if (nokNameElem) nokNameElem.value = ll.nextOfKinName || '';
+
+      const nokPhoneElem = document.getElementById('landlord-next-of-kin-phone');
+      if (nokPhoneElem) nokPhoneElem.value = ll.nextOfKinPhone || '';
+
+      const nokRelElem = document.getElementById('landlord-next-of-kin-relationship');
+      if (nokRelElem) nokRelElem.value = ll.nextOfKinRelationship || '';
+
+      const remitElem = document.getElementById('landlord-remit-method');
+      if (remitElem) remitElem.value = ll.remitMethod || 'BANK';
+      toggleLandlordRemitFields();
+
+      if (ll.remitMethod === 'BANK') {
+        const bankElem = document.getElementById('landlord-bank-name');
+        if (bankElem && ll.bank) bankElem.value = ll.bank;
+        const branchElem = document.getElementById('landlord-bank-branch');
+        if (branchElem) branchElem.value = ll.branch || '';
+        const accElem = document.getElementById('landlord-bank-acc');
+        if (accElem) accElem.value = ll.accNo || '';
+      } else {
+        const mpesaElem = document.getElementById('landlord-mpesa-phone');
+        if (mpesaElem) mpesaElem.value = ll.phone || '';
+      }
+
+      // Switch button state
+      const submitBtn = document.getElementById('btn-submit-landlord');
+      if (submitBtn) submitBtn.innerHTML = '💾 Update Landlord Details';
+
+      const cancelBtn = document.getElementById('btn-cancel-landlord-edit');
+      if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+
+      const formElem = document.getElementById('form-landlord');
+      if (formElem) formElem.scrollIntoView({ behavior: 'smooth' });
+
+      showToast(`Loaded Landlord [${ll.landlordCode || ll.id}] into editor`);
+    }
+
+    function cancelLandlordEdit() {
+      editingLandlordId = null;
+      const formElem = document.getElementById('form-landlord');
+      if (formElem) formElem.reset();
+
+      const submitBtn = document.getElementById('btn-submit-landlord');
+      if (submitBtn) submitBtn.innerHTML = '+ Register Landlord';
+
+      const cancelBtn = document.getElementById('btn-cancel-landlord-edit');
+      if (cancelBtn) cancelBtn.style.display = 'none';
+
+      updateNextLandlordCodeDisplay();
+      toggleLandlordEntityFields();
+      toggleLandlordRemitFields();
+    }
+
     /* 1. LANDLORD SUBMIT */
     function handleLandlordSubmit(e) {
       e.preventDefault();
       const entityType = document.getElementById('landlord-entity-type').value;
       const name = entityType === 'CORPORATE' 
         ? document.getElementById('landlord-company-name').value
-        : `${document.getElementById('landlord-first-name').value} ${document.getElementById('landlord-last-name').value}`;
+        : `${document.getElementById('landlord-first-name').value} ${document.getElementById('landlord-last-name').value}`.trim();
 
       const codeElem = document.getElementById('landlord-code');
       const landlordCode = (codeElem && codeElem.value) ? codeElem.value : getNextLandlordCode();
+      const postalCode = document.getElementById('landlord-postal-code') ? document.getElementById('landlord-postal-code').value : '';
+      const phone = document.getElementById('landlord-phone').value;
+      const email = document.getElementById('landlord-email').value;
+      const idReg = document.getElementById('landlord-id-reg').value;
+      const kraPin = document.getElementById('landlord-kra-pin').value;
+      const nokName = document.getElementById('landlord-next-of-kin-name') ? document.getElementById('landlord-next-of-kin-name').value : '';
+      const nokPhone = document.getElementById('landlord-next-of-kin-phone') ? document.getElementById('landlord-next-of-kin-phone').value : '';
+      const nokRel = document.getElementById('landlord-next-of-kin-relationship') ? document.getElementById('landlord-next-of-kin-relationship').value : '';
+      const remitMethod = document.getElementById('landlord-remit-method').value;
+      const bank = document.getElementById('landlord-bank-name').value;
+      const branch = document.getElementById('landlord-bank-branch').value;
+      const accNo = document.getElementById('landlord-bank-acc').value;
 
-      const newLL = {
-        id: `LL-${String(AppState.landlords.length + 1).padStart(2, '0')}`,
-        landlordCode,
-        entityType,
-        name,
-        idReg: document.getElementById('landlord-id-reg').value,
-        kraPin: document.getElementById('landlord-kra-pin').value,
-        postalCode: document.getElementById('landlord-postal-code') ? document.getElementById('landlord-postal-code').value : '',
-        phone: document.getElementById('landlord-phone').value,
-        email: document.getElementById('landlord-email').value,
-        nextOfKinName: document.getElementById('landlord-next-of-kin-name') ? document.getElementById('landlord-next-of-kin-name').value : '',
-        nextOfKinPhone: document.getElementById('landlord-next-of-kin-phone') ? document.getElementById('landlord-next-of-kin-phone').value : '',
-        nextOfKinRelationship: document.getElementById('landlord-next-of-kin-relationship') ? document.getElementById('landlord-next-of-kin-relationship').value : '',
-        remitMethod: document.getElementById('landlord-remit-method').value,
-        bank: document.getElementById('landlord-bank-name').value,
-        branch: document.getElementById('landlord-bank-branch').value,
-        accNo: document.getElementById('landlord-bank-acc').value,
-        isActive: true
-      };
+      if (editingLandlordId) {
+        confirmAction(
+          `Are you sure you want to commit updates for Landlord <strong>[${landlordCode}] ${name}</strong> to the live multi-tenant database?`,
+          () => {
+            const ll = AppState.landlords.find(l => l.id === editingLandlordId);
+            if (ll) {
+              const oldName = ll.name;
+              ll.landlordCode = landlordCode;
+              ll.entityType = entityType;
+              ll.name = name;
+              ll.idReg = idReg;
+              ll.kraPin = kraPin;
+              ll.postalCode = postalCode;
+              ll.phone = phone;
+              ll.email = email;
+              ll.nextOfKinName = nokName;
+              ll.nextOfKinPhone = nokPhone;
+              ll.nextOfKinRelationship = nokRel;
+              ll.remitMethod = remitMethod;
+              ll.bank = bank;
+              ll.branch = branch;
+              ll.accNo = accNo;
 
-      AppState.landlords.push(newLL);
-      renderLandlordsTable();
-      populateDropdowns();
-      e.target.reset();
-      updateNextLandlordCodeDisplay();
-      showToast(`Landlord [${landlordCode}] ${name} registered successfully`);
+              // Propagate name change to mandates
+              AppState.mandates.forEach(m => {
+                if (m.landlordName === oldName) m.landlordName = name;
+              });
+            }
+            cancelLandlordEdit();
+            renderLandlordsTable();
+            populateDropdowns();
+            renderLandlordPortfolioTable();
+            showToast(`✓ Landlord [${landlordCode}] ${name} updated successfully`);
+          },
+          'Database Update Confirmation',
+          'Commit Landlord Update'
+        );
+      } else {
+        confirmAction(
+          `Are you sure you want to register and commit Landlord <strong>[${landlordCode}] ${name}</strong> to the live multi-tenant database?`,
+          () => {
+            const newLL = {
+              id: `LL-${String(AppState.landlords.length + 1).padStart(2, '0')}`,
+              landlordCode,
+              entityType,
+              name,
+              idReg,
+              kraPin,
+              postalCode,
+              phone,
+              email,
+              nextOfKinName: nokName,
+              nextOfKinPhone: nokPhone,
+              nextOfKinRelationship: nokRel,
+              remitMethod,
+              bank,
+              branch,
+              accNo,
+              isActive: true
+            };
+
+            AppState.landlords.push(newLL);
+            renderLandlordsTable();
+            populateDropdowns();
+            e.target.reset();
+            updateNextLandlordCodeDisplay();
+            showToast(`✓ Landlord [${landlordCode}] ${name} registered successfully`);
+          },
+          'Database Insert Confirmation',
+          'Register Landlord'
+        );
+      }
     }
 
     function renderLandlordsTable() {
@@ -870,6 +1170,8 @@ const AppState = {
         const statusBadge = ll.isActive !== false
           ? '<span class="badge-status" style="color: var(--accent-secondary); font-weight: 700;">● ACTIVE</span>'
           : '<span class="badge-status" style="color: #DC2626; background: rgba(239, 68, 68, 0.12); font-weight: 700;">○ DEACTIVATED</span>';
+
+        const editBtn = `<button type="button" class="btn-action-pill" style="color: var(--accent-primary); border-color: var(--accent-primary);" onclick="editLandlord('${ll.id}')">Edit</button>`;
 
         const actionBtn = ll.isActive !== false
           ? `<button type="button" class="btn-action-pill" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4);" onclick="openDeactivationWarningModal('${ll.id}')">Deactivate</button>`
@@ -887,7 +1189,7 @@ const AppState = {
             <td>${nokHtml}</td>
             <td>${ll.remitMethod === 'BANK' ? `${ll.bank} (${ll.accNo})` : 'M-Pesa B2C'}</td>
             <td>${statusBadge}</td>
-            <td>${actionBtn}</td>
+            <td><div style="display: flex; gap: 6px;">${editBtn} ${actionBtn}</div></td>
           </tr>
         `;
       }).join('');
@@ -994,26 +1296,40 @@ const AppState = {
       const first = document.getElementById('tenant-first-name').value;
       const mid = document.getElementById('tenant-middle-name').value;
       const surname = document.getElementById('tenant-surname').value;
-      const name = `${first} ${mid ? mid + ' ' : ''}${surname}`;
+      const name = `${first} ${mid ? mid + ' ' : ''}${surname}`.trim();
+      const idPassport = document.getElementById('tenant-id-passport').value;
+      const phone = document.getElementById('tenant-phone-primary').value;
+      const kraPin = document.getElementById('tenant-kra-pin').value || 'N/A';
+      const emergency = `${document.getElementById('tenant-emergency-name').value} (${document.getElementById('tenant-emergency-phone').value})`;
+      const workplace = document.getElementById('tenant-workplace').value || 'Unspecified';
 
-      const newTenant = {
-        id: `TEN-${String(AppState.tenants.length + 1).padStart(2, '0')}`,
-        name,
-        idPassport: document.getElementById('tenant-id-passport').value,
-        phone: document.getElementById('tenant-phone-primary').value,
-        kraPin: document.getElementById('tenant-kra-pin').value || 'N/A',
-        emergency: `${document.getElementById('tenant-emergency-name').value} (${document.getElementById('tenant-emergency-phone').value})`,
-        workplace: document.getElementById('tenant-workplace').value || 'Unspecified'
-      };
+      confirmAction(
+        `Are you sure you want to register and commit Tenant <strong>${name}</strong> (ID: <code>${idPassport}</code>, Phone: <code>${phone}</code>) to the live multi-tenant database?`,
+        () => {
+          const newTenant = {
+            id: `TEN-${String(AppState.tenants.length + 1).padStart(2, '0')}`,
+            name,
+            idPassport,
+            phone,
+            kraPin,
+            emergency,
+            workplace
+          };
 
-      AppState.tenants.push(newTenant);
-      renderTenantsTable();
-      e.target.reset();
-      showToast(`Tenant ${name} registered with C2B phone ${newTenant.phone}`);
+          AppState.tenants.push(newTenant);
+          renderTenantsTable();
+          populateTenantDropdowns();
+          e.target.reset();
+          showToast(`✓ Tenant ${name} registered successfully`);
+        },
+        'Database Insert Confirmation',
+        'Register Tenant'
+      );
     }
 
     function renderTenantsTable() {
       const tbody = document.getElementById('table-tenants-body');
+      if (!tbody) return;
       tbody.innerHTML = AppState.tenants.map(t => `
         <tr>
           <td><strong>${t.name}</strong></td>
@@ -1040,6 +1356,7 @@ const AppState = {
 
     function renderBuilderUnits() {
       const tbody = document.getElementById('builder-units-body');
+      if (!tbody) return;
       tbody.innerHTML = builderUnitRows.map((r, i) => `
         <tr>
           <td><input type="text" class="builder-input" value="${r.code}" onchange="builderUnitRows[${i}].code=this.value"></td>
@@ -1073,6 +1390,7 @@ const AppState = {
 
     function renderBuilderPayables() {
       const tbody = document.getElementById('builder-payables-body');
+      if (!tbody) return;
       tbody.innerHTML = builderPayableRows.map((r, i) => `
         <tr>
           <td><input type="text" class="builder-input" value="${r.name}" onchange="builderPayableRows[${i}].name=this.value"></td>
@@ -1114,49 +1432,267 @@ const AppState = {
       renderBuilderPayables();
     }
 
+    /* PROPERTY EDIT MODE */
+    let editingPropertyId = null;
+
+    function editProperty(propId) {
+      const prop = AppState.properties.find(p => p.id === propId);
+      if (!prop) return;
+
+      editingPropertyId = propId;
+
+      // Switch to Properties tab
+      const propTabBtn = document.querySelector('[data-reg-target="properties"]');
+      if (propTabBtn) propTabBtn.click();
+
+      // Populate form fields
+      const codeElem = document.getElementById('prop-code');
+      if (codeElem) codeElem.value = prop.propertyIdCode || prop.id;
+      const badgeElem = document.getElementById('prop-code-badge');
+      if (badgeElem) badgeElem.textContent = `ID: ${prop.propertyIdCode || prop.id} (EDIT)`;
+
+      const nameElem = document.getElementById('prop-name');
+      if (nameElem) nameElem.value = prop.name || '';
+
+      const lrElem = document.getElementById('prop-lr');
+      if (lrElem) lrElem.value = prop.lr || '';
+
+      const branchElem = document.getElementById('prop-branch');
+      if (branchElem && prop.officeBranch) branchElem.value = prop.officeBranch;
+
+      const typeElem = document.getElementById('prop-type');
+      if (typeElem && prop.type) typeElem.value = prop.type;
+
+      const countyElem = document.getElementById('prop-county');
+      if (countyElem && prop.county) countyElem.value = prop.county;
+
+      const subCountyElem = document.getElementById('prop-subcounty');
+      if (subCountyElem) subCountyElem.value = prop.subCounty || '';
+
+      const prefixElem = document.getElementById('prop-paybill-prefix');
+      if (prefixElem) prefixElem.value = prop.prefix || '';
+
+      const sqftElem = document.getElementById('prop-total-sqft');
+      if (sqftElem) sqftElem.value = prop.totalSqFt || '';
+
+      const unitsElem = document.getElementById('prop-no-of-units');
+      if (unitsElem) unitsElem.value = prop.noOfUnits !== undefined ? prop.noOfUnits : (prop.unitsCount || '');
+
+      const remitElem = document.getElementById('prop-remittance-type');
+      if (remitElem && prop.remittanceType) remitElem.value = prop.remittanceType;
+
+      const modeElem = document.getElementById('prop-mode-of-billing');
+      if (modeElem && prop.modeOfBilling) modeElem.value = prop.modeOfBilling;
+
+      const contractElem = document.getElementById('prop-contract-date');
+      if (contractElem && prop.contractDate) contractElem.value = prop.contractDate;
+
+      const paymentElem = document.getElementById('prop-payment-date');
+      if (paymentElem && prop.paymentDate) paymentElem.value = prop.paymentDate;
+
+      const officerElem = document.getElementById('prop-officer');
+      if (officerElem && prop.propertyOfficer) officerElem.value = prop.propertyOfficer;
+
+      const parkSpacesElem = document.getElementById('prop-parking-spaces');
+      if (parkSpacesElem) parkSpacesElem.value = prop.parkingSpaces !== undefined ? prop.parkingSpaces : '';
+
+      const priceParkElem = document.getElementById('prop-price-per-parking');
+      if (priceParkElem) priceParkElem.value = prop.pricePerParking !== undefined ? prop.pricePerParking : '';
+
+      const ctNameElem = document.getElementById('prop-caretaker-name');
+      if (ctNameElem) ctNameElem.value = prop.caretakerName || (prop.caretaker ? prop.caretaker.split(' (')[0] : '');
+
+      const ctPhoneElem = document.getElementById('prop-caretaker-phone');
+      if (ctPhoneElem) ctPhoneElem.value = prop.caretakerPhone || (prop.caretaker && prop.caretaker.includes('(') ? prop.caretaker.split('(')[1].replace(')', '') : '');
+
+      const bankNameElem = document.getElementById('prop-bank-name');
+      if (bankNameElem && prop.bankName) bankNameElem.value = prop.bankName;
+
+      const bankBranchElem = document.getElementById('prop-bank-branch');
+      if (bankBranchElem) bankBranchElem.value = prop.bankBranch || '';
+
+      const bankAccElem = document.getElementById('prop-bank-account-no');
+      if (bankAccElem) bankAccElem.value = prop.bankAccountNo || '';
+
+      const bankAccNameElem = document.getElementById('prop-bank-account-name');
+      if (bankAccNameElem) bankAccNameElem.value = prop.bankAccountName || '';
+
+      const payableToLlElem = document.getElementById('prop-payable-to-ll');
+      if (payableToLlElem) payableToLlElem.checked = !!prop.payableToLlAccount;
+
+      // Switch button state
+      const submitBtn = document.getElementById('btn-submit-property');
+      if (submitBtn) submitBtn.innerHTML = '💾 Update Property Attributes';
+
+      const cancelBtn = document.getElementById('btn-cancel-prop-edit');
+      if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+
+      const formElem = document.getElementById('form-property');
+      if (formElem) formElem.scrollIntoView({ behavior: 'smooth' });
+
+      showToast(`Loaded Property [${prop.propertyIdCode || prop.id}] into editor`);
+    }
+
+    function cancelPropertyEdit() {
+      editingPropertyId = null;
+      const formElem = document.getElementById('form-property');
+      if (formElem) formElem.reset();
+
+      const submitBtn = document.getElementById('btn-submit-property');
+      if (submitBtn) submitBtn.innerHTML = '+ Complete Property Onboarding';
+
+      const cancelBtn = document.getElementById('btn-cancel-prop-edit');
+      if (cancelBtn) cancelBtn.style.display = 'none';
+
+      updateNextPropertyCodeDisplay();
+    }
+
     function handlePropertySubmit(e) {
       e.preventDefault();
-      const propId = `PROP-${String(AppState.properties.length + 1).padStart(2, '0')}`;
+      const propCodeElem = document.getElementById('prop-code');
+      const propertyIdCode = (propCodeElem && propCodeElem.value) ? propCodeElem.value : getNextPropertyCode();
       const name = document.getElementById('prop-name').value;
+      const lr = document.getElementById('prop-lr').value;
+      const officeBranch = document.getElementById('prop-branch').value;
+      const type = document.getElementById('prop-type').value;
+      const county = document.getElementById('prop-county').value;
+      const subCounty = document.getElementById('prop-subcounty').value;
+      const prefix = document.getElementById('prop-paybill-prefix').value;
+      const totalSqFt = parseFloat(document.getElementById('prop-total-sqft').value) || 0;
+      const noOfUnits = parseInt(document.getElementById('prop-no-of-units').value, 10) || builderUnitRows.length;
+      const remittanceType = document.getElementById('prop-remittance-type').value;
+      const modeOfBilling = document.getElementById('prop-mode-of-billing').value;
+      const contractDate = document.getElementById('prop-contract-date').value;
+      const paymentDate = document.getElementById('prop-payment-date').value;
+      const propertyOfficer = document.getElementById('prop-officer').value;
+      const parkingSpaces = parseInt(document.getElementById('prop-parking-spaces').value, 10) || 0;
+      const pricePerParking = parseFloat(document.getElementById('prop-price-per-parking').value) || 0;
+      const caretakerName = document.getElementById('prop-caretaker-name').value;
+      const caretakerPhone = document.getElementById('prop-caretaker-phone').value;
+      const caretaker = `${caretakerName} (${caretakerPhone})`;
+      const bankName = document.getElementById('prop-bank-name').value;
+      const bankBranch = document.getElementById('prop-bank-branch').value;
+      const bankAccountNo = document.getElementById('prop-bank-account-no').value;
+      const bankAccountName = document.getElementById('prop-bank-account-name').value;
+      const payableToLlAccount = document.getElementById('prop-payable-to-ll').checked;
 
-      const newProp = {
-        id: propId,
-        name,
-        lr: document.getElementById('prop-lr').value,
-        type: document.getElementById('prop-type').value,
-        county: document.getElementById('prop-county').value,
-        subCounty: document.getElementById('prop-subcounty').value,
-        prefix: document.getElementById('prop-paybill-prefix').value,
-        caretaker: `${document.getElementById('prop-caretaker-name').value} (${document.getElementById('prop-caretaker-phone').value})`,
-        unitsCount: builderUnitRows.length,
-        payablesCount: builderPayableRows.length,
-        isActive: true
-      };
+      if (editingPropertyId) {
+        confirmAction(
+          `Are you sure you want to commit updates for Property <strong>[${propertyIdCode}] ${name}</strong> to the live multi-tenant database?`,
+          () => {
+            const prop = AppState.properties.find(p => p.id === editingPropertyId);
+            if (prop) {
+              const oldName = prop.name;
+              prop.propertyIdCode = propertyIdCode;
+              prop.name = name;
+              prop.lr = lr;
+              prop.officeBranch = officeBranch;
+              prop.type = type;
+              prop.county = county;
+              prop.subCounty = subCounty;
+              prop.prefix = prefix;
+              prop.totalSqFt = totalSqFt;
+              prop.noOfUnits = noOfUnits;
+              prop.remittanceType = remittanceType;
+              prop.modeOfBilling = modeOfBilling;
+              prop.contractDate = contractDate;
+              prop.paymentDate = paymentDate;
+              prop.propertyOfficer = propertyOfficer;
+              prop.parkingSpaces = parkingSpaces;
+              prop.pricePerParking = pricePerParking;
+              prop.caretaker = caretaker;
+              prop.caretakerName = caretakerName;
+              prop.caretakerPhone = caretakerPhone;
+              prop.bankName = bankName;
+              prop.bankBranch = bankBranch;
+              prop.bankAccountNo = bankAccountNo;
+              prop.bankAccountName = bankAccountName;
+              prop.payableToLlAccount = payableToLlAccount;
 
-      AppState.properties.push(newProp);
+              // Propagate name change to units and mandates
+              AppState.units.forEach(u => {
+                if (u.propertyId === prop.id) u.propertyName = name;
+              });
+              AppState.mandates.forEach(m => {
+                if (m.propertyId === prop.id) m.propertyName = name;
+              });
+            }
+            cancelPropertyEdit();
+            renderPropertiesTable();
+            populateDropdowns();
+            renderLandlordPortfolioTable();
+            showToast(`✓ Property [${propertyIdCode}] ${name} updated successfully`);
+          },
+          'Database Update Confirmation',
+          'Commit Property Update'
+        );
+      } else {
+        confirmAction(
+          `Are you sure you want to onboard Property <strong>[${propertyIdCode}] ${name}</strong> with ${builderUnitRows.length} units and ${builderPayableRows.length} payables to the live multi-tenant database?`,
+          () => {
+            const propId = `PROP-${String(AppState.properties.length + 1).padStart(2, '0')}`;
+            const newProp = {
+              id: propId,
+              propertyIdCode,
+              name,
+              lr,
+              officeBranch,
+              type,
+              county,
+              subCounty,
+              prefix,
+              totalSqFt,
+              noOfUnits,
+              remittanceType,
+              modeOfBilling,
+              contractDate,
+              paymentDate,
+              propertyOfficer,
+              parkingSpaces,
+              pricePerParking,
+              caretaker,
+              caretakerName,
+              caretakerPhone,
+              bankName,
+              bankBranch,
+              bankAccountNo,
+              bankAccountName,
+              payableToLlAccount,
+              unitsCount: builderUnitRows.length,
+              payablesCount: builderPayableRows.length,
+              isActive: true
+            };
 
-      // Add built units to unit inventory
-      builderUnitRows.forEach((bu, idx) => {
-        AppState.units.push({
-          id: `UNIT-${AppState.units.length + 1}`,
-          propertyId: propId,
-          propertyName: name,
-          code: bu.code,
-          floor: bu.floor,
-          config: bu.config,
-          plinth: 80.0,
-          rent: bu.rent,
-          sc: bu.sc,
-          meter: bu.meter,
-          status: 'VACANT'
-        });
-      });
+            AppState.properties.push(newProp);
 
-      renderPropertiesTable();
-      renderUnitsTable();
-      populateDropdowns();
-      e.target.reset();
-      showToast(`Property "${name}" onboarded with ${newProp.unitsCount} units and ${newProp.payablesCount} payables`);
+            // Add built units to unit inventory
+            builderUnitRows.forEach((bu, idx) => {
+              AppState.units.push({
+                id: `UNIT-${AppState.units.length + 1}`,
+                propertyId: propId,
+                propertyName: name,
+                code: bu.code,
+                floor: bu.floor,
+                config: bu.config,
+                plinth: 80.0,
+                rent: bu.rent,
+                sc: bu.sc,
+                meter: bu.meter,
+                status: 'VACANT'
+              });
+            });
+
+            renderPropertiesTable();
+            renderUnitsTable();
+            populateDropdowns();
+            e.target.reset();
+            updateNextPropertyCodeDisplay();
+            showToast(`✓ Property "${name}" onboarded with ${newProp.unitsCount} units and ${newProp.payablesCount} payables`);
+          },
+          'Database Insert Confirmation',
+          'Onboard Property'
+        );
+      }
     }
 
     function renderPropertiesTable() {
@@ -1164,17 +1700,23 @@ const AppState = {
       if (!tbody) return;
       tbody.innerHTML = AppState.properties.map(p => `
         <tr>
-          <td><strong>${p.name}</strong></td>
-          <td><code>${p.lr}</code></td>
-          <td><span class="badge-status">${p.type}</span></td>
-          <td>${p.subCounty}, ${p.county}</td>
-          <td><code>${p.prefix}</code></td>
-          <td><strong>${p.unitsCount} Units</strong></td>
-          <td>${p.payablesCount} Payables</td>
+          <td><span class="badge-status" style="font-weight: 800; background: var(--accent-primary); color: #FFFFFF;">${p.propertyIdCode || p.id}</span></td>
+          <td><strong>${p.name}</strong><br><small style="color:var(--text-muted);">${p.subCounty || ''}, ${p.county || ''}</small></td>
+          <td><code>${p.lr}</code><br><small style="color:var(--text-muted);">Prefix: <strong>${p.prefix}</strong></small></td>
+          <td><span class="badge-status">${p.type}</span><br><small>${p.officeBranch || 'Thika Branch'}</small></td>
+          <td><strong>${p.unitsCount || p.noOfUnits || 0} Units</strong><br><small style="color:var(--text-muted);">${p.totalSqFt ? Number(p.totalSqFt).toLocaleString() + ' sq ft' : '—'}</small></td>
+          <td><span class="badge-status" style="color: ${p.remittanceType === 'Expected' ? 'var(--accent-amber)' : 'var(--accent-secondary)'}; font-weight:700;">${p.remittanceType || 'Collected'}</span><br><small style="color:var(--text-muted);">${p.paymentDate || '5th monthly'}</small></td>
+          <td><small><strong>${p.modeOfBilling || 'Monthly in Advance'}</strong><br>${p.bankName ? `${p.bankName} (${p.bankAccountNo || ''})` : ''}</small></td>
+          <td><strong>${p.propertyOfficer || 'Eng. Dennis Mugo'}</strong><br><small style="color:var(--text-muted);">Caretaker: ${p.caretakerName || (p.caretaker ? p.caretaker.split(' (')[0] : '—')}</small></td>
           <td>
             ${p.isActive !== false 
               ? '<span class="badge-status" style="color: var(--accent-secondary); font-weight: 700;">● ACTIVE</span>' 
               : '<span class="badge-status" style="color: #DC2626; background: rgba(239, 68, 68, 0.12); font-weight: 700;">○ DEACTIVATED</span>'}
+          </td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="btn-action-pill" style="color: var(--accent-primary); border-color: var(--accent-primary);" onclick="editProperty('${p.id}')">Edit</button>
+            </div>
           </td>
         </tr>
       `).join('');
@@ -1185,36 +1727,53 @@ const AppState = {
       e.preventDefault();
       const propId = document.getElementById('standalone-prop-select').value;
       const prop = AppState.properties.find(p => p.id === propId) || AppState.properties[0];
+      const code = document.getElementById('unit-code').value;
+      const floor = document.getElementById('unit-floor').value || 'Ground';
+      const config = document.getElementById('unit-room-config').value;
+      const plinth = Number(document.getElementById('unit-plinth').value) || 0;
+      const rent = Number(document.getElementById('unit-baseline-rent').value) || 0;
+      const sc = Number(document.getElementById('unit-service-charge').value) || 0;
+      const meter = document.getElementById('unit-water-meter').value || 'N/A';
 
-      const newUnit = {
-        id: `UNIT-${AppState.units.length + 1}`,
-        propertyId: prop.id,
-        propertyName: prop.name,
-        code: document.getElementById('unit-code').value,
-        floor: document.getElementById('unit-floor').value || 'Ground',
-        config: document.getElementById('unit-room-config').value,
-        plinth: Number(document.getElementById('unit-plinth').value) || 0,
-        rent: Number(document.getElementById('unit-baseline-rent').value) || 0,
-        sc: Number(document.getElementById('unit-service-charge').value) || 0,
-        meter: document.getElementById('unit-water-meter').value || 'N/A',
-        status: 'VACANT'
-      };
+      confirmAction(
+        `Are you sure you want to register Unit <strong>${code}</strong> (${config}, KES ${rent.toLocaleString()}/mo) under Property <strong>${prop.name}</strong> in the live database?`,
+        () => {
+          const newUnit = {
+            id: `UNIT-${AppState.units.length + 1}`,
+            propertyId: prop.id,
+            propertyName: prop.name,
+            code: code,
+            floor: floor,
+            config: config,
+            plinth: plinth,
+            rent: rent,
+            sc: sc,
+            meter: meter,
+            status: 'VACANT'
+          };
 
-      AppState.units.push(newUnit);
-      prop.unitsCount = (prop.unitsCount || 0) + 1;
-      renderUnitsTable();
-      renderPropertiesTable();
-      e.target.reset();
-      showToast(`Unit ${newUnit.code} added to ${prop.name}`);
+          AppState.units.push(newUnit);
+          prop.unitsCount = (prop.unitsCount || 0) + 1;
+          renderUnitsTable();
+          renderPropertiesTable();
+          populateTenantDropdowns();
+          e.target.reset();
+          showToast(`✓ Unit ${newUnit.code} added to ${prop.name}`);
+        },
+        'Database Insert Confirmation',
+        'Register Unit'
+      );
     }
 
     function renderUnitsTable() {
-      const filterProp = document.getElementById('filter-units-by-property').value;
+      const filterElem = document.getElementById('filter-units-by-property');
+      const filterProp = filterElem ? filterElem.value : 'ALL';
       const filtered = filterProp === 'ALL' || !filterProp
         ? AppState.units
         : AppState.units.filter(u => u.propertyId === filterProp);
 
       const tbody = document.getElementById('table-units-body');
+      if (!tbody) return;
       tbody.innerHTML = filtered.map(u => `
         <tr>
           <td><strong>${u.code}</strong></td>
@@ -1252,33 +1811,45 @@ const AppState = {
       const commissionType = commTypeElem ? commTypeElem.value : 'PERCENTAGE';
       const feePct = commissionType === 'PERCENTAGE' ? Number(document.getElementById('mandate-fee-pct').value || 0) : 0;
       const feeFixed = commissionType === 'FIXED' ? Number(document.getElementById('mandate-fee-fixed').value || 0) : 0;
+      const effective = document.getElementById('mandate-effective-date').value;
+      const expiry = document.getElementById('mandate-expiry-date').value || 'Open-ended';
+      const vat = document.getElementById('mandate-vat-applicable').checked;
+      const mri = document.getElementById('mandate-mri-applicable').checked;
+      const manager = document.getElementById('mandate-manager').value;
 
-      const newMandate = {
-        id: `MND-${String(AppState.mandates.length + 1).padStart(2, '0')}`,
-        landlordId: landlord.id,
-        landlordName: landlord.name,
-        propertyId: property.id,
-        propertyName: property.name,
-        effective: document.getElementById('mandate-effective-date').value,
-        expiry: document.getElementById('mandate-expiry-date').value || 'Open-ended',
-        commissionType,
-        feePct,
-        feeFixed,
-        vat: document.getElementById('mandate-vat-applicable').checked,
-        mri: document.getElementById('mandate-mri-applicable').checked,
-        manager: document.getElementById('mandate-manager').value,
-        status: 'ACTIVE'
-      };
+      confirmAction(
+        `Are you sure you want to execute and commit Management Mandate for Property <strong>${property.name}</strong> assigned to Landlord <strong>${landlord.name}</strong> (${commissionType === 'FIXED' ? `KES ${feeFixed.toLocaleString()} Fixed` : `${feePct}% Fee`})?`,
+        () => {
+          const newMandate = {
+            id: `MND-${String(AppState.mandates.length + 1).padStart(2, '0')}`,
+            landlordId: landlord.id,
+            landlordName: landlord.name,
+            propertyId: property.id,
+            propertyName: property.name,
+            effective: effective,
+            expiry: expiry,
+            commissionType,
+            feePct,
+            feeFixed,
+            vat: vat,
+            mri: mri,
+            manager: manager,
+            status: 'ACTIVE'
+          };
 
-      // Link property to landlord directly
-      property.landlordId = landlord.id;
+          // Link property to landlord directly
+          property.landlordId = landlord.id;
 
-      AppState.mandates.push(newMandate);
-      renderMandatesTable();
-      renderLandlordPortfolioTable();
-      e.target.reset();
-      toggleMandateCommissionType();
-      showToast(`Management Mandate executed for ${property.name} (${commissionType === 'FIXED' ? `KES ${feeFixed.toLocaleString()} Fixed` : `${feePct}%`})`);
+          AppState.mandates.push(newMandate);
+          renderMandatesTable();
+          renderLandlordPortfolioTable();
+          e.target.reset();
+          toggleMandateCommissionType();
+          showToast(`✓ Management Mandate executed for ${property.name}`);
+        },
+        'Mandate Execution Confirmation',
+        'Execute Mandate'
+      );
     }
 
     function renderMandatesTable() {
@@ -1311,13 +1882,13 @@ const AppState = {
       const mPropSelect = document.getElementById('mandate-property-select');
 
       const propOpts = AppState.properties.map(p => `<option value="${p.id}">${p.name} (${p.lr})</option>`).join('');
-      pSelect.innerHTML = propOpts;
-      mPropSelect.innerHTML = propOpts;
-      pFilter.innerHTML = `<option value="ALL">All Properties</option>${propOpts}`;
+      if (pSelect) pSelect.innerHTML = propOpts;
+      if (mPropSelect) mPropSelect.innerHTML = propOpts;
+      if (pFilter) pFilter.innerHTML = `<option value="ALL">All Properties</option>${propOpts}`;
 
       // Mandate landlord selector
       const mLlSelect = document.getElementById('mandate-landlord-select');
-      mLlSelect.innerHTML = AppState.landlords.map(l => `<option value="${l.id}">${l.name} (${l.kraPin})</option>`).join('');
+      if (mLlSelect) mLlSelect.innerHTML = AppState.landlords.map(l => `<option value="${l.id}">${l.name} (${l.kraPin})</option>`).join('');
 
       // Sub-Module 1.2 Tenant Dropdowns
       populateTenantDropdowns();
@@ -1445,49 +2016,64 @@ const AppState = {
         return;
       }
 
-      const newLease = {
-        id: `LSE-${String(AppState.leases.length + 1).padStart(3, '0')}`,
-        tenantId: tenant.id,
-        tenantName: tenant.name,
-        unitId: unit.id,
-        unitCode: unit.code,
-        propertyName: unit.propertyName,
-        startDate: document.getElementById('lease-start-date').value,
-        endDate: document.getElementById('lease-end-date').value || 'Open-ended',
-        rentAmount: Number(document.getElementById('lease-rent-amount').value),
-        serviceCharge: Number(document.getElementById('lease-sc-amount').value),
-        depositAmount: Number(document.getElementById('lease-deposit-amount').value),
-        handoverWater: Number(document.getElementById('lease-handover-water').value) || 0,
-        meterSerial: document.getElementById('lease-electricity-meter').value || unit.meter || 'WM-SUB-01',
-        status: 'Active'
-      };
+      const rentAmount = Number(document.getElementById('lease-rent-amount').value);
+      const serviceCharge = Number(document.getElementById('lease-sc-amount').value);
+      const depositAmount = Number(document.getElementById('lease-deposit-amount').value);
+      const startDate = document.getElementById('lease-start-date').value;
+      const endDate = document.getElementById('lease-end-date').value || 'Open-ended';
+      const handoverWater = Number(document.getElementById('lease-handover-water').value) || 0;
+      const meterSerial = document.getElementById('lease-electricity-meter').value || unit.meter || 'WM-SUB-01';
 
-      AppState.leases.push(newLease);
-      unit.status = 'OCCUPIED';
+      confirmAction(
+        `Are you sure you want to execute and commit Lease Agreement for Tenant <strong>${tenant.name}</strong> on Unit <strong>${unit.code}</strong> (Rent: KES ${rentAmount.toLocaleString()}, Deposit: KES ${depositAmount.toLocaleString()})?`,
+        () => {
+          const newLease = {
+            id: `LSE-${String(AppState.leases.length + 1).padStart(3, '0')}`,
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            unitId: unit.id,
+            unitCode: unit.code,
+            propertyName: unit.propertyName,
+            startDate: startDate,
+            endDate: endDate,
+            rentAmount: rentAmount,
+            serviceCharge: serviceCharge,
+            depositAmount: depositAmount,
+            handoverWater: handoverWater,
+            meterSerial: meterSerial,
+            status: 'Active'
+          };
 
-      // Log initial handover reading if provided
-      if (newLease.handoverWater > 0) {
-        AppState.utilityReadings.push({
-          id: `UTR-${String(AppState.utilityReadings.length + 1).padStart(3, '0')}`,
-          unitId: unit.id,
-          unitCode: unit.code,
-          propertyName: unit.propertyName,
-          meterType: 'Water',
-          readingDate: newLease.startDate,
-          previousReading: newLease.handoverWater,
-          currentReading: newLease.handoverWater,
-          consumption: 0.00,
-          tariffRate: 150.00,
-          totalAmount: 0.00,
-          billedStatus: true
-        });
-      }
+          AppState.leases.push(newLease);
+          unit.status = 'OCCUPIED';
 
-      renderLeasesTable();
-      renderUnitsTable();
-      populateTenantDropdowns();
-      e.target.reset();
-      showToast(`Lease executed for ${tenant.name} at ${unit.code}`);
+          // Log initial handover reading if provided
+          if (newLease.handoverWater > 0) {
+            AppState.utilityReadings.push({
+              id: `UTR-${String(AppState.utilityReadings.length + 1).padStart(3, '0')}`,
+              unitId: unit.id,
+              unitCode: unit.code,
+              propertyName: unit.propertyName,
+              meterType: 'Water',
+              readingDate: newLease.startDate,
+              previousReading: newLease.handoverWater,
+              currentReading: newLease.handoverWater,
+              consumption: 0.00,
+              tariffRate: 150.00,
+              totalAmount: 0.00,
+              billedStatus: true
+            });
+          }
+
+          renderLeasesTable();
+          renderUnitsTable();
+          populateTenantDropdowns();
+          e.target.reset();
+          showToast(`✓ Lease executed for ${tenant.name} at ${unit.code}`);
+        },
+        'Lease Execution Confirmation',
+        'Execute Lease'
+      );
     }
 
     function renderLeasesTable() {
@@ -1519,13 +2105,22 @@ const AppState = {
     function terminateLease(leaseId) {
       const lease = AppState.leases.find(l => l.id === leaseId);
       if (!lease) return;
-      lease.status = 'Expired';
-      const unit = AppState.units.find(u => u.id === lease.unitId);
-      if (unit) unit.status = 'VACANT';
-      renderLeasesTable();
-      renderUnitsTable();
-      populateTenantDropdowns();
-      showToast(`Lease ${leaseId} terminated. Unit ${lease.unitCode} marked VACANT.`);
+
+      confirmAction(
+        `Are you sure you want to terminate Lease <strong>${lease.id}</strong> for Tenant <strong>${lease.tenantName}</strong>? Unit <strong>${lease.unitCode}</strong> will be reverted to VACANT.`,
+        () => {
+          lease.status = 'Expired';
+          const unit = AppState.units.find(u => u.id === lease.unitId);
+          if (unit) unit.status = 'VACANT';
+          renderLeasesTable();
+          renderUnitsTable();
+          populateTenantDropdowns();
+          showToast(`✓ Lease ${leaseId} terminated. Unit ${lease.unitCode} marked VACANT.`);
+        },
+        'Lease Termination Warning',
+        'Terminate Lease',
+        true
+      );
     }
 
     // 2. METERING ENGINE
@@ -1564,27 +2159,36 @@ const AppState = {
       const tariff = parseFloat(document.getElementById('meter-tariff-rate').value) || 150;
       const consumption = Math.max(0, curr - prev);
       const total = consumption * tariff;
+      const meterType = document.getElementById('meter-type-select').value;
+      const readingDate = document.getElementById('meter-reading-date').value;
 
-      const newReading = {
-        id: `UTR-${String(AppState.utilityReadings.length + 1).padStart(3, '0')}`,
-        unitId: unit.id,
-        unitCode: unit.code,
-        propertyName: unit.propertyName,
-        meterType: document.getElementById('meter-type-select').value,
-        readingDate: document.getElementById('meter-reading-date').value,
-        previousReading: prev,
-        currentReading: curr,
-        consumption: consumption,
-        tariffRate: tariff,
-        totalAmount: total,
-        billedStatus: false
-      };
+      confirmAction(
+        `Are you sure you want to record this ${meterType} meter reading (${consumption.toFixed(2)} units / KES ${total.toLocaleString()}) for Unit <strong>${unit.code}</strong> (${unit.propertyName})?`,
+        () => {
+          const newReading = {
+            id: `UTR-${String(AppState.utilityReadings.length + 1).padStart(3, '0')}`,
+            unitId: unit.id,
+            unitCode: unit.code,
+            propertyName: unit.propertyName,
+            meterType: meterType,
+            readingDate: readingDate,
+            previousReading: prev,
+            currentReading: curr,
+            consumption: consumption,
+            tariffRate: tariff,
+            totalAmount: total,
+            billedStatus: false
+          };
 
-      AppState.utilityReadings.unshift(newReading);
-      renderReadingsTable();
-      e.target.reset();
-      handleMeterUnitSelect(unit.id);
-      showToast(`Utility reading logged: ${consumption} m³ for Unit ${unit.code} (KES ${total.toLocaleString()})`);
+          AppState.utilityReadings.unshift(newReading);
+          renderReadingsTable();
+          e.target.reset();
+          handleMeterUnitSelect(unit.id);
+          showToast(`✓ Utility reading logged: ${consumption.toFixed(2)} units for Unit ${unit.code} (KES ${total.toLocaleString()})`);
+        },
+        'Utility Reading Confirmation',
+        'Commit Reading'
+      );
     }
 
     function renderReadingsTable() {
@@ -1638,74 +2242,82 @@ const AppState = {
         return;
       }
 
-      let generatedCount = 0;
-      eligibleLeases.forEach(lease => {
-        // Check if invoice already exists for this lease and period
-        const exists = AppState.invoices.some(inv => inv.leaseId === lease.id && inv.periodMonth === month && inv.periodYear === year);
-        if (exists) return;
+      const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        // Calculate unbilled utility readings
-        const unbilledReadings = AppState.utilityReadings.filter(r => r.unitId === lease.unitId && !r.billedStatus);
-        const utilitiesTotal = unbilledReadings.reduce((sum, r) => sum + r.totalAmount, 0);
+      confirmAction(
+        `Are you sure you want to execute the Monthly Billing Run for <strong>${monthNames[month]} ${year}</strong> across <strong>${eligibleLeases.length}</strong> active lease(s)? This will commit new invoice debits to the tenant ledger.`,
+        () => {
+          let generatedCount = 0;
+          eligibleLeases.forEach(lease => {
+            // Check if invoice already exists for this lease and period
+            const exists = AppState.invoices.some(inv => inv.leaseId === lease.id && inv.periodMonth === month && inv.periodYear === year);
+            if (exists) return;
 
-        // Mark readings as billed
-        unbilledReadings.forEach(r => r.billedStatus = true);
+            // Calculate unbilled utility readings
+            const unbilledReadings = AppState.utilityReadings.filter(r => r.unitId === lease.unitId && !r.billedStatus);
+            const utilitiesTotal = unbilledReadings.reduce((sum, r) => sum + r.totalAmount, 0);
 
-        // Calculate arrears from ledger
-        const tenantLedger = AppState.ledger.filter(l => l.tenantId === lease.tenantId);
-        const totalDebits = tenantLedger.reduce((sum, l) => sum + l.debit, 0);
-        const totalCredits = tenantLedger.reduce((sum, l) => sum + l.credit, 0);
-        const arrears = Math.max(0, totalDebits - totalCredits);
+            // Mark readings as billed
+            unbilledReadings.forEach(r => r.billedStatus = true);
 
-        const totalDue = lease.rentAmount + lease.serviceCharge + utilitiesTotal + arrears;
-        const invNum = `INV-${year}-${String(month).padStart(2, '0')}-${String(AppState.invoices.length + 1).padStart(3, '0')}`;
+            // Calculate arrears from ledger
+            const tenantLedger = AppState.ledger.filter(l => l.tenantId === lease.tenantId);
+            const totalDebits = tenantLedger.reduce((sum, l) => sum + l.debit, 0);
+            const totalCredits = tenantLedger.reduce((sum, l) => sum + l.credit, 0);
+            const arrears = Math.max(0, totalDebits - totalCredits);
 
-        const invoice = {
-          id: invNum,
-          leaseId: lease.id,
-          invoiceNumber: invNum,
-          tenantId: lease.tenantId,
-          tenantName: lease.tenantName,
-          unitCode: lease.unitCode,
-          propertyName: lease.propertyName,
-          periodMonth: month,
-          periodYear: year,
-          rent: lease.rentAmount,
-          serviceCharge: lease.serviceCharge,
-          utilities: utilitiesTotal,
-          arrears: arrears,
-          totalAmount: totalDue,
-          dueDate: dueDate,
-          status: 'Unpaid'
-        };
+            const totalDue = lease.rentAmount + lease.serviceCharge + utilitiesTotal + arrears;
+            const invNum = `INV-${year}-${String(month).padStart(2, '0')}-${String(AppState.invoices.length + 1).padStart(3, '0')}`;
 
-        AppState.invoices.unshift(invoice);
+            const invoice = {
+              id: invNum,
+              leaseId: lease.id,
+              invoiceNumber: invNum,
+              tenantId: lease.tenantId,
+              tenantName: lease.tenantName,
+              unitCode: lease.unitCode,
+              propertyName: lease.propertyName,
+              periodMonth: month,
+              periodYear: year,
+              rent: lease.rentAmount,
+              serviceCharge: lease.serviceCharge,
+              utilities: utilitiesTotal,
+              arrears: arrears,
+              totalAmount: totalDue,
+              dueDate: dueDate,
+              status: 'Unpaid'
+            };
 
-        // Post debit to ledger
-        const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const runningBal = arrears + totalDue;
-        AppState.ledger.push({
-          id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
-          timestamp: `${year}-${String(month).padStart(2, '0')}-01 08:00`,
-          refNo: invNum,
-          tenantId: lease.tenantId,
-          tenantName: lease.tenantName,
-          unitCode: lease.unitCode,
-          leaseId: lease.id,
-          type: 'Invoice',
-          description: `${monthNames[month]} ${year} Rent (KES ${lease.rentAmount.toLocaleString()}), SC (KES ${lease.serviceCharge.toLocaleString()})${utilitiesTotal > 0 ? `, Water (KES ${utilitiesTotal.toLocaleString()})` : ''}`,
-          debit: totalDue,
-          credit: 0,
-          balanceAfter: runningBal
-        });
+            AppState.invoices.unshift(invoice);
 
-        generatedCount++;
-      });
+            // Post debit to ledger
+            const runningBal = arrears + totalDue;
+            AppState.ledger.push({
+              id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+              timestamp: `${year}-${String(month).padStart(2, '0')}-01 08:00`,
+              refNo: invNum,
+              tenantId: lease.tenantId,
+              tenantName: lease.tenantName,
+              unitCode: lease.unitCode,
+              leaseId: lease.id,
+              type: 'Invoice',
+              description: `${monthNames[month]} ${year} Rent (KES ${lease.rentAmount.toLocaleString()}), SC (KES ${lease.serviceCharge.toLocaleString()})${utilitiesTotal > 0 ? `, Water (KES ${utilitiesTotal.toLocaleString()})` : ''}`,
+              debit: totalDue,
+              credit: 0,
+              balanceAfter: runningBal
+            });
 
-      renderInvoicesTable();
-      renderReadingsTable();
-      renderLedgerTable();
-      showToast(`Monthly Billing Run complete. Generated ${generatedCount} invoices.`);
+            generatedCount++;
+          });
+
+          renderInvoicesTable();
+          renderReadingsTable();
+          renderLedgerTable();
+          showToast(`✓ Monthly Billing Run complete. Generated ${generatedCount} invoices.`);
+        },
+        'Batch Invoicing Run Warning',
+        'Execute Billing Run'
+      );
     }
 
     function renderInvoicesTable() {
@@ -1872,54 +2484,60 @@ const AppState = {
       const tenant = AppState.tenants.find(t => t.id === tenantId);
       const lease = AppState.leases.find(l => l.id === leaseId);
 
-      // Add Credit entry to ledger
-      const channelLabels = {
-        MPESA_C2B: 'Safaricom Daraja M-Pesa C2B Paybill',
-        BANK_DEPOSIT: 'Direct Bank Deposit',
-        RTGS: 'RTGS Electronic Wire',
-        CHEQUE: "Banker's Cheque"
-      };
+      confirmAction(
+        `Are you sure you want to post payment receipt <strong>[${refNo}]</strong> of <strong>KES ${amount.toLocaleString()}</strong> for Tenant <strong>${tenant.name}</strong> to the general ledger?`,
+        () => {
+          const channelLabels = {
+            MPESA_C2B: 'Safaricom Daraja M-Pesa C2B Paybill',
+            BANK_DEPOSIT: 'Direct Bank Deposit',
+            RTGS: 'RTGS Electronic Wire',
+            CHEQUE: "Banker's Cheque"
+          };
 
-      AppState.ledger.push({
-        id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
-        timestamp: datetime.replace('T', ' '),
-        refNo: refNo,
-        tenantId: tenant.id,
-        tenantName: tenant.name,
-        unitCode: lease ? lease.unitCode : '—',
-        leaseId: lease ? lease.id : null,
-        type: 'Payment',
-        description: `${channelLabels[channel] || channel} — ${notes}`,
-        debit: 0,
-        credit: amount,
-        balanceAfter: 0
-      });
+          AppState.ledger.push({
+            id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+            timestamp: datetime.replace('T', ' '),
+            refNo: refNo,
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            unitCode: lease ? lease.unitCode : '—',
+            leaseId: lease ? lease.id : null,
+            type: 'Payment',
+            description: `${channelLabels[channel] || channel} — ${notes}`,
+            debit: 0,
+            credit: amount,
+            balanceAfter: 0
+          });
 
-      // Auto-reconcile invoices
-      let remainingCredit = amount;
-      let targetInvoices = [];
-      if (invTarget !== 'AUTO') {
-        const singleInv = AppState.invoices.find(i => i.id === invTarget);
-        if (singleInv) targetInvoices.push(singleInv);
-      } else {
-        targetInvoices = AppState.invoices.filter(i => i.tenantId === tenantId && i.status !== 'Paid');
-      }
+          // Auto-reconcile invoices
+          let remainingCredit = amount;
+          let targetInvoices = [];
+          if (invTarget !== 'AUTO') {
+            const singleInv = AppState.invoices.find(i => i.id === invTarget);
+            if (singleInv) targetInvoices.push(singleInv);
+          } else {
+            targetInvoices = AppState.invoices.filter(i => i.tenantId === tenantId && i.status !== 'Paid');
+          }
 
-      targetInvoices.forEach(inv => {
-        if (remainingCredit <= 0) return;
-        if (remainingCredit >= inv.totalAmount) {
-          inv.status = 'Paid';
-          remainingCredit -= inv.totalAmount;
-        } else {
-          inv.status = 'Partial';
-          remainingCredit = 0;
-        }
-      });
+          targetInvoices.forEach(inv => {
+            if (remainingCredit <= 0) return;
+            if (remainingCredit >= inv.totalAmount) {
+              inv.status = 'Paid';
+              remainingCredit -= inv.totalAmount;
+            } else {
+              inv.status = 'Partial';
+              remainingCredit = 0;
+            }
+          });
 
-      closeReceiptModal();
-      renderLedgerTable();
-      renderInvoicesTable();
-      showToast(`Receipt ${refNo} (KES ${amount.toLocaleString()}) posted & reconciled.`);
+          closeReceiptModal();
+          renderLedgerTable();
+          renderInvoicesTable();
+          showToast(`✓ Receipt ${refNo} (KES ${amount.toLocaleString()}) posted & reconciled.`);
+        },
+        'Financial Receipting Confirmation',
+        'Post Receipt to Ledger'
+      );
     }
 
     /* SUB-MODULE 1.3: LANDLORDS LOGIC & INTERACTION ENGINES */
@@ -2059,38 +2677,45 @@ const AppState = {
       const net = parseFloat(document.getElementById('stmt-net-payable').value) || 0;
       const status = document.getElementById('stmt-initial-status').value || 'Approved';
 
-      const remitDetails = landlord.remitMethod === 'BANK'
-        ? `${landlord.bank} • ${landlord.branch} • Acc: ${landlord.accNo}`
-        : `M-Pesa B2C Mobile • ${landlord.phone}`;
-
       const stmtId = `STM-${year}-${String(month).padStart(2, '0')}-${String(AppState.landlordStatements.length + 1).padStart(3, '0')}`;
 
-      const newStatement = {
-        id: stmtId,
-        landlordId: landlord.id,
-        landlordName: landlord.name,
-        propertyId: property.id,
-        propertyName: property.name,
-        periodMonth: month,
-        periodYear: year,
-        grossRent: gross,
-        commPct: feePct,
-        commAmount: comm,
-        vatAmount: vat,
-        maintenance: maint,
-        mriTax: mri,
-        netPayable: net,
-        status: status,
-        remitMethod: landlord.remitMethod === 'BANK' ? `Bank Transfer (${landlord.bank})` : 'M-Pesa B2C',
-        remitDetails: remitDetails,
-        payoutRef: null,
-        payoutDate: null
-      };
+      confirmAction(
+        `Are you sure you want to generate Landlord Remittance Statement <strong>${stmtId}</strong> for <strong>${landlord.name}</strong> on <strong>${property.name}</strong> (Gross: KES ${gross.toLocaleString()}, Net: <strong>KES ${net.toLocaleString()}</strong>)?`,
+        () => {
+          const remitDetails = landlord.remitMethod === 'BANK'
+            ? `${landlord.bank} • ${landlord.branch} • Acc: ${landlord.accNo}`
+            : `M-Pesa B2C Mobile • ${landlord.phone}`;
 
-      AppState.landlordStatements.unshift(newStatement);
-      renderLandlordStatementsTable();
-      renderLandlordPayoutQueueTable();
-      showToast(`Statement ${stmtId} generated for ${landlord.name} (Net: KES ${net.toLocaleString()})`);
+          const newStatement = {
+            id: stmtId,
+            landlordId: landlord.id,
+            landlordName: landlord.name,
+            propertyId: property.id,
+            propertyName: property.name,
+            periodMonth: month,
+            periodYear: year,
+            grossRent: gross,
+            commPct: feePct,
+            commAmount: comm,
+            vatAmount: vat,
+            maintenance: maint,
+            mriTax: mri,
+            netPayable: net,
+            status: status,
+            remitMethod: landlord.remitMethod === 'BANK' ? `Bank Transfer (${landlord.bank})` : 'M-Pesa B2C',
+            remitDetails: remitDetails,
+            payoutRef: null,
+            payoutDate: null
+          };
+
+          AppState.landlordStatements.unshift(newStatement);
+          renderLandlordStatementsTable();
+          renderLandlordPayoutQueueTable();
+          showToast(`✓ Statement ${stmtId} generated for ${landlord.name} (Net: KES ${net.toLocaleString()})`);
+        },
+        'Statement Generation Confirmation',
+        'Generate Statement'
+      );
     }
 
     function renderLandlordPortfolioTable() {
@@ -2287,25 +2912,33 @@ const AppState = {
       const date = document.getElementById('payout-date-input').value || new Date().toISOString().slice(0, 10);
       const notes = document.getElementById('payout-notes-input').value || 'Landlord remittance disbursed';
 
-      statement.status = 'Paid';
-      statement.payoutRef = refNo;
-      statement.payoutDate = date;
+      confirmAction(
+        `Are you sure you want to authorize and disburse <strong>KES ${statement.netPayable.toLocaleString()}</strong> to Landlord <strong>${statement.landlordName}</strong> via ${method} (Ref: <code>${refNo}</code>)?`,
+        () => {
+          statement.status = 'Paid';
+          statement.payoutRef = refNo;
+          statement.payoutDate = date;
 
-      AppState.landlordPayouts.push({
-        id: `PAY-${String(AppState.landlordPayouts.length + 1).padStart(3, '0')}`,
-        statementId: statement.id,
-        landlordName: statement.landlordName,
-        method: method,
-        refNo: refNo,
-        amount: statement.netPayable,
-        date: date,
-        notes: notes
-      });
+          AppState.landlordPayouts.push({
+            id: `PAY-${String(AppState.landlordPayouts.length + 1).padStart(3, '0')}`,
+            statementId: statement.id,
+            landlordName: statement.landlordName,
+            method: method,
+            refNo: refNo,
+            amount: statement.netPayable,
+            date: date,
+            notes: notes
+          });
 
-      closeLandlordPayoutModal();
-      renderLandlordStatementsTable();
-      renderLandlordPayoutQueueTable();
-      showToast(`Payout recorded: KES ${statement.netPayable.toLocaleString()} disbursed to ${statement.landlordName} (Ref: ${refNo})`);
+          closeLandlordPayoutModal();
+          renderLandlordStatementsTable();
+          renderLandlordPayoutQueueTable();
+          showToast(`✓ Payout recorded: KES ${statement.netPayable.toLocaleString()} disbursed to ${statement.landlordName} (Ref: ${refNo})`);
+        },
+        'Disbursement Authorization Warning',
+        'Authorize & Disburse Payout',
+        true
+      );
     }
 
     /* SUB-MODULE 1.4: REPAIRS & MAINTENANCE LOGIC & ENGINES */
@@ -2451,32 +3084,39 @@ const AppState = {
       const reportedBy = document.getElementById('ticket-reported-by-select').value;
       const description = document.getElementById('ticket-desc-input').value.trim();
 
-      const newId = `REQ-2026-${String(AppState.maintenanceRequests.length + 1).padStart(3, '0')}`;
-      const ticketNum = `TKT-2026-${String(AppState.maintenanceRequests.length + 1).padStart(3, '0')}`;
-      const now = new Date();
-      const createdAt = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      confirmAction(
+        `Are you sure you want to log Maintenance Incident Ticket for Property <strong>${property ? property.name : 'Unknown Property'}</strong> (${unit ? `Unit ${unit.code}` : 'Common Area'}) under <strong>${priority}</strong> priority?`,
+        () => {
+          const newId = `REQ-2026-${String(AppState.maintenanceRequests.length + 1).padStart(3, '0')}`;
+          const ticketNum = `TKT-2026-${String(AppState.maintenanceRequests.length + 1).padStart(3, '0')}`;
+          const now = new Date();
+          const createdAt = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-      AppState.maintenanceRequests.unshift({
-        id: newId,
-        ticketNumber: ticketNum,
-        propertyId: propId,
-        propertyName: property ? property.name : 'Unknown Property',
-        unitId: unitId,
-        unitCode: unit ? unit.code : 'Common Area',
-        tenantId: tenantId,
-        tenantName: tenant ? tenant.name : (unitId ? 'Vacant Turnaround' : 'Estate Common Area'),
-        category: category,
-        priority: priority,
-        reportedBy: reportedBy,
-        description: description,
-        status: 'Reported',
-        createdAt: createdAt
-      });
+          AppState.maintenanceRequests.unshift({
+            id: newId,
+            ticketNumber: ticketNum,
+            propertyId: propId,
+            propertyName: property ? property.name : 'Unknown Property',
+            unitId: unitId,
+            unitCode: unit ? unit.code : 'Common Area',
+            tenantId: tenantId,
+            tenantName: tenant ? tenant.name : (unitId ? 'Vacant Turnaround' : 'Estate Common Area'),
+            category: category,
+            priority: priority,
+            reportedBy: reportedBy,
+            description: description,
+            status: 'Reported',
+            createdAt: createdAt
+          });
 
-      document.getElementById('form-maintenance-ticket').reset();
-      populateRepairDropdowns();
-      renderMaintenanceTicketsTable();
-      showToast(`Incident ticket ${ticketNum} logged under priority: ${priority}`);
+          document.getElementById('form-maintenance-ticket').reset();
+          populateRepairDropdowns();
+          renderMaintenanceTicketsTable();
+          showToast(`✓ Incident ticket ${ticketNum} logged under priority: ${priority}`);
+        },
+        'Maintenance Ticket Confirmation',
+        'Log Incident Ticket'
+      );
     }
 
     function convertTicketToLpo(ticketId) {
@@ -2518,68 +3158,77 @@ const AppState = {
       const approvedBy = document.getElementById('wo-approved-by-input').value;
       const scope = document.getElementById('wo-scope-input').value.trim();
 
-      // Determine Target Account & Financial Accounting Impact
-      let targetAccount = 'Common Reserve Pool';
-      let accountingImpact = 'Absorbed into Common Service Charge Pool';
-
-      if (allocation === 'Landlord Deductible') {
-        const mandate = AppState.mandates.find(m => m.propertyName === (property ? property.name : ''));
-        targetAccount = mandate ? mandate.landlordName : 'Property Landlord';
-        accountingImpact = `Deducted from ${targetAccount} Monthly Remittance Statement`;
-
-        // Update landlord statement maintenance deduction if statement exists
-        const stmt = AppState.landlordStatements.find(s => s.propertyName === (property ? property.name : ''));
-        if (stmt) {
-          stmt.maintenance += actCost;
-          stmt.netPayable = Math.max(0, stmt.grossRent - stmt.commAmount - stmt.vatAmount - stmt.maintenance - stmt.mriTax);
-          renderLandlordStatementsTable();
-        }
-      } else if (allocation === 'Tenant Damage Recovery') {
-        const lease = unitId ? AppState.leases.find(l => l.unitId === unitId && l.status === 'Active') : null;
-        targetAccount = lease ? lease.tenantName : (ticket ? ticket.tenantName : 'Occupant Tenant');
-        accountingImpact = `Billed to Tenant Debit Ledger / Invoice Surcharge`;
-      } else {
-        targetAccount = `${property ? property.name : 'Estate'} SC Reserve Pool`;
-        accountingImpact = `Absorbed into Common Area Expense Pool`;
-      }
-
       const lpoNum = `LPO-2026-${String(AppState.maintenanceWorkOrders.length + 1).padStart(3, '0')}`;
-      const issuedDate = new Date().toISOString().slice(0, 10);
 
-      // Update ticket status if linked
-      if (ticket) {
-        ticket.status = (status === 'Fulfilled') ? 'Completed' : 'In_Progress';
-      }
+      confirmAction(
+        `Are you sure you want to authorize and issue Local Purchase Order <strong>[${lpoNum}]</strong> for <strong>KES ${actCost.toLocaleString()}</strong> to Contractor <strong>${vendor ? vendor.name : 'Contractor'}</strong> (${allocation})?`,
+        () => {
+          // Determine Target Account & Financial Accounting Impact
+          let targetAccount = 'Common Reserve Pool';
+          let accountingImpact = 'Absorbed into Common Service Charge Pool';
 
-      AppState.maintenanceWorkOrders.unshift({
-        id: lpoNum,
-        lpoNumber: lpoNum,
-        ticketId: ticketId,
-        ticketNumber: ticket ? ticket.ticketNumber : 'Direct Work Order',
-        vendorId: vendorId,
-        vendorName: vendor ? vendor.name : 'Contractor',
-        propertyId: propId,
-        propertyName: property ? property.name : 'Property',
-        unitId: unitId,
-        unitCode: unit ? unit.code : 'Common Area',
-        scopeOfWork: scope,
-        estimatedCost: estCost,
-        actualCost: actCost,
-        costAllocation: allocation,
-        approvalStatus: status,
-        approvedBy: approvedBy,
-        issuedDate: issuedDate,
-        completionDate: (status === 'Fulfilled') ? issuedDate : null,
-        targetAccount: targetAccount,
-        accountingImpact: accountingImpact
-      });
+          if (allocation === 'Landlord Deductible') {
+            const mandate = AppState.mandates.find(m => m.propertyName === (property ? property.name : ''));
+            targetAccount = mandate ? mandate.landlordName : 'Property Landlord';
+            accountingImpact = `Deducted from ${targetAccount} Monthly Remittance Statement`;
 
-      document.getElementById('form-work-order').reset();
-      populateWoTicketDropdown();
-      renderWorkOrdersTable();
-      renderMaintenanceTicketsTable();
-      renderCostAllocationLedger();
-      showToast(`Work Order & LPO ${lpoNum} authorized (KES ${actCost.toLocaleString()})`);
+            // Update landlord statement maintenance deduction if statement exists
+            const stmt = AppState.landlordStatements.find(s => s.propertyName === (property ? property.name : ''));
+            if (stmt) {
+              stmt.maintenance += actCost;
+              stmt.netPayable = Math.max(0, stmt.grossRent - stmt.commAmount - stmt.vatAmount - stmt.maintenance - stmt.mriTax);
+              renderLandlordStatementsTable();
+            }
+          } else if (allocation === 'Tenant Damage Recovery') {
+            const lease = unitId ? AppState.leases.find(l => l.unitId === unitId && l.status === 'Active') : null;
+            targetAccount = lease ? lease.tenantName : (ticket ? ticket.tenantName : 'Occupant Tenant');
+            accountingImpact = `Billed to Tenant Debit Ledger / Invoice Surcharge`;
+          } else {
+            targetAccount = `${property ? property.name : 'Estate'} SC Reserve Pool`;
+            accountingImpact = `Absorbed into Common Area Expense Pool`;
+          }
+
+          const issuedDate = new Date().toISOString().slice(0, 10);
+
+          // Update ticket status if linked
+          if (ticket) {
+            ticket.status = (status === 'Fulfilled') ? 'Completed' : 'In_Progress';
+          }
+
+          AppState.maintenanceWorkOrders.unshift({
+            id: lpoNum,
+            lpoNumber: lpoNum,
+            ticketId: ticketId,
+            ticketNumber: ticket ? ticket.ticketNumber : 'Direct Work Order',
+            vendorId: vendorId,
+            vendorName: vendor ? vendor.name : 'Contractor',
+            propertyId: propId,
+            propertyName: property ? property.name : 'Property',
+            unitId: unitId,
+            unitCode: unit ? unit.code : 'Common Area',
+            scopeOfWork: scope,
+            estimatedCost: estCost,
+            actualCost: actCost,
+            costAllocation: allocation,
+            approvalStatus: status,
+            approvedBy: approvedBy,
+            issuedDate: issuedDate,
+            completionDate: (status === 'Fulfilled') ? issuedDate : null,
+            targetAccount: targetAccount,
+            accountingImpact: accountingImpact
+          });
+
+          document.getElementById('form-work-order').reset();
+          populateWoTicketDropdown();
+          renderWorkOrdersTable();
+          renderMaintenanceTicketsTable();
+          renderCostAllocationLedger();
+          showToast(`✓ Work Order & LPO ${lpoNum} authorized (KES ${actCost.toLocaleString()})`);
+        },
+        'LPO Issuance & Financial Commitment Warning',
+        'Issue & Authorize LPO',
+        true
+      );
     }
 
     function handleVendorSubmit(e) {
@@ -2592,24 +3241,31 @@ const AppState = {
       const pin = document.getElementById('vendor-pin-input').value.trim() || '—';
       const payment = document.getElementById('vendor-payment-input').value.trim() || 'Pending Account Verification';
 
-      const vendorId = `VND-${String(AppState.vendors.length + 1).padStart(3, '0')}`;
+      confirmAction(
+        `Are you sure you want to register and approve Contractor <strong>${name}</strong> (${trade}) in the vendor directory?`,
+        () => {
+          const vendorId = `VND-${String(AppState.vendors.length + 1).padStart(3, '0')}`;
 
-      AppState.vendors.push({
-        id: vendorId,
-        name: name,
-        tradeCategory: trade,
-        contactPerson: contact,
-        phone: phone,
-        email: email,
-        kraPin: pin,
-        paymentDetails: payment,
-        isActive: true
-      });
+          AppState.vendors.push({
+            id: vendorId,
+            name: name,
+            tradeCategory: trade,
+            contactPerson: contact,
+            phone: phone,
+            email: email,
+            kraPin: pin,
+            paymentDetails: payment,
+            isActive: true
+          });
 
-      document.getElementById('form-vendor-reg').reset();
-      populateWoVendorDropdown();
-      renderVendorsTable();
-      showToast(`Vendor ${name} registered in trade: ${trade}`);
+          document.getElementById('form-vendor-reg').reset();
+          populateWoVendorDropdown();
+          renderVendorsTable();
+          showToast(`✓ Vendor ${name} registered in trade: ${trade}`);
+        },
+        'Contractor Registration Confirmation',
+        'Register Contractor'
+      );
     }
 
     function toggleVendorStatus(vendorId) {
