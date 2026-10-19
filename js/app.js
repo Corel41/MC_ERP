@@ -1,5 +1,16 @@
+const SUPABASE_CONFIG = {
+  url: 'https://uwkqihhvkegiadelowft.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3a3FpaGh2a2VnaWFkZWxvd2Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzNjM2MTEsImV4cCI6MjEwNzkzOTYxMX0.dfhqF7xAi5_a-wDnZgRCtAimE52dNoWzb-3WuYpGtj8'
+};
+
+function getActiveOrgId() {
+  const current = (typeof AppState !== 'undefined' && AppState.organizationId) || '';
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(current);
+  return isUuid ? current : '00000000-0000-0000-0000-000000000001';
+}
+
 const AppState = {
-      organizationId: "org-metrocosmo-001",
+      organizationId: "00000000-0000-0000-0000-000000000001",
       theme: 'flowly',
       sidebarCollapsed: false,
       activeView: 'estate-reg',
@@ -4626,9 +4637,84 @@ const AppState = {
     }
 
     /* ==========================================================================
-       08. ADMIN — COMPANY INFORMATION & SETUP (image_713764.png)
+       08. ADMIN — COMPANY INFORMATION PERSISTENCE & SUPABASE PROFILE
        ========================================================================== */
-    function initAdminCompanySetup() {
+    async function loadAdminCompanyProfile() {
+      // 1. Instant hydration from localStorage for zero latency
+      try {
+        const cached = localStorage.getItem('mc_erp_company_profile');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && (parsed.companyName || parsed.company_name)) {
+            AppState.companyProfile = {
+              companyName: parsed.companyName || parsed.company_name || 'METROCOSMO LTD - THIKA',
+              slogan: parsed.slogan || '',
+              address1: parsed.address1 || '',
+              address2: parsed.address2 || '',
+              postalCode: parsed.postalCode || parsed.postal_code || '',
+              cityTown: parsed.cityTown || parsed.city_town || '',
+              phone: parsed.phone || '',
+              nhifNo: parsed.nhifNo || parsed.nhif_no || '',
+              nssfNo: parsed.nssfNo || parsed.nssf_no || '',
+              pinNo: parsed.pinNo || parsed.pin_no || '',
+              email: parsed.email || '',
+              logoUrl: parsed.logoUrl || parsed.logo_url || '',
+              tempLogoBase64: parsed.tempLogoBase64 || parsed.logoUrl || parsed.logo_url || null
+            };
+            populateCompanyProfileUI();
+          }
+        }
+      } catch (err) {
+        console.warn('localStorage profile hydration warning:', err);
+      }
+
+      // 2. Fetch live profile record from Supabase company_profile table
+      try {
+        const orgId = getActiveOrgId();
+        const url = `${SUPABASE_CONFIG.url}/rest/v1/company_profile?organization_id=eq.${orgId}&select=*`;
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_CONFIG.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            const row = data[0];
+            AppState.companyProfile = {
+              companyName: row.company_name || 'METROCOSMO LTD - THIKA',
+              slogan: row.slogan || '',
+              address1: row.address1 || '',
+              address2: row.address2 || '',
+              postalCode: row.postal_code || '',
+              cityTown: row.city_town || '',
+              phone: row.phone || '',
+              nhifNo: row.nhif_no || '',
+              nssfNo: row.nssf_no || '',
+              pinNo: row.pin_no || '',
+              email: row.email || '',
+              logoUrl: row.logo_url || '',
+              tempLogoBase64: row.logo_url || null
+            };
+
+            try {
+              localStorage.setItem('mc_erp_company_profile', JSON.stringify(AppState.companyProfile));
+            } catch (e) {
+              console.warn('Failed to cache company profile:', e);
+            }
+
+            populateCompanyProfileUI();
+          }
+        }
+      } catch (dbErr) {
+        console.warn('Supabase profile live load warning:', dbErr);
+      }
+    }
+
+    function populateCompanyProfileUI() {
       const cp = AppState.companyProfile;
       if (!cp) return;
 
@@ -4661,6 +4747,12 @@ const AppState = {
         if (logoImg) logoImg.style.display = 'none';
         if (logoHolder) logoHolder.style.display = 'block';
       }
+
+      // Update executive user badge in sidebar footer
+      const userFullname = document.querySelector('.user-fullname');
+      if (userFullname && cp.companyName) {
+        userFullname.textContent = cp.companyName.split(' - ')[0] || cp.companyName;
+      }
     }
 
     function handleCompanyLogoPreview(event) {
@@ -4671,6 +4763,7 @@ const AppState = {
       reader.onload = function(e) {
         const result = e.target.result;
         AppState.companyProfile.tempLogoBase64 = result;
+        AppState.companyProfile.logoUrl = result;
         const logoImg = document.getElementById('company-logo-preview');
         const logoHolder = document.getElementById('company-logo-placeholder');
         if (logoImg) {
@@ -4680,12 +4773,12 @@ const AppState = {
         if (logoHolder) {
           logoHolder.style.display = 'none';
         }
-        showToast('✓ Logo preview loaded');
+        showToast('✓ Logo preview loaded (ready to save)');
       };
       reader.readAsDataURL(file);
     }
 
-    function handleCompanyProfileSubmit(e) {
+    function saveAdminCompanyProfile(e) {
       if (e) e.preventDefault();
 
       const getVal = (id) => (document.getElementById(id)?.value || '').trim();
@@ -4700,7 +4793,7 @@ const AppState = {
       const cNssf = getVal('company-nssf');
       const cPin = getVal('company-pin');
       const cEmail = getVal('company-email');
-      const logoData = AppState.companyProfile.tempLogoBase64 || AppState.companyProfile.logoUrl || '';
+      const persistentLogo = AppState.companyProfile.tempLogoBase64 || AppState.companyProfile.logoUrl || '';
 
       if (!cName) {
         showToast('⚠ Company Name is required');
@@ -4709,8 +4802,9 @@ const AppState = {
 
       confirmAction(
         `Are you sure you want to commit and save the Company Profile for <strong>${cName}</strong> to the central enterprise database?`,
-        () => {
-          AppState.companyProfile = {
+        async () => {
+          const orgId = getActiveOrgId();
+          const updatedProfile = {
             companyName: cName,
             slogan: cSlogan,
             address1: cAddr1,
@@ -4722,30 +4816,84 @@ const AppState = {
             nssfNo: cNssf,
             pinNo: cPin,
             email: cEmail,
-            logoUrl: logoData,
-            tempLogoBase64: logoData
+            logoUrl: persistentLogo,
+            tempLogoBase64: persistentLogo
           };
 
-          // Also update executive user badge or header brand if desired
-          const userFullname = document.querySelector('.user-fullname');
-          if (userFullname && cName) {
-            userFullname.textContent = cName.split(' - ')[0] || cName;
+          // 1. Update in-memory state and localStorage immediately
+          AppState.companyProfile = updatedProfile;
+          try {
+            localStorage.setItem('mc_erp_company_profile', JSON.stringify(updatedProfile));
+          } catch (storageErr) {
+            console.warn('localStorage cache warning:', storageErr);
           }
+          populateCompanyProfileUI();
 
-          showToast(`✓ Company Profile for "${cName}" saved successfully!`);
+          // 2. Perform Supabase UPSERT into company_profile table
+          try {
+            const payload = {
+              organization_id: orgId,
+              company_name: cName,
+              slogan: cSlogan,
+              address1: cAddr1,
+              address2: cAddr2,
+              postal_code: cPostCode,
+              city_town: cCity,
+              phone: cPhone,
+              nhif_no: cNhif,
+              nssf_no: cNssf,
+              pin_no: cPin,
+              email: cEmail,
+              logo_url: persistentLogo,
+              updated_at: new Date().toISOString()
+            };
+
+            const upsertUrl = `${SUPABASE_CONFIG.url}/rest/v1/company_profile?on_conflict=organization_id`;
+            const res = await fetch(upsertUrl, {
+              method: 'POST',
+              headers: {
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates,return=representation'
+              },
+              body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+              const errBody = await res.text();
+              console.error('Supabase UPSERT response status:', res.status, errBody);
+              showToast(`✓ Profile saved locally (Supabase status ${res.status})`);
+              return;
+            }
+
+            const resJson = await res.json();
+            console.log('✓ Successfully persisted company profile to Supabase:', resJson);
+            showToast(`✓ Company Profile for "${cName}" saved & persisted to database!`);
+          } catch (netErr) {
+            console.warn('Supabase UPSERT network warning:', netErr);
+            showToast(`✓ Company Profile for "${cName}" saved locally!`);
+          }
         },
         'Database Execution Warning',
         'Save Profile'
       );
     }
 
-    window.initAdminCompanySetup = initAdminCompanySetup;
+    // Expose handlers globally for dynamic module binding
+    window.loadAdminCompanyProfile = loadAdminCompanyProfile;
+    window.saveAdminCompanyProfile = saveAdminCompanyProfile;
+    window.handleCompanyProfileSubmit = saveAdminCompanyProfile;
+    window.initAdminCompanySetup = loadAdminCompanyProfile;
     window.handleCompanyLogoPreview = handleCompanyLogoPreview;
-    window.handleCompanyProfileSubmit = handleCompanyProfileSubmit;
+    window.populateCompanyProfileUI = populateCompanyProfileUI;
 
     // Initialize Theme and Load Active Module
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'developer';
     setTheme(savedTheme);
+
+    // Initial boot load for Company Profile
+    loadAdminCompanyProfile();
 
     const initialView = AppState.activeView || 'estate-reg';
     const initialNav = document.querySelector(`.nav-item[data-view="${initialView}"]`);
