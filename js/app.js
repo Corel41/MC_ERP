@@ -30,6 +30,45 @@ const AppState = {
         logoUrl: '',
         tempLogoBase64: null
       },
+      activeAdminTab: 'tab-bank-accounts',
+      bankAccounts: [
+        {
+          id: '00000000-0000-0000-0000-000000000010',
+          bank_name: 'PETTY CASH',
+          branch_name: 'PETTY CASH',
+          account_name: 'METRO CASH',
+          account_no: 'CASH001',
+          swift_code: 'PCASH',
+          is_active: true
+        },
+        {
+          id: '00000000-0000-0000-0000-000000000020',
+          bank_name: 'ABSA BANK',
+          branch_name: 'RUIRU',
+          account_name: 'METROCOSMO LIMITED',
+          account_no: '0311121448',
+          swift_code: '',
+          is_active: true
+        }
+      ],
+      mpesaPaybills: [
+        {
+          id: '00000000-0000-0000-0000-000000000030',
+          paybill_number: '522522',
+          business_name: 'METROCOSMO LTD',
+          account_prefix: 'TENANT CODE',
+          bank_account_id: '00000000-0000-0000-0000-000000000020',
+          is_active: true
+        },
+        {
+          id: '00000000-0000-0000-0000-000000000040',
+          paybill_number: '247247',
+          business_name: 'METROCOSMO PROPERTIES',
+          account_prefix: 'UNIT NUMBER',
+          bank_account_id: '00000000-0000-0000-0000-000000000020',
+          is_active: true
+        }
+      ],
       landlords: [
         {
           id: 'LL-01',
@@ -4921,22 +4960,578 @@ const AppState = {
       );
     }
 
+    /* ==========================================================================
+       08. ADMIN — BANK ACCOUNTS & M-PESA PAYBILLS CONFIGURATION
+       ========================================================================== */
+
+    function switchAdminTab(targetTabId) {
+      AppState.activeAdminTab = targetTabId;
+
+      // Update button visual styles
+      const tabBtns = document.querySelectorAll('.admin-subtab-btn');
+      tabBtns.forEach(btn => {
+        if (btn.id === `btn-${targetTabId}` || btn.getAttribute('data-tab') === targetTabId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Update panel visibility
+      const panels = document.querySelectorAll('.admin-tab-panel');
+      panels.forEach(p => {
+        if (p.id === `panel-${targetTabId}`) {
+          p.style.display = 'block';
+        } else {
+          p.style.display = 'none';
+        }
+      });
+
+      // Trigger data binding for the active tab
+      if (targetTabId === 'tab-bank-accounts') {
+        renderBankAccountsTable();
+      } else if (targetTabId === 'tab-mpesa-paybills') {
+        renderMpesaPaybillsTable();
+        populateLinkedBankDropdown();
+      } else if (targetTabId === 'tab-company-info') {
+        populateCompanyProfileUI();
+      }
+    }
+
+    // 1. BANK ACCOUNTS CONTROLLERS
+    async function loadBankAccounts() {
+      // Instant cache rehydration
+      try {
+        const cached = localStorage.getItem('mc_erp_bank_accounts');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            AppState.bankAccounts = parsed;
+            renderBankAccountsTable();
+            populateLinkedBankDropdown();
+          }
+        }
+      } catch (e) {
+        console.warn('localStorage bank accounts warning:', e);
+      }
+
+      // Live Supabase fetch
+      try {
+        const orgId = getActiveOrgId();
+        const url = `${SUPABASE_CONFIG.url}/rest/v1/company_bank_accounts?organization_id=eq.${orgId}&order=created_at.asc`;
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_CONFIG.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            AppState.bankAccounts = data;
+            try {
+              localStorage.setItem('mc_erp_bank_accounts', JSON.stringify(data));
+            } catch (err) {}
+            renderBankAccountsTable();
+            populateLinkedBankDropdown();
+          }
+        }
+      } catch (netErr) {
+        console.warn('Supabase bank accounts fetch warning:', netErr);
+      }
+    }
+
+    function renderBankAccountsTable() {
+      const tbody = document.getElementById('bank-accounts-table-body');
+      if (!tbody) return;
+
+      if (!AppState.bankAccounts || AppState.bankAccounts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="padding: 12px; text-align: center; color: #6B7280; font-style: italic;">No bank accounts configured. Use the form above to add an account.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = AppState.bankAccounts.map(item => `
+        <tr class="pm-table-row">
+          <td style="text-align: center; border-right: 1px solid #CBD5E1;">
+            <button type="button" style="color: #DC2626; font-weight: 700; background: none; border: none; cursor: pointer; font-size: 11.5px; padding: 2px 4px;" onclick="deleteBankAccount('${item.id}')" title="Delete Account">-X-</button>
+          </td>
+          <td style="text-align: center; border-right: 1px solid #CBD5E1;">
+            <button type="button" style="color: #D97706; font-weight: 700; background: none; border: none; cursor: pointer; font-size: 11.5px; padding: 2px 4px;" onclick="editBankAccount('${item.id}')" title="Edit Account">-Edit-</button>
+          </td>
+          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-weight: 600; color: #111827;">${item.bank_name || ''}</td>
+          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; color: #374151;">${item.branch_name || ''}</td>
+          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-weight: 600; color: #111827;">${item.account_name || ''}</td>
+          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-family: monospace; font-weight: 600; color: #1F2937;">${item.account_no || ''}</td>
+          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; color: #4B5563;">${item.swift_code || ''}</td>
+          <td style="text-align: center;">
+            <input type="checkbox" disabled ${item.is_active ? 'checked' : ''} style="accent-color: #008080; cursor: default;">
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function saveBankAccount(event) {
+      if (event) event.preventDefault();
+
+      const bankName = (document.getElementById('bank-name-select')?.value || '').trim();
+      const accName = (document.getElementById('bank-acc-name')?.value || '').trim();
+      const swiftCode = (document.getElementById('bank-swift-code')?.value || '').trim();
+      const branchName = (document.getElementById('bank-branch-name')?.value || '').trim();
+      const accNo = (document.getElementById('bank-acc-no')?.value || '').trim();
+      const isActive = document.getElementById('bank-acc-active') ? document.getElementById('bank-acc-active').checked : true;
+      const editId = (document.getElementById('bank-acc-edit-id')?.value || '').trim();
+
+      if (!bankName) {
+        showToast('⚠ Please select a Bank Name');
+        return;
+      }
+      if (!accName) {
+        showToast('⚠ Account Name is required');
+        return;
+      }
+      if (!accNo) {
+        showToast('⚠ Account Number is required');
+        return;
+      }
+
+      confirmAction(
+        `Are you sure you want to commit and save Bank Account <strong>${accNo} (${bankName})</strong> to the central database?`,
+        async () => {
+          const orgId = getActiveOrgId();
+          const payload = {
+            organization_id: orgId,
+            bank_name: bankName,
+            branch_name: branchName,
+            account_name: accName,
+            account_no: accNo,
+            swift_code: swiftCode,
+            is_active: isActive,
+            updated_at: new Date().toISOString()
+          };
+
+          if (editId) {
+            // Update local memory
+            const idx = AppState.bankAccounts.findIndex(b => b.id === editId);
+            if (idx > -1) {
+              AppState.bankAccounts[idx] = { ...AppState.bankAccounts[idx], ...payload };
+            }
+            try {
+              localStorage.setItem('mc_erp_bank_accounts', JSON.stringify(AppState.bankAccounts));
+            } catch (err) {}
+            renderBankAccountsTable();
+            populateLinkedBankDropdown();
+            resetBankAccountForm();
+
+            // Supabase REST PATCH
+            try {
+              await fetch(`${SUPABASE_CONFIG.url}/rest/v1/company_bank_accounts?id=eq.${editId}`, {
+                method: 'PATCH',
+                headers: {
+                  'apikey': SUPABASE_CONFIG.anonKey,
+                  'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(payload)
+              });
+            } catch (netErr) {
+              console.warn('Supabase PATCH bank account warning:', netErr);
+            }
+            showToast(`✓ Bank Account "${accNo}" updated successfully!`);
+          } else {
+            // Create new record
+            const newId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + String(Date.now()).padStart(12, '0').slice(-12);
+            const record = { id: newId, ...payload, created_at: new Date().toISOString() };
+            AppState.bankAccounts.push(record);
+
+            try {
+              localStorage.setItem('mc_erp_bank_accounts', JSON.stringify(AppState.bankAccounts));
+            } catch (err) {}
+            renderBankAccountsTable();
+            populateLinkedBankDropdown();
+            resetBankAccountForm();
+
+            // Supabase REST POST
+            try {
+              await fetch(`${SUPABASE_CONFIG.url}/rest/v1/company_bank_accounts`, {
+                method: 'POST',
+                headers: {
+                  'apikey': SUPABASE_CONFIG.anonKey,
+                  'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(record)
+              });
+            } catch (netErr) {
+              console.warn('Supabase POST bank account warning:', netErr);
+            }
+            showToast(`✓ Bank Account "${accNo}" saved to central database!`);
+          }
+        },
+        'Bank Account Execution Warning',
+        'Save Account'
+      );
+    }
+
+    function editBankAccount(id) {
+      const item = AppState.bankAccounts.find(b => b.id === id);
+      if (!item) return;
+
+      const setVal = (elemId, val) => {
+        const el = document.getElementById(elemId);
+        if (el) el.value = val !== undefined && val !== null ? val : '';
+      };
+
+      setVal('bank-name-select', item.bank_name);
+      setVal('bank-acc-name', item.account_name);
+      setVal('bank-swift-code', item.swift_code);
+      setVal('bank-branch-name', item.branch_name);
+      setVal('bank-acc-no', item.account_no);
+      setVal('bank-acc-edit-id', item.id);
+
+      const chk = document.getElementById('bank-acc-active');
+      if (chk) chk.checked = item.is_active !== false;
+
+      const saveBtn = document.getElementById('btn-save-bank-acc');
+      if (saveBtn) saveBtn.textContent = 'Update';
+
+      document.getElementById('form-bank-account')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      showToast(`Editing Bank Account ${item.account_no}`);
+    }
+
+    function deleteBankAccount(id) {
+      const item = AppState.bankAccounts.find(b => b.id === id);
+      const label = item ? `${item.account_no} (${item.bank_name})` : 'this account';
+
+      confirmAction(
+        `Are you sure you want to permanently delete Bank Account <strong>${label}</strong> from the database?`,
+        async () => {
+          AppState.bankAccounts = AppState.bankAccounts.filter(b => b.id !== id);
+          try {
+            localStorage.setItem('mc_erp_bank_accounts', JSON.stringify(AppState.bankAccounts));
+          } catch (err) {}
+          renderBankAccountsTable();
+          populateLinkedBankDropdown();
+          resetBankAccountForm();
+
+          try {
+            await fetch(`${SUPABASE_CONFIG.url}/rest/v1/company_bank_accounts?id=eq.${id}`, {
+              method: 'DELETE',
+              headers: {
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+              }
+            });
+          } catch (netErr) {
+            console.warn('Supabase DELETE bank account warning:', netErr);
+          }
+          showToast(`✓ Bank account deleted successfully.`);
+        },
+        'Bank Account Deletion Warning',
+        'Delete Account'
+      );
+    }
+
+    function resetBankAccountForm() {
+      const form = document.getElementById('form-bank-account');
+      if (form) form.reset();
+      const hiddenId = document.getElementById('bank-acc-edit-id');
+      if (hiddenId) hiddenId.value = '';
+      const chk = document.getElementById('bank-acc-active');
+      if (chk) chk.checked = true;
+      const saveBtn = document.getElementById('btn-save-bank-acc');
+      if (saveBtn) saveBtn.textContent = 'Save';
+    }
+
+    // 2. M-PESA PAYBILLS CONTROLLERS
+    async function loadMpesaPaybills() {
+      try {
+        const cached = localStorage.getItem('mc_erp_mpesa_paybills');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            AppState.mpesaPaybills = parsed;
+            renderMpesaPaybillsTable();
+          }
+        }
+      } catch (e) {
+        console.warn('localStorage mpesa paybills warning:', e);
+      }
+
+      try {
+        const orgId = getActiveOrgId();
+        const url = `${SUPABASE_CONFIG.url}/rest/v1/company_mpesa_paybills?organization_id=eq.${orgId}&order=created_at.asc`;
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_CONFIG.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            AppState.mpesaPaybills = data;
+            try {
+              localStorage.setItem('mc_erp_mpesa_paybills', JSON.stringify(data));
+            } catch (err) {}
+            renderMpesaPaybillsTable();
+          }
+        }
+      } catch (netErr) {
+        console.warn('Supabase mpesa paybills fetch warning:', netErr);
+      }
+    }
+
+    function populateLinkedBankDropdown() {
+      const select = document.getElementById('mpesa-linked-bank-select');
+      if (!select) return;
+
+      const currentVal = select.value;
+      select.innerHTML = '<option value="">-Select Linked Bank Account-</option>' + 
+        AppState.bankAccounts.map(b => `
+          <option value="${b.id}">${b.bank_name} • ${b.account_no} (${b.account_name})</option>
+        `).join('');
+
+      if (currentVal) select.value = currentVal;
+    }
+
+    function renderMpesaPaybillsTable() {
+      const tbody = document.getElementById('mpesa-paybills-table-body');
+      if (!tbody) return;
+
+      if (!AppState.mpesaPaybills || AppState.mpesaPaybills.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="padding: 12px; text-align: center; color: #6B7280; font-style: italic;">No M-Pesa paybills configured. Use the form above to add a paybill.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = AppState.mpesaPaybills.map(item => {
+        const linkedBank = AppState.bankAccounts.find(b => b.id === item.bank_account_id);
+        const linkedBankText = linkedBank ? `${linkedBank.bank_name} - ${linkedBank.account_no}` : (item.bank_account_id ? 'Linked' : '— None —');
+
+        return `
+          <tr class="pm-table-row">
+            <td style="text-align: center; border-right: 1px solid #CBD5E1;">
+              <button type="button" style="color: #DC2626; font-weight: 700; background: none; border: none; cursor: pointer; font-size: 11.5px; padding: 2px 4px;" onclick="deleteMpesaPaybill('${item.id}')" title="Delete Paybill">-X-</button>
+            </td>
+            <td style="text-align: center; border-right: 1px solid #CBD5E1;">
+              <button type="button" style="color: #D97706; font-weight: 700; background: none; border: none; cursor: pointer; font-size: 11.5px; padding: 2px 4px;" onclick="editMpesaPaybill('${item.id}')" title="Edit Paybill">-Edit-</button>
+            </td>
+            <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-family: monospace; font-weight: 700; color: #008080;">${item.paybill_number || ''}</td>
+            <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-weight: 600; color: #111827;">${item.business_name || ''}</td>
+            <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; color: #374151;">${item.account_prefix || '—'}</td>
+            <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; color: #4B5563;">${linkedBankText}</td>
+            <td style="text-align: center;">
+              <input type="checkbox" disabled ${item.is_active ? 'checked' : ''} style="accent-color: #008080; cursor: default;">
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function saveMpesaPaybill(event) {
+      if (event) event.preventDefault();
+
+      const paybillNo = (document.getElementById('mpesa-paybill-no')?.value || '').trim();
+      const bizName = (document.getElementById('mpesa-business-name')?.value || '').trim();
+      const accPrefix = (document.getElementById('mpesa-acc-prefix')?.value || '').trim();
+      const linkedBankId = (document.getElementById('mpesa-linked-bank-select')?.value || '').trim() || null;
+      const isActive = document.getElementById('mpesa-active') ? document.getElementById('mpesa-active').checked : true;
+      const editId = (document.getElementById('mpesa-paybill-edit-id')?.value || '').trim();
+
+      if (!paybillNo) {
+        showToast('⚠ Paybill Number is required');
+        return;
+      }
+      if (!bizName) {
+        showToast('⚠ Business Name is required');
+        return;
+      }
+
+      confirmAction(
+        `Are you sure you want to commit and save M-Pesa Paybill <strong>${paybillNo} (${bizName})</strong> to the central database?`,
+        async () => {
+          const orgId = getActiveOrgId();
+          const payload = {
+            organization_id: orgId,
+            paybill_number: paybillNo,
+            business_name: bizName,
+            account_prefix: accPrefix,
+            bank_account_id: linkedBankId,
+            is_active: isActive,
+            updated_at: new Date().toISOString()
+          };
+
+          if (editId) {
+            const idx = AppState.mpesaPaybills.findIndex(m => m.id === editId);
+            if (idx > -1) {
+              AppState.mpesaPaybills[idx] = { ...AppState.mpesaPaybills[idx], ...payload };
+            }
+            try {
+              localStorage.setItem('mc_erp_mpesa_paybills', JSON.stringify(AppState.mpesaPaybills));
+            } catch (err) {}
+            renderMpesaPaybillsTable();
+            resetMpesaPaybillForm();
+
+            try {
+              await fetch(`${SUPABASE_CONFIG.url}/rest/v1/company_mpesa_paybills?id=eq.${editId}`, {
+                method: 'PATCH',
+                headers: {
+                  'apikey': SUPABASE_CONFIG.anonKey,
+                  'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(payload)
+              });
+            } catch (netErr) {
+              console.warn('Supabase PATCH paybill warning:', netErr);
+            }
+            showToast(`✓ M-Pesa Paybill "${paybillNo}" updated successfully!`);
+          } else {
+            const newId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + String(Date.now()).padStart(12, '0').slice(-12);
+            const record = { id: newId, ...payload, created_at: new Date().toISOString() };
+            AppState.mpesaPaybills.push(record);
+
+            try {
+              localStorage.setItem('mc_erp_mpesa_paybills', JSON.stringify(AppState.mpesaPaybills));
+            } catch (err) {}
+            renderMpesaPaybillsTable();
+            resetMpesaPaybillForm();
+
+            try {
+              await fetch(`${SUPABASE_CONFIG.url}/rest/v1/company_mpesa_paybills`, {
+                method: 'POST',
+                headers: {
+                  'apikey': SUPABASE_CONFIG.anonKey,
+                  'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(record)
+              });
+            } catch (netErr) {
+              console.warn('Supabase POST paybill warning:', netErr);
+            }
+            showToast(`✓ M-Pesa Paybill "${paybillNo}" saved to central database!`);
+          }
+        },
+        'M-Pesa Paybill Configuration Warning',
+        'Save Paybill'
+      );
+    }
+
+    function editMpesaPaybill(id) {
+      const item = AppState.mpesaPaybills.find(m => m.id === id);
+      if (!item) return;
+
+      const setVal = (elemId, val) => {
+        const el = document.getElementById(elemId);
+        if (el) el.value = val !== undefined && val !== null ? val : '';
+      };
+
+      setVal('mpesa-paybill-no', item.paybill_number);
+      setVal('mpesa-business-name', item.business_name);
+      setVal('mpesa-acc-prefix', item.account_prefix);
+      setVal('mpesa-linked-bank-select', item.bank_account_id);
+      setVal('mpesa-paybill-edit-id', item.id);
+
+      const chk = document.getElementById('mpesa-active');
+      if (chk) chk.checked = item.is_active !== false;
+
+      const saveBtn = document.getElementById('btn-save-mpesa');
+      if (saveBtn) saveBtn.textContent = 'Update';
+
+      document.getElementById('form-mpesa-paybill')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      showToast(`Editing M-Pesa Paybill ${item.paybill_number}`);
+    }
+
+    function deleteMpesaPaybill(id) {
+      const item = AppState.mpesaPaybills.find(m => m.id === id);
+      const label = item ? `${item.paybill_number} (${item.business_name})` : 'this paybill';
+
+      confirmAction(
+        `Are you sure you want to permanently delete M-Pesa Paybill <strong>${label}</strong> from the database?`,
+        async () => {
+          AppState.mpesaPaybills = AppState.mpesaPaybills.filter(m => m.id !== id);
+          try {
+            localStorage.setItem('mc_erp_mpesa_paybills', JSON.stringify(AppState.mpesaPaybills));
+          } catch (err) {}
+          renderMpesaPaybillsTable();
+          resetMpesaPaybillForm();
+
+          try {
+            await fetch(`${SUPABASE_CONFIG.url}/rest/v1/company_mpesa_paybills?id=eq.${id}`, {
+              method: 'DELETE',
+              headers: {
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+              }
+            });
+          } catch (netErr) {
+            console.warn('Supabase DELETE paybill warning:', netErr);
+          }
+          showToast(`✓ M-Pesa Paybill deleted successfully.`);
+        },
+        'M-Pesa Deletion Warning',
+        'Delete Paybill'
+      );
+    }
+
+    function resetMpesaPaybillForm() {
+      const form = document.getElementById('form-mpesa-paybill');
+      if (form) form.reset();
+      const hiddenId = document.getElementById('mpesa-paybill-edit-id');
+      if (hiddenId) hiddenId.value = '';
+      const chk = document.getElementById('mpesa-active');
+      if (chk) chk.checked = true;
+      const saveBtn = document.getElementById('btn-save-mpesa');
+      if (saveBtn) saveBtn.textContent = 'Save';
+    }
+
+    function initAdminCompanySetup() {
+      loadAdminCompanyProfile();
+      loadBankAccounts();
+      loadMpesaPaybills();
+      switchAdminTab(AppState.activeAdminTab || 'tab-bank-accounts');
+    }
+
     // Expose handlers globally for dynamic module binding
     window.updateSidebarBranding = updateSidebarBranding;
     window.loadAdminCompanyProfile = loadAdminCompanyProfile;
     window.saveAdminCompanyProfile = saveAdminCompanyProfile;
     window.handleCompanyProfileSubmit = saveAdminCompanyProfile;
-    window.initAdminCompanySetup = loadAdminCompanyProfile;
+    window.initAdminCompanySetup = initAdminCompanySetup;
     window.handleCompanyLogoPreview = handleCompanyLogoPreview;
     window.populateCompanyProfileUI = populateCompanyProfileUI;
+    window.switchAdminTab = switchAdminTab;
+    window.saveBankAccount = saveBankAccount;
+    window.editBankAccount = editBankAccount;
+    window.deleteBankAccount = deleteBankAccount;
+    window.resetBankAccountForm = resetBankAccountForm;
+    window.saveMpesaPaybill = saveMpesaPaybill;
+    window.editMpesaPaybill = editMpesaPaybill;
+    window.deleteMpesaPaybill = deleteMpesaPaybill;
+    window.resetMpesaPaybillForm = resetMpesaPaybillForm;
+    window.loadBankAccounts = loadBankAccounts;
+    window.loadMpesaPaybills = loadMpesaPaybills;
+    window.renderBankAccountsTable = renderBankAccountsTable;
+    window.renderMpesaPaybillsTable = renderMpesaPaybillsTable;
+    window.populateLinkedBankDropdown = populateLinkedBankDropdown;
 
     // Initialize Theme and Load Active Module
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'developer';
     setTheme(savedTheme);
 
-    // Initial boot load for Company Profile & Global Sidebar Branding
+    // Initial boot load for Company Profile, Bank Accounts, M-Pesa, & Global Sidebar Branding
     updateSidebarBranding(AppState.companyProfile);
     loadAdminCompanyProfile();
+    loadBankAccounts();
+    loadMpesaPaybills();
 
     const initialView = AppState.activeView || 'estate-reg';
     const initialNav = document.querySelector(`.nav-item[data-view="${initialView}"]`);
