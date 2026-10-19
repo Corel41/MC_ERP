@@ -4714,6 +4714,43 @@ const AppState = {
       }
     }
 
+    function updateSidebarBranding(cp) {
+      if (!cp) return;
+      const brandTitle = document.getElementById('brand-title') || document.querySelector('.brand-title');
+      const brandSub = document.getElementById('brand-subtitle') || document.querySelector('.brand-subtitle');
+      const brandImg = document.getElementById('sidebar-brand-logo');
+      const brandSvg = document.getElementById('sidebar-default-glyph');
+      const brandSquircle = document.getElementById('brand-glyph-btn');
+
+      if (brandTitle && cp.companyName) {
+        brandTitle.textContent = cp.companyName;
+        brandTitle.title = cp.companyName;
+      }
+      if (brandSub) {
+        brandSub.textContent = cp.slogan || 'Metrocosmo Enterprise';
+        brandSub.title = cp.slogan || '';
+      }
+
+      const logoSrc = cp.tempLogoBase64 || cp.logoUrl;
+      if (logoSrc) {
+        if (brandImg) {
+          brandImg.src = logoSrc;
+          brandImg.style.display = 'block';
+          if (brandSvg) brandSvg.style.display = 'none';
+        } else if (brandSquircle) {
+          brandSquircle.innerHTML = `<img id="sidebar-brand-logo" src="${logoSrc}" alt="Brand Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px; padding: 2px;">`;
+        }
+      } else {
+        if (brandImg) brandImg.style.display = 'none';
+        if (brandSvg) brandSvg.style.display = 'block';
+      }
+
+      const userFullname = document.querySelector('.user-fullname');
+      if (userFullname && cp.companyName) {
+        userFullname.textContent = cp.companyName.split(' - ')[0] || cp.companyName;
+      }
+    }
+
     function populateCompanyProfileUI() {
       const cp = AppState.companyProfile;
       if (!cp) return;
@@ -4753,6 +4790,9 @@ const AppState = {
       if (userFullname && cp.companyName) {
         userFullname.textContent = cp.companyName.split(' - ')[0] || cp.companyName;
       }
+
+      // Enforce live global sidebar branding
+      updateSidebarBranding(cp);
     }
 
     function handleCompanyLogoPreview(event) {
@@ -4773,6 +4813,7 @@ const AppState = {
         if (logoHolder) {
           logoHolder.style.display = 'none';
         }
+        updateSidebarBranding(AppState.companyProfile);
         showToast('✓ Logo preview loaded (ready to save)');
       };
       reader.readAsDataURL(file);
@@ -4881,6 +4922,7 @@ const AppState = {
     }
 
     // Expose handlers globally for dynamic module binding
+    window.updateSidebarBranding = updateSidebarBranding;
     window.loadAdminCompanyProfile = loadAdminCompanyProfile;
     window.saveAdminCompanyProfile = saveAdminCompanyProfile;
     window.handleCompanyProfileSubmit = saveAdminCompanyProfile;
@@ -4892,7 +4934,8 @@ const AppState = {
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'developer';
     setTheme(savedTheme);
 
-    // Initial boot load for Company Profile
+    // Initial boot load for Company Profile & Global Sidebar Branding
+    updateSidebarBranding(AppState.companyProfile);
     loadAdminCompanyProfile();
 
     const initialView = AppState.activeView || 'estate-reg';

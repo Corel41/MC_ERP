@@ -8,6 +8,45 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
+  <script>
+    // Immediate synchronous branding hydration from localStorage to prevent flash of default logo/title
+    (function() {
+      function applyEarlyBranding() {
+        try {
+          const raw = localStorage.getItem('mc_erp_company_profile');
+          if (!raw) return;
+          const cp = JSON.parse(raw);
+          if (!cp) return;
+
+          const titleEl = document.getElementById('brand-title');
+          const subEl = document.getElementById('brand-subtitle');
+          const logoEl = document.getElementById('sidebar-brand-logo');
+          const glyphEl = document.getElementById('sidebar-default-glyph');
+
+          if (titleEl && cp.companyName) {
+            titleEl.textContent = cp.companyName;
+            titleEl.title = cp.companyName;
+          }
+          if (subEl && cp.slogan) {
+            subEl.textContent = cp.slogan;
+            subEl.title = cp.slogan;
+          }
+          const logo = cp.tempLogoBase64 || cp.logoUrl;
+          if (logo && logoEl) {
+            logoEl.src = logo;
+            logoEl.style.display = 'block';
+            if (glyphEl) glyphEl.style.display = 'none';
+          }
+        } catch(e) {}
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyEarlyBranding);
+      } else {
+        applyEarlyBranding();
+      }
+    })();
+  </script>
 </head>
 <body>
 
@@ -22,7 +61,8 @@
     <div class="sidebar-header">
       <div class="brand-group">
         <div class="brand-squircle" id="brand-glyph-btn" title="MC ERP Core">
-          <svg viewBox="0 0 24 24" fill="none">
+          <img id="sidebar-brand-logo" src="" alt="Brand Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px; padding: 2px; display: none;">
+          <svg id="sidebar-default-glyph" viewBox="0 0 24 24" fill="none">
             <defs>
               <linearGradient id="glyph-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
                 <stop offset="0%" stop-color="#38BDF8"/>
@@ -35,8 +75,8 @@
           </svg>
         </div>
         <div class="brand-meta">
-          <div class="brand-title">MC ERP</div>
-          <div class="brand-subtitle">Metrocosmo Enterprise</div>
+          <div class="brand-title" id="brand-title">MC ERP</div>
+          <div class="brand-subtitle" id="brand-subtitle">Metrocosmo Enterprise</div>
         </div>
       </div>
       <button class="sidebar-collapse-btn" id="sidebar-toggle-btn" title="Toggle Rail Mode">
