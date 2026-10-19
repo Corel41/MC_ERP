@@ -69,6 +69,24 @@ const AppState = {
           is_active: true
         }
       ],
+      accountingPeriods: [
+        { id: '00000000-0000-0000-0000-000000000146', period_no: 46, period_month: '10', period_year: 2026, description: 'October', status: 'Open', opened_at: '2026-10-07 14:22:22.397', closed_at: null, opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000145', period_no: 45, period_month: '9', period_year: 2026, description: 'September', status: 'Closed', opened_at: '2026-09-01 08:38:40.140', closed_at: '2026-10-07 14:22:22.397', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000144', period_no: 44, period_month: '8', period_year: 2026, description: 'August', status: 'Closed', opened_at: '2026-08-01 09:05:43.580', closed_at: '2026-09-01 08:38:40.140', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000143', period_no: 43, period_month: '7', period_year: 2026, description: 'July', status: 'Closed', opened_at: '2026-07-01 08:07:07.233', closed_at: '2026-08-01 09:05:43.580', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000142', period_no: 42, period_month: '6', period_year: 2026, description: 'June', status: 'Closed', opened_at: '2026-05-31 14:07:24.597', closed_at: '2026-07-01 08:07:07.233', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000141', period_no: 41, period_month: '5', period_year: 2026, description: 'May', status: 'Closed', opened_at: '2026-05-02 09:11:23.670', closed_at: '2026-05-31 14:07:24.597', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000140', period_no: 40, period_month: '4', period_year: 2026, description: 'April', status: 'Closed', opened_at: '2026-03-31 08:45:11.250', closed_at: '2026-05-02 09:11:23.670', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000139', period_no: 39, period_month: '3', period_year: 2026, description: 'March', status: 'Closed', opened_at: '2026-02-28 11:08:38.153', closed_at: '2026-03-31 08:45:11.250', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000138', period_no: 38, period_month: '2', period_year: 2026, description: 'February', status: 'Closed', opened_at: '2026-01-22 10:29:34.317', closed_at: '2026-02-28 11:08:38.153', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000137', period_no: 37, period_month: '1', period_year: 2026, description: 'January', status: 'Closed', opened_at: '2026-01-02 18:31:13.923', closed_at: '2026-01-22 10:29:34.317', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000136', period_no: 36, period_month: '12', period_year: 2025, description: 'December', status: 'Closed', opened_at: '2025-12-01 08:13:43.023', closed_at: '2026-01-02 18:31:13.923', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000135', period_no: 35, period_month: '11', period_year: 2025, description: 'November', status: 'Closed', opened_at: '2025-10-31 09:33:18.753', closed_at: '2025-12-01 08:13:43.023', opened_by: 'DEAN' },
+        { id: '00000000-0000-0000-0000-000000000134', period_no: 34, period_month: '10', period_year: 2025, description: 'October', status: 'Closed', opened_at: '2025-09-30 13:28:35.377', closed_at: '2025-10-31 09:33:18.753', opened_by: 'MARGARET' },
+        { id: '00000000-0000-0000-0000-000000000133', period_no: 33, period_month: '9', period_year: 2025, description: 'September', status: 'Closed', opened_at: '2025-08-30 14:33:43.997', closed_at: '2025-09-30 13:28:35.377', opened_by: 'MARGARET' },
+        { id: '00000000-0000-0000-0000-000000000132', period_no: 32, period_month: '8', period_year: 2025, description: 'August', status: 'Closed', opened_at: '2025-08-01 07:46:25.427', closed_at: '2025-08-30 14:33:43.997', opened_by: 'MARGARET' }
+      ],
+      tenantInvoices: [],
       landlords: [
         {
           id: 'LL-01',
@@ -149,6 +167,215 @@ const AppState = {
           emergencyContactPhone: '0722334455',
           emergencyRelationship: 'Parent',
           isActive: true
+        },
+        {
+          id: 'TEN-CRE-01',
+          tenantCode: 'T16557',
+          name: 'Nancy Jacqueline Njuhi Kamau',
+          idPassport: '29810452',
+          idNumber: '29810452',
+          phone: '0722111001',
+          telNo: '0722111001',
+          email: 'nancy.kamau@gmail.com',
+          address: 'P.O. Box 1024-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A002847192K',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '1',
+          unitId: 'UNIT-CRE-01',
+          rentAmount: 35000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-02',
+          tenantCode: 'T00186',
+          name: 'Deep Shah And Nirah Shah',
+          idPassport: '31092841',
+          idNumber: '31092841',
+          phone: '0722111002',
+          telNo: '0722111002',
+          email: 'deep.shah@gmail.com',
+          address: 'P.O. Box 2490-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A003928172M',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '2',
+          unitId: 'UNIT-CRE-02',
+          rentAmount: 38000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-03',
+          tenantCode: 'T10649',
+          name: 'Niraj Naendra Shah',
+          idPassport: '27849102',
+          idNumber: '27849102',
+          phone: '0722111003',
+          telNo: '0722111003',
+          email: 'niraj.shah@gmail.com',
+          address: 'P.O. Box 5510-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A004819201P',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '3',
+          unitId: 'UNIT-CRE-03',
+          rentAmount: 38000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-04',
+          tenantCode: 'T00188',
+          name: 'Murunga Imanyara And Wanjiru Nyagah',
+          idPassport: '26910482',
+          idNumber: '26910482',
+          phone: '0722111004',
+          telNo: '0722111004',
+          email: 'murunga.nyagah@gmail.com',
+          address: 'P.O. Box 7712-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A005910283T',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '4',
+          unitId: 'UNIT-CRE-04',
+          rentAmount: 35000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-05',
+          tenantCode: 'T11235',
+          name: 'Dutton Paul Robert',
+          idPassport: 'PP482910',
+          idNumber: 'PP482910',
+          phone: '0722111005',
+          telNo: '0722111005',
+          email: 'paul.dutton@gmail.com',
+          address: 'P.O. Box 8890-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A006820194Q',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '5',
+          unitId: 'UNIT-CRE-05',
+          rentAmount: 40000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-06',
+          tenantCode: 'T00190',
+          name: 'Francis Nagi Githui',
+          idPassport: '24910284',
+          idNumber: '24910284',
+          phone: '0722111006',
+          telNo: '0722111006',
+          email: 'francis.githui@gmail.com',
+          address: 'P.O. Box 3341-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A007910284R',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '6',
+          unitId: 'UNIT-CRE-06',
+          rentAmount: 35000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-07',
+          tenantCode: 'T10769',
+          name: 'Edwin Mugendi Ndiira',
+          idPassport: '28109283',
+          idNumber: '28109283',
+          phone: '0722111007',
+          telNo: '0722111007',
+          email: 'edwin.ndiira@gmail.com',
+          address: 'P.O. Box 6620-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A008920195S',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '7',
+          unitId: 'UNIT-CRE-07',
+          rentAmount: 36000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-08',
+          tenantCode: 'T10804',
+          name: 'Christof Schmidt / Farai Pangisile Schmidt',
+          idPassport: 'PP910283',
+          idNumber: 'PP910283',
+          phone: '0722111008',
+          telNo: '0722111008',
+          email: 'christof.schmidt@gmail.com',
+          address: 'P.O. Box 9912-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A009810293U',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '8',
+          unitId: 'UNIT-CRE-08',
+          rentAmount: 42000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-09',
+          tenantCode: 'T01463',
+          name: 'Aureum Creative Limited',
+          idPassport: 'CPR/2019/3321',
+          idNumber: 'CPR/2019/3321',
+          phone: '0722111009',
+          telNo: '0722111009',
+          email: 'info@aureumcreative.com',
+          address: 'P.O. Box 1204-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'P051920192A',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '9',
+          unitId: 'UNIT-CRE-09',
+          rentAmount: 45000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-10',
+          tenantCode: 'T00194',
+          name: 'Rajvi Hitesh Shah',
+          idPassport: '32910294',
+          idNumber: '32910294',
+          phone: '0722111010',
+          telNo: '0722111010',
+          email: 'rajvi.shah@gmail.com',
+          address: 'P.O. Box 4410-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A010928102W',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '10',
+          unitId: 'UNIT-CRE-10',
+          rentAmount: 38000,
+          isActive: true
+        },
+        {
+          id: 'TEN-CRE-11',
+          tenantCode: 'T00195',
+          name: 'Lee Dae Sung',
+          idPassport: 'PP551029',
+          idNumber: 'PP551029',
+          phone: '0722111011',
+          telNo: '0722111011',
+          email: 'lee.dae.sung@gmail.com',
+          address: 'P.O. Box 2201-00100 Nairobi',
+          postalCode: '00100 - GPO Nairobi',
+          kraPin: 'A011920194Y',
+          propertyId: 'PROP-03',
+          propertyName: 'CHIMNEY RISE ESTATE -',
+          unitCode: '11',
+          unitId: 'UNIT-CRE-11',
+          rentAmount: 38000,
+          isActive: true
         }
       ],
       properties: [
@@ -215,6 +442,38 @@ const AppState = {
           unitsCount: 2,
           payablesCount: 2,
           isActive: true
+        },
+        {
+          id: 'PROP-03',
+          propertyIdCode: 'P003',
+          landlordId: 'LL-01',
+          name: 'CHIMNEY RISE ESTATE -',
+          lr: 'NAIROBI/BLOCK 102/44',
+          type: 'RESIDENTIAL',
+          county: 'Nairobi',
+          subCounty: 'Runda, Nairobi',
+          prefix: 'CRE',
+          officeBranch: 'Nairobi Head Office',
+          totalSqFt: 35000,
+          noOfUnits: 11,
+          remittanceType: 'Collected',
+          bankName: 'KCB Bank Kenya',
+          bankBranch: 'Thika Section 9',
+          bankAccountNo: '1120948192',
+          bankAccountName: 'Chimney Rise Estate Collection',
+          paymentDate: '5th of every month',
+          parkingSpaces: 22,
+          pricePerParking: 0,
+          contractDate: '2025-08-01',
+          modeOfBilling: 'Monthly in Advance',
+          propertyOfficer: 'DEAN',
+          payableToLlAccount: false,
+          caretaker: 'Dennis K. (0722001122)',
+          caretakerName: 'Dennis K.',
+          caretakerPhone: '0722001122',
+          unitsCount: 11,
+          payablesCount: 10,
+          isActive: true
         }
       ],
       units: [
@@ -256,7 +515,18 @@ const AppState = {
           sc: 7500,
           meter: 'WM-KIL-101',
           status: 'OCCUPIED'
-        }
+        },
+        { id: 'UNIT-CRE-01', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '1', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 35000, sc: 1.00, meter: 'WM-CRE-01', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-02', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '2', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 38000, sc: 1.00, meter: 'WM-CRE-02', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-03', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '3', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 38000, sc: 1.00, meter: 'WM-CRE-03', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-04', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '4', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 35000, sc: 1.00, meter: 'WM-CRE-04', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-05', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '5', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 40000, sc: 1.00, meter: 'WM-CRE-05', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-06', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '6', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 35000, sc: 1.00, meter: 'WM-CRE-06', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-07', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '7', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 36000, sc: 1.00, meter: 'WM-CRE-07', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-08', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '8', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 42000, sc: 1.00, meter: 'WM-CRE-08', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-09', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '9', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 45000, sc: 1.00, meter: 'WM-CRE-09', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-10', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '10', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 38000, sc: 1.00, meter: 'WM-CRE-10', status: 'OCCUPIED' },
+        { id: 'UNIT-CRE-11', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', code: '11', floor: 'Ground Floor', config: '3_BEDROOM', plinth: 120, rent: 38000, sc: 1.00, meter: 'WM-CRE-11', status: 'OCCUPIED' }
       ],
       mandates: [
         {
@@ -355,13 +625,26 @@ const AppState = {
           { code: '013', description: 'Branch', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 50 },
           { code: '019', description: 'Shifting Fee', isCompulsory: true, isRefundable: false, isAgentHold: true, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 50 },
           { code: '021', description: 'Goodwill', isCompulsory: true, isRefundable: true, isAgentHold: false, isCommissionable: false, isPercentage: false, isRecurring: false, isFixedAmount: false, rateOnRent: 0.00, status: true, priority: 60 }
+        ],
+        'PROP-03': [
+          { id: '30640', code: '001', description: 'Rent', defaultAmount: 0.00 },
+          { id: '30641', code: '002', description: 'Water Bill', defaultAmount: 0.00 },
+          { id: '30643', code: '005', description: 'Water Deposit', defaultAmount: 0.00 },
+          { id: '30644', code: '006', description: 'Electricity Deposit', defaultAmount: 0.00 },
+          { id: '30645', code: '008', description: 'Tenancy Agreement', defaultAmount: 0.00 },
+          { id: '30646', code: '035', description: 'Penalty', defaultAmount: 1.00 },
+          { id: '30647', code: '009', description: 'Service Charge', defaultAmount: 1.00 },
+          { id: '60731', code: '015', description: 'Security', defaultAmount: 0.00 },
+          { id: '60732', code: '017', description: 'Garbage', defaultAmount: 0.00 },
+          { id: '70001', code: '004', description: 'Rent Deposit', defaultAmount: 0.00 }
         ]
       },
       propertyWaterfallRules: {
         'PROP-01': { overpaymentRouting: 'ADVANCE_RENT' },
-        'PROP-02': { overpaymentRouting: 'ADVANCE_RENT' }
+        'PROP-02': { overpaymentRouting: 'ADVANCE_RENT' },
+        'PROP-03': { overpaymentRouting: 'ADVANCE_RENT' }
       },
-      activeTenantTab: 'leases',
+      activeTenantTab: 'tab-single-tenant',
       leases: [
         {
           id: 'LSE-001',
@@ -394,7 +677,18 @@ const AppState = {
           handoverWater: 88.00,
           meterSerial: 'WM-KIL-101',
           status: 'Active'
-        }
+        },
+        { id: 'LSE-CRE-01', tenantId: 'TEN-CRE-01', tenantCode: 'T16557', tenantName: 'Nancy Jacqueline Njuhi Kamau', unitId: 'UNIT-CRE-01', unitCode: '1', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 35000, serviceCharge: 1.00, depositAmount: 35000, handoverWater: 0, meterSerial: 'WM-CRE-01', status: 'Active' },
+        { id: 'LSE-CRE-02', tenantId: 'TEN-CRE-02', tenantCode: 'T00186', tenantName: 'Deep Shah And Nirah Shah', unitId: 'UNIT-CRE-02', unitCode: '2', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 38000, serviceCharge: 1.00, depositAmount: 38000, handoverWater: 0, meterSerial: 'WM-CRE-02', status: 'Active' },
+        { id: 'LSE-CRE-03', tenantId: 'TEN-CRE-03', tenantCode: 'T10649', tenantName: 'Niraj Naendra Shah', unitId: 'UNIT-CRE-03', unitCode: '3', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 38000, serviceCharge: 1.00, depositAmount: 38000, handoverWater: 0, meterSerial: 'WM-CRE-03', status: 'Active' },
+        { id: 'LSE-CRE-04', tenantId: 'TEN-CRE-04', tenantCode: 'T00188', tenantName: 'Murunga Imanyara And Wanjiru Nyagah', unitId: 'UNIT-CRE-04', unitCode: '4', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 35000, serviceCharge: 1.00, depositAmount: 35000, handoverWater: 0, meterSerial: 'WM-CRE-04', status: 'Active' },
+        { id: 'LSE-CRE-05', tenantId: 'TEN-CRE-05', tenantCode: 'T11235', tenantName: 'Dutton Paul Robert', unitId: 'UNIT-CRE-05', unitCode: '5', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 40000, serviceCharge: 1.00, depositAmount: 40000, handoverWater: 0, meterSerial: 'WM-CRE-05', status: 'Active' },
+        { id: 'LSE-CRE-06', tenantId: 'TEN-CRE-06', tenantCode: 'T00190', tenantName: 'Francis Nagi Githui', unitId: 'UNIT-CRE-06', unitCode: '6', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 35000, serviceCharge: 1.00, depositAmount: 35000, handoverWater: 0, meterSerial: 'WM-CRE-06', status: 'Active' },
+        { id: 'LSE-CRE-07', tenantId: 'TEN-CRE-07', tenantCode: 'T10769', tenantName: 'Edwin Mugendi Ndiira', unitId: 'UNIT-CRE-07', unitCode: '7', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 36000, serviceCharge: 1.00, depositAmount: 36000, handoverWater: 0, meterSerial: 'WM-CRE-07', status: 'Active' },
+        { id: 'LSE-CRE-08', tenantId: 'TEN-CRE-08', tenantCode: 'T10804', tenantName: 'Christof Schmidt / Farai Pangisile Schmidt', unitId: 'UNIT-CRE-08', unitCode: '8', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 42000, serviceCharge: 1.00, depositAmount: 42000, handoverWater: 0, meterSerial: 'WM-CRE-08', status: 'Active' },
+        { id: 'LSE-CRE-09', tenantId: 'TEN-CRE-09', tenantCode: 'T01463', tenantName: 'Aureum Creative Limited', unitId: 'UNIT-CRE-09', unitCode: '9', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 45000, serviceCharge: 1.00, depositAmount: 45000, handoverWater: 0, meterSerial: 'WM-CRE-09', status: 'Active' },
+        { id: 'LSE-CRE-10', tenantId: 'TEN-CRE-10', tenantCode: 'T00194', tenantName: 'Rajvi Hitesh Shah', unitId: 'UNIT-CRE-10', unitCode: '10', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 38000, serviceCharge: 1.00, depositAmount: 38000, handoverWater: 0, meterSerial: 'WM-CRE-10', status: 'Active' },
+        { id: 'LSE-CRE-11', tenantId: 'TEN-CRE-11', tenantCode: 'T00195', tenantName: 'Lee Dae Sung', unitId: 'UNIT-CRE-11', unitCode: '11', propertyId: 'PROP-03', propertyName: 'CHIMNEY RISE ESTATE -', startDate: '2025-08-01', endDate: '2027-07-31', rentAmount: 38000, serviceCharge: 1.00, depositAmount: 38000, handoverWater: 0, meterSerial: 'WM-CRE-11', status: 'Active' }
       ],
       utilityReadings: [
         {
@@ -932,14 +1226,14 @@ const AppState = {
 
         case 'estate-tenants':
           setupTenantTabs();
+          initSingleTenantBilling();
+          initBulkTenantsBilling();
+          initArrearsBilling();
           renderLeasesTable();
           renderReadingsTable();
           renderInvoicesTable();
           renderLedgerTable();
-          if (AppState.activeTenantTab) {
-            const btn = document.querySelector(`[data-tenant-target="${AppState.activeTenantTab}"]`);
-            if (btn) btn.click();
-          }
+          switchTenantTab(AppState.activeTenantTab || 'tab-single-tenant');
           break;
 
         case 'estate-landlords':
@@ -2956,21 +3250,614 @@ const AppState = {
 
     /* SUB-MODULE 1.2: TENANTS LOGIC & INTERACTION ENGINES */
 
-    // Tab switching for 1.2 Tenants
+    function switchTenantTab(targetTabId) {
+      AppState.activeTenantTab = targetTabId;
+
+      // Update button visual styles
+      const tabBtns = document.querySelectorAll('.tenant-subtab-btn');
+      tabBtns.forEach(btn => {
+        if (btn.id === `btn-${targetTabId}` || btn.getAttribute('data-tenant-target') === targetTabId) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Update panel visibility
+      const panels = document.querySelectorAll('.tenant-panel');
+      panels.forEach(p => {
+        if (p.id === `panel-${targetTabId}` || p.id === `panel-tenant-${targetTabId}`) {
+          p.style.display = 'block';
+          p.classList.add('active');
+        } else {
+          p.style.display = 'none';
+          p.classList.remove('active');
+        }
+      });
+
+      // Trigger data binding for the active tab
+      if (targetTabId === 'tab-single-tenant') {
+        initSingleTenantBilling();
+      } else if (targetTabId === 'tab-bulk-tenants') {
+        initBulkTenantsBilling();
+      } else if (targetTabId === 'tab-previous-arrears') {
+        initArrearsBilling();
+      } else if (targetTabId === 'tab-leases' || targetTabId === 'leases') {
+        populateTenantDropdowns();
+        renderLeasesTable();
+      } else if (targetTabId === 'tab-metering' || targetTabId === 'metering') {
+        populateTenantDropdowns();
+        renderReadingsTable();
+      } else if (targetTabId === 'tab-ledger' || targetTabId === 'ledger') {
+        populateTenantDropdowns();
+        renderLedgerTable();
+      }
+    }
+
     function setupTenantTabs() {
-      const tenantTabBtns = document.querySelectorAll('.tenant-tab-btn');
+      const tenantTabBtns = document.querySelectorAll('.tenant-subtab-btn, .tenant-tab-btn');
       tenantTabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          tenantTabBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-
-          const target = btn.getAttribute('data-tenant-target');
-          AppState.activeTenantTab = target;
-          document.querySelectorAll('.tenant-panel').forEach(p => p.classList.remove('active'));
-          const targetPanel = document.getElementById(`panel-tenant-${target}`);
-          if (targetPanel) targetPanel.classList.add('active');
+          const target = btn.getAttribute('data-tenant-target') || btn.id.replace('btn-', '');
+          if (target) {
+            switchTenantTab(target);
+          }
         });
       });
+    }
+
+    /* --------------------------------------------------------------------------
+       1. SINGLE TENANT INVOICING ENGINE (image_731002.png)
+       -------------------------------------------------------------------------- */
+    function initSingleTenantBilling() {
+      const propSel = document.getElementById('single-invoice-property-select');
+      if (!propSel) return;
+
+      propSel.innerHTML = AppState.properties.map(p => 
+        `<option value="${p.id}" ${p.name.includes('CHIMNEY RISE') ? 'selected' : ''}>${p.name}</option>`
+      ).join('');
+
+      const descInput = document.getElementById('single-invoice-description');
+      if (descInput && !descInput.value) {
+        descInput.value = 'October 2026 Billing';
+      }
+
+      onSinglePropertyChange(propSel.value);
+    }
+
+    function onSinglePropertyChange(propertyId) {
+      const tenantSel = document.getElementById('single-invoice-tenant-select');
+      if (!tenantSel) return;
+
+      const filteredTenants = AppState.tenants.filter(t => t.isActive && (t.propertyId === propertyId || !t.propertyId));
+      tenantSel.innerHTML = '<option value="">-Select Tenant-</option>' + filteredTenants.map((t, idx) => 
+        `<option value="${t.id}" ${idx === 0 ? 'selected' : ''}>${t.tenantCode ? t.tenantCode + ' - ' : ''}${t.name}</option>`
+      ).join('');
+
+      onSingleTenantChange(tenantSel.value);
+    }
+
+    function onSingleTenantChange(tenantId) {
+      renderSinglePayablesTable();
+    }
+
+    function renderSinglePayablesTable() {
+      const tbody = document.getElementById('single-payables-table-body');
+      if (!tbody) return;
+
+      const propSel = document.getElementById('single-invoice-property-select');
+      const propertyId = propSel ? propSel.value : 'PROP-03';
+      const tenantSel = document.getElementById('single-invoice-tenant-select');
+      const tenantId = tenantSel ? tenantSel.value : '';
+      const tenant = AppState.tenants.find(t => t.id === tenantId);
+
+      const payablesList = (AppState.propertyPayablesConfig && AppState.propertyPayablesConfig[propertyId]) || [
+        { id: '30640', code: '001', description: 'Rent', defaultAmount: 0.00 },
+        { id: '30641', code: '002', description: 'Water Bill', defaultAmount: 0.00 },
+        { id: '30643', code: '005', description: 'Water Deposit', defaultAmount: 0.00 },
+        { id: '30644', code: '006', description: 'Electricity Deposit', defaultAmount: 0.00 },
+        { id: '30645', code: '008', description: 'Tenancy Agreement', defaultAmount: 0.00 },
+        { id: '30646', code: '035', description: 'Penalty', defaultAmount: 1.00 },
+        { id: '30647', code: '009', description: 'Service Charge', defaultAmount: 1.00 },
+        { id: '60731', code: '015', description: 'Security', defaultAmount: 0.00 },
+        { id: '60732', code: '017', description: 'Garbage', defaultAmount: 0.00 },
+        { id: '70001', code: '004', description: 'Rent Deposit', defaultAmount: 0.00 }
+      ];
+
+      tbody.innerHTML = payablesList.map((p, idx) => {
+        const isRent = p.code === '001';
+        let defaultVal = p.defaultAmount !== undefined ? p.defaultAmount : 0.00;
+        if (isRent && tenant && tenant.rentAmount) {
+          defaultVal = tenant.rentAmount;
+        }
+
+        return `
+          <tr class="pm-table-row">
+            <td style="padding: 5px 10px; width: 80px; text-align: center; border-right: 1px solid #E5E7EB; color: #4B5563;">${p.id || (30640 + idx)}</td>
+            <td style="padding: 5px 12px; width: 90px; text-align: left; border-right: 1px solid #E5E7EB; font-weight: 600;">${p.code}</td>
+            <td style="padding: 5px 14px; text-align: left; border-right: 1px solid #E5E7EB;">${p.description}</td>
+            <td style="padding: 5px 14px; width: 110px; text-align: right; border-right: 1px solid #E5E7EB; color: #4B5563;">0.00</td>
+            <td style="padding: 4px 14px; width: 150px; text-align: right; border-right: 1px solid #E5E7EB;">
+              <input type="number" step="0.01" class="pm-legacy-input single-bill-amount" data-code="${p.code}" data-desc="${p.description}" value="${defaultVal.toFixed(2)}" style="width: 120px; text-align: right;">
+            </td>
+            <td style="padding: 5px 10px; width: 70px; text-align: center;">
+              <input type="checkbox" class="single-bill-select" data-code="${p.code}" ${defaultVal > 0 ? 'checked' : ''} style="accent-color: #008080; cursor: pointer; width: 16px; height: 16px;">
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function executeSingleTenantBilling() {
+      const propSel = document.getElementById('single-invoice-property-select');
+      const tenantSel = document.getElementById('single-invoice-tenant-select');
+      const descInput = document.getElementById('single-invoice-description');
+
+      const propertyId = propSel ? propSel.value : '';
+      const tenantId = tenantSel ? tenantSel.value : '';
+      const desc = descInput ? descInput.value.trim() : 'Single Tenant Billing';
+
+      if (!tenantId) {
+        showToast('Please select a tenant to bill.');
+        return;
+      }
+
+      const tenant = AppState.tenants.find(t => t.id === tenantId);
+      const prop = AppState.properties.find(p => p.id === propertyId);
+      if (!tenant) {
+        showToast('Selected tenant not found in registry.');
+        return;
+      }
+
+      const selectedItems = [];
+      const rows = document.querySelectorAll('#single-payables-table-body tr');
+      rows.forEach(tr => {
+        const chk = tr.querySelector('.single-bill-select');
+        const input = tr.querySelector('.single-bill-amount');
+        if (chk && chk.checked) {
+          const code = input.getAttribute('data-code');
+          const pDesc = input.getAttribute('data-desc');
+          const amt = parseFloat(input.value) || 0;
+          selectedItems.push({ code, description: pDesc, amount: amt });
+        }
+      });
+
+      if (selectedItems.length === 0) {
+        showToast('Please select at least one payable item checkbox to bill.');
+        return;
+      }
+
+      const totalBilled = selectedItems.reduce((acc, item) => acc + item.amount, 0);
+
+      confirmAction(
+        `Are you sure you want to bill <strong>${tenant.name} (${tenant.tenantCode || ''})</strong> a total of <strong>KES ${totalBilled.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> across ${selectedItems.length} payable(s)?`,
+        async () => {
+          const nowIso = new Date().toISOString();
+          let postedCount = 0;
+
+          for (const item of selectedItems) {
+            const invoiceRecord = {
+              id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + postedCount).toString(16).padStart(12, '0'),
+              organization_id: getActiveOrgId(),
+              tenant_id: tenant.id,
+              property_id: propertyId,
+              unit_id: tenant.unitId || null,
+              tenant_code: tenant.tenantCode || '',
+              tenant_name: tenant.name,
+              unit_code: tenant.unitCode || '',
+              property_name: prop ? prop.name : '',
+              payable_code: item.code,
+              description: desc ? `${desc} - ${item.description}` : item.description,
+              amount: item.amount,
+              billing_type: 'Single',
+              period_month: '10',
+              period_year: 2026,
+              is_paid: false,
+              created_at: nowIso
+            };
+
+            AppState.tenantInvoices.unshift(invoiceRecord);
+
+            try {
+              await fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices`, {
+                method: 'POST',
+                headers: {
+                  'apikey': SUPABASE_CONFIG.anonKey,
+                  'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(invoiceRecord)
+              });
+            } catch (err) {
+              console.warn('Supabase tenant_invoices insert warning:', err);
+            }
+            postedCount++;
+          }
+
+          // Post to Tenant Ledger
+          AppState.ledger.push({
+            id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+            timestamp: nowIso.replace('T', ' ').substring(0, 16),
+            refNo: `SIN-${Date.now().toString().slice(-6)}`,
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            unitCode: tenant.unitCode || '',
+            type: 'Invoice',
+            description: `${desc || 'Single Tenant Billing'} (${selectedItems.map(i => i.description).join(', ')})`,
+            debit: totalBilled,
+            credit: 0,
+            balanceAfter: totalBilled
+          });
+
+          renderLedgerTable();
+          showToast(`✓ Billed KES ${totalBilled.toLocaleString()} to ${tenant.name} (${postedCount} payables) successfully.`);
+        },
+        'Single Tenant Billing Confirmation',
+        'Bill Tenant'
+      );
+    }
+
+    /* --------------------------------------------------------------------------
+       2. BULK TENANTS INVOICING ENGINE (image_7310dc.png)
+       -------------------------------------------------------------------------- */
+    function initBulkTenantsBilling() {
+      const propSel = document.getElementById('bulk-invoice-property-select');
+      const payableSel = document.getElementById('bulk-invoice-payable-select');
+      const descInput = document.getElementById('bulk-invoice-description');
+      if (!propSel || !payableSel) return;
+
+      propSel.innerHTML = AppState.properties.map(p => 
+        `<option value="${p.id}" ${p.name.includes('CHIMNEY RISE') ? 'selected' : ''}>${p.name}</option>`
+      ).join('');
+
+      payableSel.innerHTML = `
+        <option value="001" selected>001 Rent</option>
+        <option value="002">002 Water Bill</option>
+        <option value="009">009 Service Charge</option>
+        <option value="015">015 Security</option>
+        <option value="017">017 Garbage</option>
+        <option value="035">035 Penalty</option>
+        <option value="008">008 Tenancy Agreement</option>
+      `;
+
+      if (descInput && !descInput.value) {
+        descInput.value = 'October 2026 Bulk Rent Run';
+      }
+
+      renderBulkTenantsTable();
+    }
+
+    function onBulkPropertyChange(propertyId) {
+      renderBulkTenantsTable();
+    }
+
+    function onBulkPayableChange(payableCode) {
+      const payableSel = document.getElementById('bulk-invoice-payable-select');
+      const payableText = payableSel ? payableSel.options[payableSel.selectedIndex].text : '';
+      const descInput = document.getElementById('bulk-invoice-description');
+      if (descInput) {
+        descInput.value = `October 2026 Bulk ${payableText} Run`;
+      }
+      renderBulkTenantsTable();
+    }
+
+    function renderBulkTenantsTable() {
+      const tbody = document.getElementById('bulk-tenants-table-body');
+      if (!tbody) return;
+
+      const propSel = document.getElementById('bulk-invoice-property-select');
+      const payableSel = document.getElementById('bulk-invoice-payable-select');
+      const propertyId = propSel ? propSel.value : 'PROP-03';
+      const payableCode = payableSel ? payableSel.value : '001';
+      const payableText = payableSel ? payableSel.options[payableSel.selectedIndex].text.replace(/^[0-9]+\s*/, '') : 'Rent';
+
+      const filteredTenants = AppState.tenants.filter(t => t.isActive && (t.propertyId === propertyId || !t.propertyId));
+
+      tbody.innerHTML = filteredTenants.map((t, idx) => {
+        const isRent = payableCode === '001';
+        const defaultAmt = isRent ? (t.rentAmount || 35000) : 0;
+        return `
+          <tr class="pm-table-row">
+            <td style="padding: 5px 10px; width: 90px; text-align: left; border-right: 1px solid #E5E7EB; font-weight: 600;">${t.tenantCode || 'T' + (10000 + idx)}</td>
+            <td style="padding: 5px 12px; text-align: left; border-right: 1px solid #E5E7EB;">${t.name}</td>
+            <td style="padding: 5px 10px; width: 60px; text-align: center; border-right: 1px solid #E5E7EB;">${t.unitCode || (idx + 1)}</td>
+            <td style="padding: 5px 12px; width: 100px; text-align: left; border-right: 1px solid #E5E7EB; color: #4B5563;">${payableText}</td>
+            <td style="padding: 4px 12px; width: 130px; text-align: right; border-right: 1px solid #E5E7EB;">
+              <input type="number" step="0.01" class="pm-legacy-input bulk-bill-amount" data-tenant-id="${t.id}" value="${defaultAmt.toFixed(2)}" style="width: 105px; text-align: right;">
+            </td>
+            <td style="padding: 5px 12px; width: 100px; text-align: right; border-right: 1px solid #E5E7EB; color: #6B7280;">0.00</td>
+            <td style="padding: 5px 10px; width: 85px; text-align: center; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" class="bulk-tenant-checkbox" data-tenant-id="${t.id}" ${defaultAmt > 0 ? 'checked' : ''} style="accent-color: #008080; cursor: pointer; width: 16px; height: 16px;">
+            </td>
+            <td style="padding: 5px 10px; width: 45px; text-align: center; color: #6B7280;">${idx + 1}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleBulkSelectAll(checked) {
+      const checkboxes = document.querySelectorAll('.bulk-tenant-checkbox');
+      checkboxes.forEach(cb => { cb.checked = checked; });
+    }
+
+    function executeBulkTenantsBilling() {
+      const propSel = document.getElementById('bulk-invoice-property-select');
+      const payableSel = document.getElementById('bulk-invoice-payable-select');
+      const descInput = document.getElementById('bulk-invoice-description');
+
+      const propertyId = propSel ? propSel.value : '';
+      const payableCode = payableSel ? payableSel.value : '001';
+      const payableText = payableSel ? payableSel.options[payableSel.selectedIndex].text.replace(/^[0-9]+\s*/, '') : 'Rent';
+      const desc = descInput ? descInput.value.trim() : `Bulk ${payableText} Billing`;
+      const prop = AppState.properties.find(p => p.id === propertyId);
+
+      const billedItems = [];
+      const rows = document.querySelectorAll('#bulk-tenants-table-body tr');
+      rows.forEach(tr => {
+        const chk = tr.querySelector('.bulk-tenant-checkbox');
+        const input = tr.querySelector('.bulk-bill-amount');
+        if (chk && chk.checked) {
+          const tenantId = chk.getAttribute('data-tenant-id');
+          const amt = parseFloat(input.value) || 0;
+          const tenant = AppState.tenants.find(t => t.id === tenantId);
+          if (tenant) {
+            billedItems.push({ tenant, amount: amt });
+          }
+        }
+      });
+
+      if (billedItems.length === 0) {
+        showToast('Please select at least one tenant to bill in the bulk table.');
+        return;
+      }
+
+      const totalAmount = billedItems.reduce((acc, i) => acc + i.amount, 0);
+
+      confirmAction(
+        `Are you sure you want to execute Bulk Billing for <strong>${billedItems.length} tenant(s)</strong> totaling <strong>KES ${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> under <strong>${payableText}</strong>?`,
+        async () => {
+          const nowIso = new Date().toISOString();
+          let count = 0;
+
+          for (const item of billedItems) {
+            const invoiceRecord = {
+              id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + count).toString(16).padStart(12, '0'),
+              organization_id: getActiveOrgId(),
+              tenant_id: item.tenant.id,
+              property_id: propertyId,
+              unit_id: item.tenant.unitId || null,
+              tenant_code: item.tenant.tenantCode || '',
+              tenant_name: item.tenant.name,
+              unit_code: item.tenant.unitCode || '',
+              property_name: prop ? prop.name : '',
+              payable_code: payableCode,
+              description: desc || `Bulk ${payableText} Billing`,
+              amount: item.amount,
+              billing_type: 'Bulk',
+              period_month: '10',
+              period_year: 2026,
+              is_paid: false,
+              created_at: nowIso
+            };
+
+            AppState.tenantInvoices.unshift(invoiceRecord);
+
+            try {
+              await fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices`, {
+                method: 'POST',
+                headers: {
+                  'apikey': SUPABASE_CONFIG.anonKey,
+                  'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(invoiceRecord)
+              });
+            } catch (err) {
+              console.warn('Supabase bulk tenant_invoices insert warning:', err);
+            }
+
+            // Post ledger entry
+            AppState.ledger.push({
+              id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+              timestamp: nowIso.replace('T', ' ').substring(0, 16),
+              refNo: `BLK-${Date.now().toString().slice(-6)}`,
+              tenantId: item.tenant.id,
+              tenantName: item.tenant.name,
+              unitCode: item.tenant.unitCode || '',
+              type: 'Invoice',
+              description: desc || `Bulk ${payableText} Billing`,
+              debit: item.amount,
+              credit: 0,
+              balanceAfter: item.amount
+            });
+
+            count++;
+          }
+
+          renderLedgerTable();
+          showToast(`✓ Bulk billing executed: ${count} tenants billed KES ${totalAmount.toLocaleString()} successfully.`);
+        },
+        'Bulk Tenants Billing Confirmation',
+        'Bill All Selected'
+      );
+    }
+
+    /* --------------------------------------------------------------------------
+       3. PREVIOUS ARREARS INVOICING ENGINE (image_7362b5.png)
+       -------------------------------------------------------------------------- */
+    function initArrearsBilling() {
+      const propSel = document.getElementById('arrears-property-select');
+      const payableSel = document.getElementById('arrears-payable-select');
+      const descInput = document.getElementById('arrears-description');
+      if (!propSel || !payableSel) return;
+
+      propSel.innerHTML = AppState.properties.map(p => 
+        `<option value="${p.id}" ${p.name.includes('CHIMNEY RISE') ? 'selected' : ''}>${p.name}</option>`
+      ).join('');
+
+      payableSel.innerHTML = `
+        <option value="001" selected>001 Rent</option>
+        <option value="002">002 Water Bill</option>
+        <option value="009">009 Service Charge</option>
+        <option value="015">015 Security</option>
+        <option value="017">017 Garbage</option>
+        <option value="035">035 Penalty</option>
+      `;
+
+      if (descInput && !descInput.value) {
+        descInput.value = 'Opening Arrears Balance';
+      }
+
+      renderArrearsTable();
+    }
+
+    function onArrearsPropertyChange(propertyId) {
+      renderArrearsTable();
+    }
+
+    function onArrearsPayableChange(payableCode) {
+      renderArrearsTable();
+    }
+
+    function renderArrearsTable() {
+      const tbody = document.getElementById('arrears-table-body');
+      if (!tbody) return;
+
+      const propSel = document.getElementById('arrears-property-select');
+      const payableSel = document.getElementById('arrears-payable-select');
+      const propertyId = propSel ? propSel.value : 'PROP-03';
+      const payableText = payableSel ? payableSel.options[payableSel.selectedIndex].text.replace(/^[0-9]+\s*/, '') : 'Rent';
+
+      const filteredTenants = AppState.tenants.filter(t => t.isActive && (t.propertyId === propertyId || !t.propertyId));
+
+      tbody.innerHTML = filteredTenants.map((t, idx) => {
+        return `
+          <tr class="pm-table-row">
+            <td style="padding: 5px 10px; width: 90px; text-align: left; border-right: 1px solid #E5E7EB; font-weight: 600;">${t.tenantCode || 'T' + (10000 + idx)}</td>
+            <td style="padding: 5px 12px; text-align: left; border-right: 1px solid #E5E7EB;">${t.name}</td>
+            <td style="padding: 5px 10px; width: 60px; text-align: center; border-right: 1px solid #E5E7EB;">${t.unitCode || (idx + 1)}</td>
+            <td style="padding: 5px 12px; width: 100px; text-align: left; border-right: 1px solid #E5E7EB; color: #4B5563;">${payableText}</td>
+            <td style="padding: 4px 12px; width: 140px; text-align: right; border-right: 1px solid #E5E7EB;">
+              <input type="number" step="0.01" class="pm-legacy-input arrears-bill-amount" data-tenant-id="${t.id}" placeholder="0.00" style="width: 110px; text-align: right;">
+            </td>
+            <td style="padding: 5px 12px; width: 100px; text-align: right; border-right: 1px solid #E5E7EB; color: #6B7280;">0.00</td>
+            <td style="padding: 5px 10px; width: 85px; text-align: center; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" class="arrears-tenant-checkbox" data-tenant-id="${t.id}" style="accent-color: #008080; cursor: pointer; width: 16px; height: 16px;">
+            </td>
+            <td style="padding: 5px 10px; width: 45px; text-align: center; color: #6B7280;">${idx + 1}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleArrearsSelectAll(checked) {
+      const checkboxes = document.querySelectorAll('.arrears-tenant-checkbox');
+      checkboxes.forEach(cb => { cb.checked = checked; });
+    }
+
+    function executeArrearsBilling() {
+      const propSel = document.getElementById('arrears-property-select');
+      const payableSel = document.getElementById('arrears-payable-select');
+      const descInput = document.getElementById('arrears-description');
+
+      const propertyId = propSel ? propSel.value : '';
+      const payableCode = payableSel ? payableSel.value : '001';
+      const payableText = payableSel ? payableSel.options[payableSel.selectedIndex].text.replace(/^[0-9]+\s*/, '') : 'Rent';
+      const desc = descInput ? descInput.value.trim() : 'Previous Arrears Balance';
+      const prop = AppState.properties.find(p => p.id === propertyId);
+
+      const arrearsItems = [];
+      const rows = document.querySelectorAll('#arrears-table-body tr');
+      rows.forEach(tr => {
+        const chk = tr.querySelector('.arrears-tenant-checkbox');
+        const input = tr.querySelector('.arrears-bill-amount');
+        if (chk && chk.checked) {
+          const tenantId = chk.getAttribute('data-tenant-id');
+          const amt = parseFloat(input.value) || 0;
+          const tenant = AppState.tenants.find(t => t.id === tenantId);
+          if (tenant && amt > 0) {
+            arrearsItems.push({ tenant, amount: amt });
+          }
+        }
+      });
+
+      if (arrearsItems.length === 0) {
+        showToast('Please check at least one tenant checkbox and enter an arrear amount > 0.');
+        return;
+      }
+
+      const totalAmount = arrearsItems.reduce((acc, i) => acc + i.amount, 0);
+
+      confirmAction(
+        `Are you sure you want to commit Previous Arrears for <strong>${arrearsItems.length} tenant(s)</strong> totaling <strong>KES ${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> under <strong>${payableText}</strong>?<br><br><span style="color: #DC2626; font-size: 11.5px;">NB: Billing Arrears of a New Property must only be run once before regular monthly bills are posted.</span>`,
+        async () => {
+          const nowIso = new Date().toISOString();
+          let count = 0;
+
+          for (const item of arrearsItems) {
+            const invoiceRecord = {
+              id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + count).toString(16).padStart(12, '0'),
+              organization_id: getActiveOrgId(),
+              tenant_id: item.tenant.id,
+              property_id: propertyId,
+              unit_id: item.tenant.unitId || null,
+              tenant_code: item.tenant.tenantCode || '',
+              tenant_name: item.tenant.name,
+              unit_code: item.tenant.unitCode || '',
+              property_name: prop ? prop.name : '',
+              payable_code: payableCode,
+              description: desc || `Previous Arrears - ${payableText}`,
+              amount: item.amount,
+              billing_type: 'Arrears',
+              period_month: '10',
+              period_year: 2026,
+              is_paid: false,
+              created_at: nowIso
+            };
+
+            AppState.tenantInvoices.unshift(invoiceRecord);
+
+            try {
+              await fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices`, {
+                method: 'POST',
+                headers: {
+                  'apikey': SUPABASE_CONFIG.anonKey,
+                  'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(invoiceRecord)
+              });
+            } catch (err) {
+              console.warn('Supabase arrears insert warning:', err);
+            }
+
+            // Post opening balance debit to ledger
+            AppState.ledger.push({
+              id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+              timestamp: nowIso.replace('T', ' ').substring(0, 16),
+              refNo: `ARR-${Date.now().toString().slice(-6)}`,
+              tenantId: item.tenant.id,
+              tenantName: item.tenant.name,
+              unitCode: item.tenant.unitCode || '',
+              type: 'Invoice',
+              description: `Previous Arrears - ${payableText}`,
+              debit: item.amount,
+              credit: 0,
+              balanceAfter: item.amount
+            });
+
+            count++;
+          }
+
+          renderLedgerTable();
+          showToast(`✓ Previous arrears committed: ${count} tenant(s) billed KES ${totalAmount.toLocaleString()} successfully.`);
+        },
+        'Previous Arrears Confirmation',
+        'Post Arrears'
+      );
     }
 
     // Populate dropdowns for Sub-Module 1.2
@@ -4993,6 +5880,9 @@ const AppState = {
       } else if (targetTabId === 'tab-mpesa-paybills') {
         renderMpesaPaybillsTable();
         populateLinkedBankDropdown();
+      } else if (targetTabId === 'tab-transaction-periods') {
+        loadAccountingPeriods();
+        renderAccountingPeriodsTable();
       } else if (targetTabId === 'tab-company-info') {
         populateCompanyProfileUI();
       }
@@ -5493,10 +6383,222 @@ const AppState = {
       if (saveBtn) saveBtn.textContent = 'Save';
     }
 
+    /* --------------------------------------------------------------------------
+       3. TRANSACTION PERIODS & ROLL-OVER CONTROLLER (image_7366d4.png)
+       -------------------------------------------------------------------------- */
+    async function loadAccountingPeriods() {
+      // Rehydrate cache
+      try {
+        const cached = localStorage.getItem('mc_erp_accounting_periods');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            AppState.accountingPeriods = parsed;
+            renderAccountingPeriodsTable();
+          }
+        }
+      } catch (e) {
+        console.warn('localStorage accounting_periods warning:', e);
+      }
+
+      // Fetch from Supabase
+      try {
+        const orgId = getActiveOrgId();
+        const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/accounting_periods?select=*&order=period_no.desc`, {
+          headers: {
+            'apikey': SUPABASE_CONFIG.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            AppState.accountingPeriods = data;
+            try {
+              localStorage.setItem('mc_erp_accounting_periods', JSON.stringify(data));
+            } catch(e) {}
+            renderAccountingPeriodsTable();
+          }
+        }
+      } catch (netErr) {
+        console.warn('Supabase accounting_periods fetch warning:', netErr);
+      }
+    }
+
+    function renderAccountingPeriodsTable() {
+      const tbody = document.getElementById('accounting-periods-table-body');
+      if (!tbody) return;
+
+      const monthNames = {
+        '1': 'January', '2': 'February', '3': 'March', '4': 'April',
+        '5': 'May', '6': 'June', '7': 'July', '8': 'August',
+        '9': 'September', '10': 'October', '11': 'November', '12': 'December'
+      };
+
+      tbody.innerHTML = AppState.accountingPeriods.map(p => {
+        const isOpen = p.status === 'Open';
+        const dateOpened = p.opened_at ? p.opened_at.replace('T', ' ').substring(0, 23) : '';
+        const dateClosed = p.closed_at ? p.closed_at.replace('T', ' ').substring(0, 23) : '';
+        const desc = p.description || monthNames[p.period_month] || `Period ${p.period_no}`;
+
+        return `
+          <tr class="pm-table-row">
+            <td style="padding: 5px 8px; width: 45px; text-align: center; border-right: 1px solid #E5E7EB; font-weight: 600;">${p.period_no}</td>
+            <td style="padding: 5px 12px; text-align: left; border-right: 1px solid #E5E7EB;">${dateOpened}</td>
+            <td style="padding: 5px 10px; width: 60px; text-align: center; border-right: 1px solid #E5E7EB;">${p.period_month}</td>
+            <td style="padding: 5px 10px; width: 65px; text-align: center; border-right: 1px solid #E5E7EB;">${p.period_year}</td>
+            <td style="padding: 5px 14px; text-align: left; border-right: 1px solid #E5E7EB;">${desc}</td>
+            <td style="padding: 5px 12px; text-align: left; border-right: 1px solid #E5E7EB;">${dateClosed}</td>
+            <td style="padding: 5px 12px; width: 85px; text-align: center; border-right: 1px solid #E5E7EB;">
+              <span style="font-weight: 700; color: ${isOpen ? '#16A34A' : '#DC2626'};">
+                ${p.status}
+              </span>
+            </td>
+            <td style="padding: 5px 12px; width: 90px; text-align: center; font-weight: 600;">${p.opened_by || 'DEAN'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function executePeriodRollOver() {
+      const monthSel = document.getElementById('period-rollover-month');
+      const yearSel = document.getElementById('period-rollover-year');
+
+      const monthVal = monthSel ? monthSel.value : '11';
+      const monthName = monthSel ? monthSel.options[monthSel.selectedIndex].text : 'Nov';
+      const yearVal = parseInt(yearSel ? yearSel.value : '2026', 10);
+
+      const monthNames = {
+        '1': 'January', '2': 'February', '3': 'March', '4': 'April',
+        '5': 'May', '6': 'June', '7': 'July', '8': 'August',
+        '9': 'September', '10': 'October', '11': 'November', '12': 'December'
+      };
+      const fullMonthDesc = monthNames[monthVal] || monthName;
+
+      confirmAction(
+        `Are you sure you want to execute Period Roll-Over to <strong>${fullMonthDesc} ${yearVal}</strong>?<br><br>This operation will:<br>1. Close the current open accounting period.<br>2. Open new accounting period for <strong>${fullMonthDesc} ${yearVal}</strong>.<br>3. Automatically post monthly recurring invoices for active leases into the tenant ledger.`,
+        async () => {
+          const nowStr = new Date().toISOString();
+
+          // 1. Close current open period
+          const currentOpen = AppState.accountingPeriods.find(p => p.status === 'Open');
+          if (currentOpen) {
+            currentOpen.status = 'Closed';
+            currentOpen.closed_at = nowStr;
+
+            try {
+              await fetch(`${SUPABASE_CONFIG.url}/rest/v1/accounting_periods?id=eq.${currentOpen.id}`, {
+                method: 'PATCH',
+                headers: {
+                  'apikey': SUPABASE_CONFIG.anonKey,
+                  'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ status: 'Closed', closed_at: nowStr })
+              });
+            } catch (err) {
+              console.warn('Supabase close period warning:', err);
+            }
+          }
+
+          // 2. Open new period
+          const maxNo = AppState.accountingPeriods.reduce((m, p) => Math.max(m, parseInt(p.period_no || 0, 10)), 0);
+          const newPeriodNo = maxNo > 0 ? maxNo + 1 : 47;
+
+          const newPeriodRecord = {
+            id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + Date.now().toString(16).padStart(12, '0'),
+            organization_id: getActiveOrgId(),
+            period_no: newPeriodNo,
+            period_month: monthVal,
+            period_year: yearVal,
+            description: fullMonthDesc,
+            status: 'Open',
+            opened_at: nowStr,
+            closed_at: null,
+            opened_by: 'DEAN',
+            created_at: nowStr
+          };
+
+          AppState.accountingPeriods.unshift(newPeriodRecord);
+          try {
+            localStorage.setItem('mc_erp_accounting_periods', JSON.stringify(AppState.accountingPeriods));
+          } catch(e) {}
+
+          try {
+            await fetch(`${SUPABASE_CONFIG.url}/rest/v1/accounting_periods`, {
+              method: 'POST',
+              headers: {
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(newPeriodRecord)
+            });
+          } catch (err) {
+            console.warn('Supabase new period insert warning:', err);
+          }
+
+          // 3. Bill tenants for new period
+          let billedCount = 0;
+          let totalBilled = 0;
+          for (const lse of AppState.leases) {
+            if (lse.status === 'Active') {
+              const inv = {
+                id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + billedCount).toString(16).padStart(12, '0'),
+                organization_id: getActiveOrgId(),
+                tenant_id: lse.tenantId,
+                property_id: lse.propertyId || 'PROP-03',
+                unit_id: lse.unitId,
+                tenant_code: lse.tenantCode || '',
+                tenant_name: lse.tenantName,
+                unit_code: lse.unitCode,
+                property_name: lse.propertyName,
+                payable_code: '001',
+                description: `${fullMonthDesc} ${yearVal} Rent Roll-Over`,
+                amount: Number(lse.rentAmount || 0),
+                billing_type: 'Bulk',
+                period_month: monthVal,
+                period_year: yearVal,
+                is_paid: false,
+                created_at: nowStr
+              };
+              AppState.tenantInvoices.unshift(inv);
+
+              AppState.ledger.push({
+                id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+                timestamp: nowStr.replace('T', ' ').substring(0, 16),
+                refNo: `RO-${Date.now().toString().slice(-6)}`,
+                tenantId: lse.tenantId,
+                tenantName: lse.tenantName,
+                unitCode: lse.unitCode || '',
+                type: 'Invoice',
+                description: `${fullMonthDesc} ${yearVal} Rent Roll-Over`,
+                debit: Number(lse.rentAmount || 0),
+                credit: 0,
+                balanceAfter: Number(lse.rentAmount || 0)
+              });
+
+              billedCount++;
+              totalBilled += Number(lse.rentAmount || 0);
+            }
+          }
+
+          renderAccountingPeriodsTable();
+          renderLedgerTable();
+          showToast(`✓ Period ${newPeriodNo} (${fullMonthDesc} ${yearVal}) opened successfully! ${billedCount} active tenancies billed (KES ${totalBilled.toLocaleString()}).`);
+        },
+        'Period Roll-Over Confirmation',
+        'Bill Tenants & Open Period'
+      );
+    }
+
     function initAdminCompanySetup() {
       loadAdminCompanyProfile();
       loadBankAccounts();
       loadMpesaPaybills();
+      loadAccountingPeriods();
       switchAdminTab(AppState.activeAdminTab || 'tab-bank-accounts');
     }
 
@@ -5523,15 +6625,39 @@ const AppState = {
     window.renderMpesaPaybillsTable = renderMpesaPaybillsTable;
     window.populateLinkedBankDropdown = populateLinkedBankDropdown;
 
+    // Tenant Invoicing & Period Roll-Over Handlers
+    window.switchTenantTab = switchTenantTab;
+    window.initSingleTenantBilling = initSingleTenantBilling;
+    window.onSinglePropertyChange = onSinglePropertyChange;
+    window.onSingleTenantChange = onSingleTenantChange;
+    window.renderSinglePayablesTable = renderSinglePayablesTable;
+    window.executeSingleTenantBilling = executeSingleTenantBilling;
+    window.initBulkTenantsBilling = initBulkTenantsBilling;
+    window.onBulkPropertyChange = onBulkPropertyChange;
+    window.onBulkPayableChange = onBulkPayableChange;
+    window.renderBulkTenantsTable = renderBulkTenantsTable;
+    window.toggleBulkSelectAll = toggleBulkSelectAll;
+    window.executeBulkTenantsBilling = executeBulkTenantsBilling;
+    window.initArrearsBilling = initArrearsBilling;
+    window.onArrearsPropertyChange = onArrearsPropertyChange;
+    window.onArrearsPayableChange = onArrearsPayableChange;
+    window.renderArrearsTable = renderArrearsTable;
+    window.toggleArrearsSelectAll = toggleArrearsSelectAll;
+    window.executeArrearsBilling = executeArrearsBilling;
+    window.loadAccountingPeriods = loadAccountingPeriods;
+    window.renderAccountingPeriodsTable = renderAccountingPeriodsTable;
+    window.executePeriodRollOver = executePeriodRollOver;
+
     // Initialize Theme and Load Active Module
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'developer';
     setTheme(savedTheme);
 
-    // Initial boot load for Company Profile, Bank Accounts, M-Pesa, & Global Sidebar Branding
+    // Initial boot load for Company Profile, Bank Accounts, M-Pesa, Accounting Periods & Global Sidebar Branding
     updateSidebarBranding(AppState.companyProfile);
     loadAdminCompanyProfile();
     loadBankAccounts();
     loadMpesaPaybills();
+    loadAccountingPeriods();
 
     const initialView = AppState.activeView || 'estate-reg';
     const initialNav = document.querySelector(`.nav-item[data-view="${initialView}"]`);
