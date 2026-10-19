@@ -1,0 +1,540 @@
+<div class="view-content active" id="view-estate-reg">
+
+      <!-- Navigation Segment Tabs -->
+      <div class="reg-nav-tabs">
+        <button class="reg-tab-btn active" data-reg-target="landlords">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>1. Landlord Registration</span>
+        </button>
+        <button class="reg-tab-btn" data-reg-target="tenants">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+          <span>2. Tenant Registration</span>
+        </button>
+        <button class="reg-tab-btn" data-reg-target="properties">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>3. Property Registration</span>
+        </button>
+        <button class="reg-tab-btn" data-reg-target="standalone-units">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="8" height="8" x="2" y="2" rx="2"/><rect width="8" height="8" x="14" y="2" rx="2"/><rect width="8" height="8" x="14" y="14" rx="2"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>
+          <span>4. Standalone Units</span>
+        </button>
+        <button class="reg-tab-btn" data-reg-target="assignments">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>5. Property Assignment</span>
+        </button>
+      </div>
+
+      <!-- 1. LANDLORD REGISTRATION PANEL -->
+      <div class="reg-panel active" id="panel-landlords">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Landlord & Owner Entity Onboarding</h2>
+              <p>Register individual and corporate property owners with statutory KRA PIN and remittance routing.</p>
+            </div>
+            <span class="live-pulse-badge">multi-tenant: organization_id</span>
+          </div>
+
+          <form id="form-landlord" onsubmit="handleLandlordSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Entity Type</label>
+                <select class="form-input" id="landlord-entity-type" onchange="toggleLandlordEntityFields()">
+                  <option value="INDIVIDUAL">Individual Owner</option>
+                  <option value="CORPORATE">Corporate / Trust / Investment Firm</option>
+                </select>
+              </div>
+              <div class="form-group" id="group-ll-first-name">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-input" id="landlord-first-name" required placeholder="e.g. Dennis">
+              </div>
+              <div class="form-group" id="group-ll-middle-name">
+                <label class="form-label">Middle Name</label>
+                <input type="text" class="form-input" id="landlord-middle-name" placeholder="e.g. Kamau">
+              </div>
+              <div class="form-group" id="group-ll-last-name">
+                <label class="form-label">Last Name / Surname</label>
+                <input type="text" class="form-input" id="landlord-last-name" required placeholder="e.g. Mugo">
+              </div>
+              <div class="form-group span-full" id="group-ll-company-name" style="display: none;">
+                <label class="form-label">Company / Trust Entity Name</label>
+                <input type="text" class="form-input" id="landlord-company-name" placeholder="e.g. Mugo Investments Holdings Ltd">
+              </div>
+              <div class="form-group">
+                <label class="form-label">National ID / Registration No.</label>
+                <input type="text" class="form-input" id="landlord-id-reg" required placeholder="e.g. 24891023 or CPR/2018/9812">
+              </div>
+              <div class="form-group">
+                <label class="form-label">KRA PIN Number</label>
+                <input type="text" class="form-input" id="landlord-kra-pin" required placeholder="e.g. P051189201A">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Primary Phone (E.164)</label>
+                <input type="tel" class="form-input" id="landlord-phone" required placeholder="e.g. +254722000111">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="landlord-email" placeholder="e.g. owner@investments.co.ke">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Remittance Method</label>
+                <select class="form-input" id="landlord-remit-method" onchange="toggleLandlordRemitFields()">
+                  <option value="BANK">Bank Electronic Funds Transfer</option>
+                  <option value="MPESA_B2C">Safaricom M-Pesa B2C Mobile</option>
+                </select>
+              </div>
+              <div class="form-group" id="group-ll-bank-name">
+                <label class="form-label">Bank Name</label>
+                <select class="form-input" id="landlord-bank-name">
+                  <option value="KCB Bank Kenya">KCB Bank Kenya</option>
+                  <option value="Equity Bank Kenya">Equity Bank Kenya</option>
+                  <option value="Standard Chartered Kenya">Standard Chartered Kenya</option>
+                  <option value="NCBA Bank Kenya">NCBA Bank Kenya</option>
+                  <option value="Co-operative Bank">Co-operative Bank</option>
+                  <option value="Absa Bank Kenya">Absa Bank Kenya</option>
+                </select>
+              </div>
+              <div class="form-group" id="group-ll-bank-branch">
+                <label class="form-label">Bank Branch</label>
+                <input type="text" class="form-input" id="landlord-bank-branch" placeholder="e.g. Thika Section 9 Branch">
+              </div>
+              <div class="form-group" id="group-ll-bank-acc">
+                <label class="form-label">Bank Account Number</label>
+                <input type="text" class="form-input" id="landlord-bank-acc" placeholder="e.g. 1120948192">
+              </div>
+              <div class="form-group" id="group-ll-mpesa-b2c" style="display: none;">
+                <label class="form-label">M-Pesa B2C Payout Mobile No.</label>
+                <input type="tel" class="form-input" id="landlord-mpesa-phone" placeholder="e.g. 0722000111">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Register Landlord</button>
+            </div>
+          </form>
+
+          <!-- Directory Table -->
+          <div style="margin-top: 14px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Registered Landlords</h3>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Entity</th>
+                    <th>Name / Corporate Name</th>
+                    <th>ID / Reg No.</th>
+                    <th>KRA PIN</th>
+                    <th>Primary Phone</th>
+                    <th>Remittance Target</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="table-landlords-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. TENANT REGISTRATION PANEL -->
+      <div class="reg-panel" id="panel-tenants">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Tenant Entity Onboarding</h2>
+              <p>Register residential and commercial tenants with primary billing numbers for automated M-Pesa C2B reconciliation.</p>
+            </div>
+            <span class="live-pulse-badge">Daraja C2B Matchable</span>
+          </div>
+
+          <form id="form-tenant" onsubmit="handleTenantSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-input" id="tenant-first-name" required placeholder="e.g. Grace">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Middle Name</label>
+                <input type="text" class="form-input" id="tenant-middle-name" placeholder="e.g. Wanjiru">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Surname</label>
+                <input type="text" class="form-input" id="tenant-surname" required placeholder="e.g. Ndung'u">
+              </div>
+              <div class="form-group">
+                <label class="form-label">National ID / Passport Number</label>
+                <input type="text" class="form-input" id="tenant-id-passport" required placeholder="e.g. 31984210">
+              </div>
+              <div class="form-group">
+                <label class="form-label">KRA PIN (Optional)</label>
+                <input type="text" class="form-input" id="tenant-kra-pin" placeholder="e.g. A010948192K">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Primary Billing Mobile (M-Pesa C2B)</label>
+                <input type="tel" class="form-input" id="tenant-phone-primary" required placeholder="e.g. 0712345678">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="tenant-email" placeholder="e.g. grace.ndungu@gmail.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Emergency Contact Name</label>
+                <input type="text" class="form-input" id="tenant-emergency-name" placeholder="e.g. John Ndung'u (Brother)">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Emergency Contact Phone</label>
+                <input type="tel" class="form-input" id="tenant-emergency-phone" placeholder="e.g. 0722998877">
+              </div>
+              <div class="form-group span-full">
+                <label class="form-label">Physical / Workplace Details</label>
+                <input type="text" class="form-input" id="tenant-workplace" placeholder="e.g. Senior Auditor, PwC Kenya, Delta Corner Tower A, Westlands">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Register Tenant</button>
+            </div>
+          </form>
+
+          <!-- Directory Table -->
+          <div style="margin-top: 14px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Registered Tenants</h3>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Full Name</th>
+                    <th>ID / Passport</th>
+                    <th>Billing Phone (C2B)</th>
+                    <th>KRA PIN</th>
+                    <th>Emergency Contact</th>
+                    <th>Workplace Details</th>
+                  </tr>
+                </thead>
+                <tbody id="table-tenants-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. PROPERTY REGISTRATION (MULTI-SEGMENT WORKFLOW) -->
+      <div class="reg-panel" id="panel-properties">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Property Onboarding Workflow</h2>
+              <p>Primary registration with inline units builder and pre-configured property payables.</p>
+            </div>
+            <span class="live-pulse-badge">Multi-Segment Onboarding</span>
+          </div>
+
+          <form id="form-property" onsubmit="handlePropertySubmit(event)">
+            <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 12px;">Step 1: Primary Property Attributes</h3>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Property Name</label>
+                <input type="text" class="form-input" id="prop-name" required placeholder="e.g. Chania Falls View Courts">
+              </div>
+              <div class="form-group">
+                <label class="form-label">LR Number (Land Registration)</label>
+                <input type="text" class="form-input" id="prop-lr" required placeholder="e.g. THIKA/MUNICIPALITY/BLOCK 4/182">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Property Type</label>
+                <select class="form-input" id="prop-type">
+                  <option value="RESIDENTIAL">Residential Apartment / Estate</option>
+                  <option value="COMMERCIAL">Commercial Office / Retail Plaza</option>
+                  <option value="MIXED_USE">Mixed-Use Commercial & Residential</option>
+                  <option value="INDUSTRIAL">Industrial Warehousing / Logistics Park</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">County</label>
+                <select class="form-input" id="prop-county">
+                  <option value="Kiambu">Kiambu County</option>
+                  <option value="Nairobi">Nairobi County</option>
+                  <option value="Mombasa">Mombasa County</option>
+                  <option value="Machakos">Machakos County</option>
+                  <option value="Nakuru">Nakuru County</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Sub-County / Location</label>
+                <input type="text" class="form-input" id="prop-subcounty" placeholder="e.g. Section 9, Thika">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Paybill Billing Prefix (M-Pesa)</label>
+                <input type="text" class="form-input" id="prop-paybill-prefix" required placeholder="e.g. CFV">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Caretaker Name</label>
+                <input type="text" class="form-input" id="prop-caretaker-name" placeholder="e.g. Samuel Mwangi">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Caretaker Phone</label>
+                <input type="tel" class="form-input" id="prop-caretaker-phone" placeholder="e.g. 0722445566">
+              </div>
+            </div>
+
+            <!-- Nested Segment 1: Units Builder -->
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--divider-color);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                  <h3 style="font-size: 1rem; font-weight: 700;">Nested Segment 1 — Units Builder</h3>
+                  <p style="font-size: 0.78rem; color: var(--text-muted);">Define units inline during initial property onboarding.</p>
+                </div>
+                <button type="button" class="btn-action-pill" onclick="addUnitBuilderRow()">+ Add Unit Row</button>
+              </div>
+
+              <div class="builder-table-wrap">
+                <table class="builder-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 15%;">Unit Code</th>
+                      <th style="width: 15%;">Floor</th>
+                      <th style="width: 25%;">Room Configuration</th>
+                      <th style="width: 15%;">Base Rent (KES)</th>
+                      <th style="width: 15%;">Service Charge</th>
+                      <th style="width: 10%;">Meter Serial</th>
+                      <th style="width: 5%;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="builder-units-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Nested Segment 2: Property Payables -->
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--divider-color);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                  <h3 style="font-size: 1rem; font-weight: 700;">Nested Segment 2 — Property Payables & Liabilities</h3>
+                  <p style="font-size: 0.78rem; color: var(--text-muted);">Pre-configure utility providers, land rates, security contracts, and allocation rules.</p>
+                </div>
+                <button type="button" class="btn-action-pill" onclick="addPayableBuilderRow()">+ Add Payable Row</button>
+              </div>
+
+              <div class="builder-table-wrap">
+                <table class="builder-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 25%;">Payable Name & Provider</th>
+                      <th style="width: 15%;">Category</th>
+                      <th style="width: 20%;">Provider Account / Meter</th>
+                      <th style="width: 15%;">Budget / Amount</th>
+                      <th style="width: 12%;">Frequency</th>
+                      <th style="width: 18%;">Allocation Rule</th>
+                      <th style="width: 5%;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="builder-payables-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+              <button type="submit" class="btn-elevated-primary">+ Complete Property Onboarding</button>
+            </div>
+          </form>
+
+          <!-- Properties Directory Table -->
+          <div style="margin-top: 20px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Onboarded Properties</h3>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Property Name</th>
+                    <th>LR Number</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Prefix</th>
+                    <th>Units Configured</th>
+                    <th>Payables Configured</th>
+                  </tr>
+                </thead>
+                <tbody id="table-properties-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. STANDALONE UNIT REGISTRATION -->
+      <div class="reg-panel" id="panel-standalone-units">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Standalone Unit Registration & Editing</h2>
+              <p>Add new units to existing properties with plinth dimensions, sub-metering serials, and baseline rates.</p>
+            </div>
+            <span class="live-pulse-badge">Post-Onboarding Units</span>
+          </div>
+
+          <form id="form-standalone-unit" onsubmit="handleStandaloneUnitSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group span-full">
+                <label class="form-label">Select Target Property</label>
+                <select class="form-input" id="standalone-prop-select" required></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Unit Code</label>
+                <input type="text" class="form-input" id="unit-code" required placeholder="e.g. Unit A-04 or Suite 201">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Floor Level</label>
+                <input type="text" class="form-input" id="unit-floor" placeholder="e.g. 2nd Floor">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Room Configuration</label>
+                <select class="form-input" id="unit-room-config">
+                  <option value="1_BEDROOM">1 Bedroom Apartment</option>
+                  <option value="2_BEDROOM">2 Bedroom Executive</option>
+                  <option value="3_BEDROOM">3 Bedroom Master Ensuite</option>
+                  <option value="BEDSITTER">Studio / Bedsitter</option>
+                  <option value="COMMERCIAL_OFFICE">Commercial Office Suite</option>
+                  <option value="RETAIL_SHOP">Ground Floor Retail Shop</option>
+                  <option value="WAREHOUSE_BAY">Industrial Warehouse Bay</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Plinth Area (Sq Metres / Sq Ft)</label>
+                <input type="number" step="0.01" class="form-input" id="unit-plinth" placeholder="e.g. 85.5">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Baseline Rent (KES / Month)</label>
+                <input type="number" step="0.01" class="form-input" id="unit-baseline-rent" required placeholder="e.g. 35000">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Service Charge (KES / Month)</label>
+                <input type="number" step="0.01" class="form-input" id="unit-service-charge" placeholder="e.g. 4500">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Water Sub-Meter Serial Number</label>
+                <input type="text" class="form-input" id="unit-water-meter" placeholder="e.g. WM-2024-0091">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Initial Water Reading (m³)</label>
+                <input type="number" step="0.01" class="form-input" id="unit-water-reading" placeholder="e.g. 142.50">
+              </div>
+              <div class="form-group">
+                <label class="form-label">KPLC Electricity Meter Number</label>
+                <input type="text" class="form-input" id="unit-elec-meter" placeholder="e.g. 04291829102">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Add Standalone Unit</button>
+            </div>
+          </form>
+
+          <!-- Units Directory Table -->
+          <div style="margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Units Inventory</h3>
+              <select class="pill-select" id="filter-units-by-property" onchange="renderUnitsTable()"></select>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Unit Code</th>
+                    <th>Property</th>
+                    <th>Floor</th>
+                    <th>Configuration</th>
+                    <th>Plinth Area</th>
+                    <th>Base Rent</th>
+                    <th>Service Charge</th>
+                    <th>Water Meter</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="table-units-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. PROPERTY ASSIGNMENT (MANAGEMENT MANDATES) -->
+      <div class="reg-panel" id="panel-assignments">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Property Assignment & Management Mandate</h2>
+              <p>Formally link Landlords to Properties with commission percentages, 7.5% MRI Withholding status, and 16% agency VAT.</p>
+            </div>
+            <span class="live-pulse-badge">Mandate Execution</span>
+          </div>
+
+          <form id="form-mandate" onsubmit="handleMandateSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Registered Landlord</label>
+                <select class="form-input" id="mandate-landlord-select" required></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Target Property</label>
+                <select class="form-input" id="mandate-property-select" required></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Assigned Property Manager</label>
+                <input type="text" class="form-input" id="mandate-manager" required placeholder="e.g. Eng. Dennis Mugo (Branch Lead)">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Effective Start Date</label>
+                <input type="date" class="form-input" id="mandate-effective-date" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                <input type="date" class="form-input" id="mandate-expiry-date">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Agency Management Fee (%)</label>
+                <input type="number" step="0.1" class="form-input" id="mandate-fee-pct" required placeholder="e.g. 8.5">
+              </div>
+              <div class="form-group span-full">
+                <label class="form-label">Disbursement Remittance Account</label>
+                <input type="text" class="form-input" id="mandate-disburse-acc" placeholder="e.g. KCB Bank Kenya — Acc: 1120948192 (Auto-derived from Landlord master)">
+              </div>
+              <div class="form-group span-full" style="display: flex; gap: 28px; margin-top: 4px;">
+                <label class="form-checkbox-label">
+                  <input type="checkbox" id="mandate-vat-applicable" checked>
+                  <span>16% VAT Applicable on Management Fee</span>
+                </label>
+                <label class="form-checkbox-label">
+                  <input type="checkbox" id="mandate-mri-applicable" checked>
+                  <span>7.5% Residential Monthly Rental Income (MRI) Tax Withheld</span>
+                </label>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Execute Management Mandate</button>
+            </div>
+          </form>
+
+          <!-- Mandates Directory Table -->
+          <div style="margin-top: 20px;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">Active Management Mandates</h3>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Landlord</th>
+                    <th>Property Assigned</th>
+                    <th>Effective - Expiry</th>
+                    <th>Mgmt Fee %</th>
+                    <th>16% VAT</th>
+                    <th>7.5% MRI Tax</th>
+                    <th>Property Manager</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="table-mandates-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SUB-MODULE 1.2: TENANTS (LEASES, METERING, INVOICING, DOUBLE-ENTRY LEDGER) -->

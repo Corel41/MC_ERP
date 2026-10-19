@@ -1,0 +1,446 @@
+<div class="view-content" id="view-estate-tenants">
+
+      <!-- Navigation Segment Tabs for 1.2 Tenants -->
+      <div class="tenant-nav-tabs">
+        <button class="tenant-tab-btn active" data-tenant-target="leases">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>1. Active Leases & Onboarding</span>
+        </button>
+        <button class="tenant-tab-btn" data-tenant-target="metering">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="M2 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="M12 22v-4"/><path d="m19.07 19.07-2.83-2.83"/><path d="M22 12h-4"/><path d="m19.07 4.93-2.83 2.83"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>2. Meter Readings Engine</span>
+        </button>
+        <button class="tenant-tab-btn" data-tenant-target="billing">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          <span>3. Monthly Billing Run</span>
+        </button>
+        <button class="tenant-tab-btn" data-tenant-target="ledger">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span>4. Tenant Ledger / Receipting</span>
+        </button>
+      </div>
+
+      <!-- 1. ACTIVE LEASES & ONBOARDING PANEL -->
+      <div class="tenant-panel active" id="panel-tenant-leases">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Tenant Lease Agreements & Unit Allocation</h2>
+              <p>Execute legally binding unit tenancies, configure baseline rent, service charge covenants, and security deposits.</p>
+            </div>
+            <span class="live-pulse-badge">PostgreSQL: uq_active_unit_lease (Double-Booking Exclusion)</span>
+          </div>
+
+          <form id="form-lease" onsubmit="handleLeaseSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Tenant</label>
+                <select class="form-input" id="lease-tenant-select" required>
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Assigned Unit</label>
+                <select class="form-input" id="lease-unit-select" required onchange="handleLeaseUnitSelect(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lease Start Date</label>
+                <input type="date" class="form-input" id="lease-start-date" required value="2026-10-01">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Lease Expiry Date</label>
+                <input type="date" class="form-input" id="lease-end-date" value="2027-09-30">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Monthly Baseline Rent (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="lease-rent-amount" required placeholder="32000.00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Monthly Service Charge (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="lease-sc-amount" required placeholder="3500.00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Security Deposit Held (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="lease-deposit-amount" required placeholder="32000.00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Handover Water Meter Reading (m³)</label>
+                <input type="number" step="0.01" class="form-input" id="lease-handover-water" placeholder="e.g. 142.50">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Electricity Meter Serial / Account</label>
+                <input type="text" class="form-input" id="lease-electricity-meter" placeholder="e.g. 14190823901">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Execute Lease Agreement</button>
+            </div>
+          </form>
+
+          <!-- Directory Table of Active Leases -->
+          <div style="margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Active Lease Agreements</h3>
+              <span class="badge-status" id="lease-counter-badge" style="color: var(--accent-secondary);">2 Active Leases</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Tenant Name</th>
+                    <th>Unit & Property</th>
+                    <th>Rent (KES)</th>
+                    <th>Service Charge</th>
+                    <th>Deposit Held</th>
+                    <th>Lease Term</th>
+                    <th>Handover Water</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-leases-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. METER READINGS ENGINE PANEL -->
+      <div class="tenant-panel" id="panel-tenant-metering">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Utility Sub-Metering & Quick-Entry Engine</h2>
+              <p>Record monthly water and electricity sub-meter readings with automated volume consumption calculation and tariff rate billing.</p>
+            </div>
+            <span class="live-pulse-badge">Generated Column: consumption STORED</span>
+          </div>
+
+          <form id="form-meter-reading" onsubmit="handleMeterReadingSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Property & Unit</label>
+                <select class="form-input" id="meter-unit-select" required onchange="handleMeterUnitSelect(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Meter Type</label>
+                <select class="form-input" id="meter-type-select">
+                  <option value="Water">Water (m³ Sub-Meter)</option>
+                  <option value="Electricity">Electricity (kWh Sub-Meter)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Reading Date</label>
+                <input type="date" class="form-input" id="meter-reading-date" required value="2026-10-01">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Previous Reading</label>
+                <input type="number" step="0.01" class="form-input" id="meter-prev-reading" required value="0.00" oninput="calculateMeterConsumption()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Current Reading</label>
+                <input type="number" step="0.01" class="form-input" id="meter-curr-reading" required placeholder="e.g. 156.00" oninput="calculateMeterConsumption()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Computed Consumption</label>
+                <input type="number" step="0.01" class="form-input" id="meter-consumption" readonly value="0.00" style="font-weight: 700; color: var(--accent-primary);">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tariff Rate (KES / Unit)</label>
+                <input type="number" step="0.01" class="form-input" id="meter-tariff-rate" required value="150.00" oninput="calculateMeterConsumption()">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Total Computed Bill (KES)</label>
+                <input type="number" step="0.01" class="form-input" id="meter-total-bill" readonly value="0.00" style="font-weight: 800; color: var(--accent-secondary);">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Audit Note / Tag</label>
+                <input type="text" class="form-input" id="meter-audit-note" placeholder="Monthly Routine Cycle">
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+              <button type="submit" class="btn-elevated-primary">+ Record Utility Reading</button>
+            </div>
+          </form>
+
+          <!-- Readings History Table -->
+          <div style="margin-top: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Sub-Meter Reading Log</h3>
+              <span class="badge-status" style="color: var(--accent-secondary);">dbo_Bill_Readings Sync</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Unit & Property</th>
+                    <th>Meter Type</th>
+                    <th>Reading Date</th>
+                    <th>Previous</th>
+                    <th>Current</th>
+                    <th>Consumption</th>
+                    <th>Tariff</th>
+                    <th>Total Bill (KES)</th>
+                    <th>Billing Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="table-readings-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. MONTHLY BILLING RUN PANEL -->
+      <div class="tenant-panel" id="panel-tenant-billing">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Automated Monthly Billing & Invoicing Engine</h2>
+              <p>Generate consolidated 1st-of-month tenant invoices aggregating rent, service charges, utility sub-metering, and carried arrears.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_Tenant_Bills Invoicing Engine</span>
+          </div>
+
+          <!-- Billing Trigger Strip -->
+          <div style="background: var(--nav-active-bg); border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px;">
+            <div class="form-group" style="min-width: 140px;">
+              <label class="form-label">Billing Month</label>
+              <select class="form-input" id="bill-period-month">
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10" selected>October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width: 110px;">
+              <label class="form-label">Billing Year</label>
+              <select class="form-input" id="bill-period-year">
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width: 220px; flex: 1;">
+              <label class="form-label">Target Property</label>
+              <select class="form-input" id="bill-target-property">
+                <option value="ALL">All Properties (Consolidated Run)</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width: 160px;">
+              <label class="form-label">Invoice Due Date</label>
+              <input type="date" class="form-input" id="bill-due-date" value="2026-10-05">
+            </div>
+            <div>
+              <button type="button" class="btn-elevated-primary" onclick="executeMonthlyBillingRun()" style="height: 42px;">
+                ⚡ Execute Monthly Billing Run
+              </button>
+            </div>
+          </div>
+
+          <!-- Billing Stats Strip -->
+          <div class="stat-pill-group">
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Invoiced (October 2026)</span>
+              <span class="stat-pill-value" id="stat-total-invoiced" style="color: var(--accent-primary);">KES 120,025</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Collected / Settled</span>
+              <span class="stat-pill-value" id="stat-total-collected" style="color: var(--accent-secondary);">KES 37,525</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Outstanding Period Arrears</span>
+              <span class="stat-pill-value" id="stat-total-arrears" style="color: var(--accent-amber);">KES 82,500</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Invoices Issued</span>
+              <span class="stat-pill-value" id="stat-invoice-count">2 Invoices</span>
+            </div>
+          </div>
+
+          <!-- Invoices Directory Table -->
+          <div style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Generated Tenant Invoices</h3>
+              <span class="badge-status" style="color: var(--accent-secondary);">Auto-Synced to Ledger</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Invoice No.</th>
+                    <th>Period</th>
+                    <th>Tenant</th>
+                    <th>Unit & Property</th>
+                    <th>Rent</th>
+                    <th>Service Chg</th>
+                    <th>Water / Util</th>
+                    <th>Total Invoiced</th>
+                    <th>Due Date</th>
+                    <th>Payment Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="table-invoices-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. TENANT LEDGER / RECEIPTING PANEL -->
+      <div class="tenant-panel" id="panel-tenant-ledger">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Tenant Double-Entry Ledger & Statement of Account</h2>
+              <p>Searchable double-entry ledger detailing all debits (charges & invoices) and credits (M-Pesa C2B Paybill & bank receipts) with running balance reconciliation.</p>
+            </div>
+            <span class="live-pulse-badge">Double-Entry Financial Ledger</span>
+          </div>
+
+          <!-- Filter & Action Bar -->
+          <div style="background: var(--nav-active-bg); border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; flex: 1;">
+              <div class="form-group" style="min-width: 240px;">
+                <label class="form-label">Filter By Tenant Statement</label>
+                <select class="form-input" id="ledger-tenant-filter" onchange="renderLedgerTable()">
+                  <option value="ALL">All Tenants (Consolidated Ledger)</option>
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+              <div class="form-group" style="min-width: 200px;">
+                <label class="form-label">Search Reference / M-Pesa</label>
+                <input type="text" class="form-input" id="ledger-search-query" placeholder="Filter by Code or Ref..." oninput="renderLedgerTable()">
+              </div>
+            </div>
+            <button type="button" class="btn-elevated-primary" onclick="openReceiptModal()">
+              💳 Log Payment Receipt (M-Pesa / Bank)
+            </button>
+          </div>
+
+          <!-- Ledger Totals -->
+          <div class="stat-pill-group">
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Debits (Invoices / Charges)</span>
+              <span class="stat-pill-value" id="ledger-stat-debits" style="color: var(--accent-primary);">KES 120,025</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Total Credits (Receipts Settled)</span>
+              <span class="stat-pill-value" id="ledger-stat-credits" style="color: var(--accent-secondary);">KES 37,525</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-title">Current Net Balance (Arrears)</span>
+              <span class="stat-pill-value" id="ledger-stat-balance" style="color: var(--accent-amber);">KES 82,500</span>
+            </div>
+          </div>
+
+          <!-- Ledger Statement Table -->
+          <div style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Double-Entry Ledger Statement</h3>
+              <span class="badge-status" style="color: var(--accent-secondary);">Immutable Audit Trail</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Ref / M-Pesa Code</th>
+                    <th>Tenant Name</th>
+                    <th>Unit</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Debit (Charges)</th>
+                    <th>Credit (Paid)</th>
+                    <th>Running Balance</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="table-ledger-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RECEIPTING MODAL FOR M-PESA C2B & BANK PAYMENTS -->
+    <div class="modal-overlay" id="modal-receipt">
+      <div class="modal-card">
+        <div class="modal-header-strip">
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 800;">Log Tenant Payment Receipt</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Post M-Pesa C2B Paybill, Bank Deposit or Cheque to Tenant Ledger with Instant Invoice Reconciliation.</p>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="closeReceiptModal()" title="Close">&times;</button>
+        </div>
+
+        <form id="form-receipt" onsubmit="handleReceiptSubmit(event)">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Payment Channel</label>
+              <select class="form-input" id="receipt-channel">
+                <option value="MPESA_C2B">Safaricom Daraja M-Pesa C2B Paybill</option>
+                <option value="BANK_DEPOSIT">Bank Transfer / KCB / Equity / Stanchart</option>
+                <option value="RTGS">RTGS Electronic Settlement</option>
+                <option value="CHEQUE">Banker's Cheque</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Transaction Reference / M-Pesa Code</label>
+              <input type="text" class="form-input" id="receipt-ref-no" required placeholder="e.g. QKJ8910238 or BNK-82910">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tenant</label>
+              <select class="form-input" id="receipt-tenant-select" required onchange="handleReceiptTenantSelect(this.value)">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Matching Active Lease / Unit</label>
+              <select class="form-input" id="receipt-lease-select" required>
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount Paid (KES)</label>
+              <input type="number" step="0.01" class="form-input" id="receipt-amount" required placeholder="32000.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Payment Date & Time</label>
+              <input type="datetime-local" class="form-input" id="receipt-datetime" required>
+            </div>
+            <div class="form-group span-full">
+              <label class="form-label">Invoice Allocation (Optional)</label>
+              <select class="form-input" id="receipt-invoice-select">
+                <option value="AUTO">Auto-Reconcile Oldest Unpaid Invoices</option>
+              </select>
+            </div>
+            <div class="form-group span-full">
+              <label class="form-label">Payment Description / Notes</label>
+              <input type="text" class="form-input" id="receipt-notes" placeholder="e.g. October 2026 Rent & Water settlement via M-Pesa">
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+            <button type="button" class="btn-action-pill" onclick="closeReceiptModal()" style="padding: 10px 18px;">Cancel</button>
+            <button type="submit" class="btn-elevated-primary">✓ Confirm & Post to Ledger</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- SUB-MODULE 1.3: LANDLORDS (PORTFOLIO, STATEMENTS ENGINE, REMITTANCE & PAYOUT QUEUE) -->

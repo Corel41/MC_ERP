@@ -1,0 +1,422 @@
+<div class="view-content" id="view-estate-repairs">
+
+      <!-- Navigation Segment Tabs for 1.4 Repairs -->
+      <div class="repair-nav-tabs">
+        <button class="repair-tab-btn active" data-repair-target="tickets">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>1. Incident Ticketing</span>
+        </button>
+        <button class="repair-tab-btn" data-repair-target="work-orders">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <span>2. Work Orders & LPO Engine</span>
+        </button>
+        <button class="repair-tab-btn" data-repair-target="vendors">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>3. Vendors & Contractors</span>
+        </button>
+        <button class="repair-tab-btn" data-repair-target="allocation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span>4. 3-Way Cost Allocation Ledger</span>
+        </button>
+      </div>
+
+      <!-- 1. INCIDENT TICKETING & MAINTENANCE REQUESTS PANEL -->
+      <div class="repair-panel active" id="panel-repair-tickets">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Incident Ticketing & Maintenance Requests</h2>
+              <p>Log reactive maintenance faults, assign trade categories and urgency priority ratings, link affected tenancy units, and dispatch work orders.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_Pro_Tasks Sync Engine</span>
+          </div>
+
+          <!-- Ticket Creation Form -->
+          <form id="form-maintenance-ticket" onsubmit="handleTicketSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Managed Property</label>
+                <select class="form-input" id="ticket-property-select" required onchange="handleTicketPropertyChange(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Unit / Location</label>
+                <select class="form-input" id="ticket-unit-select" onchange="handleTicketUnitChange(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Tenancy / Occupant</label>
+                <select class="form-input" id="ticket-tenant-select">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Trade / Defect Category</label>
+                <select class="form-input" id="ticket-category-select" required>
+                  <option value="Plumbing">Plumbing & Drainage</option>
+                  <option value="Electrical">Electrical & Lighting</option>
+                  <option value="Carpentry">Carpentry & Joinery</option>
+                  <option value="Masonry">Masonry & Tiling</option>
+                  <option value="Painting">Painting & Wall Finishes</option>
+                  <option value="Roofing">Roofing & Gutters</option>
+                  <option value="Appliance">Appliances & Fixtures</option>
+                  <option value="General">General Repairs</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Severity Priority</label>
+                <select class="form-input" id="ticket-priority-select" required>
+                  <option value="Low">Low (Routine maintenance within 7 days)</option>
+                  <option value="Medium" selected>Medium (Standard defect within 48 hrs)</option>
+                  <option value="High">High (Urgent disruption within 24 hrs)</option>
+                  <option value="Emergency">Emergency (Immediate hazard / water leak / fire risk)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Reported By</label>
+                <select class="form-input" id="ticket-reported-by-select" required>
+                  <option value="Tenant">Tenant</option>
+                  <option value="Caretaker">Estate Caretaker</option>
+                  <option value="Landlord">Landlord</option>
+                  <option value="Inspection">Routine Inspection</option>
+                </select>
+              </div>
+
+              <div class="form-group span-full">
+                <label class="form-label">Defect Description & Incident Notes</label>
+                <textarea class="form-input" id="ticket-desc-input" rows="3" required placeholder="Describe specific defects, symptoms, location within unit (e.g., master bath valve leaking heavily), and any immediate precautions taken..."></textarea>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+              <button type="submit" class="btn-elevated-primary">✓ Log Maintenance Incident Ticket</button>
+            </div>
+          </form>
+
+          <!-- Tickets Directory Table -->
+          <div style="margin-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Active Maintenance Tickets & Defect Log</h3>
+              <span class="badge-status" id="tickets-count-badge" style="color: var(--accent-primary);">0 Tickets</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Ticket #</th>
+                    <th>Reported Date</th>
+                    <th>Property & Unit</th>
+                    <th>Tenant / Reporter</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-maintenance-tickets-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. WORK ORDERS & LPO ENGINE PANEL -->
+      <div class="repair-panel" id="panel-repair-work-orders">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Local Purchase Orders (LPO) & Contractor Work Orders</h2>
+              <p>Issue binding purchase orders to certified vendors, define work scopes, fix estimated budgets, and designate the 3-way cost allocation route.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_PR_LPO Procurement Sync</span>
+          </div>
+
+          <!-- LPO Creation Form -->
+          <form id="form-work-order" onsubmit="handleWorkOrderSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Linked Incident Ticket</label>
+                <select class="form-input" id="wo-ticket-select" onchange="handleWoTicketSelect(this.value)">
+                  <!-- Dynamically populated with open tickets -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Assigned Vendor / Contractor</label>
+                <select class="form-input" id="wo-vendor-select" required>
+                  <!-- Dynamically populated from vendors list -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Property</label>
+                <select class="form-input" id="wo-property-select" required onchange="handleWoPropertyChange(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Unit / Common Zone</label>
+                <select class="form-input" id="wo-unit-select">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Estimated Cost (KES)</label>
+                <input type="number" step="0.01" min="0" class="form-input" id="wo-est-cost-input" required placeholder="0.00" oninput="if(!document.getElementById('wo-act-cost-input').value) document.getElementById('wo-act-cost-input').value = this.value;">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Actual / Invoiced Cost (KES)</label>
+                <input type="number" step="0.01" min="0" class="form-input" id="wo-act-cost-input" required placeholder="0.00">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">3-Way Cost Allocation Route</label>
+                <select class="form-input" id="wo-allocation-select" required>
+                  <option value="Landlord Deductible" selected>Landlord Deductible (Deducted from Landlord Monthly Remittance)</option>
+                  <option value="Tenant Damage Recovery">Tenant Damage Recovery (Billed to Tenant Debit Ledger / Invoice Surcharge)</option>
+                  <option value="Common Service Charge Pool">Common Service Charge Pool (Absorbed by Estate Service Charge Reserve Pool)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Approval Status</label>
+                <select class="form-input" id="wo-status-select" required>
+                  <option value="Approved" selected>Approved (Issued to Contractor)</option>
+                  <option value="Draft">Draft (Pending Verification)</option>
+                  <option value="Fulfilled">Fulfilled (Work Completed & Certified)</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Authorizing Officer</label>
+                <input type="text" class="form-input" id="wo-approved-by-input" required value="Eng. Dennis Mugo / Property Manager">
+              </div>
+
+              <div class="form-group span-full">
+                <label class="form-label">Scope of Work & Technical Specifications</label>
+                <textarea class="form-input" id="wo-scope-input" rows="3" required placeholder="Detail specific contractor scope, required parts, warranty terms, and agreed completion deadlines..."></textarea>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+              <button type="submit" class="btn-elevated-primary">✓ Issue & Authorize Local Purchase Order (LPO)</button>
+            </div>
+          </form>
+
+          <!-- Work Orders Directory Table -->
+          <div style="margin-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Issued Work Orders & Contractor LPOs</h3>
+              <span class="badge-status" id="work-orders-count-badge" style="color: var(--accent-secondary);">0 LPOs</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>LPO #</th>
+                    <th>Issued Date</th>
+                    <th>Vendor / Contractor</th>
+                    <th>Property & Unit</th>
+                    <th>Scope of Work</th>
+                    <th>Est. Cost</th>
+                    <th>Actual Cost</th>
+                    <th>Cost Allocation</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-work-orders-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. VENDORS & CONTRACTORS REGISTRY PANEL -->
+      <div class="repair-panel" id="panel-repair-vendors">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Vendors & Approved Contractors Registry</h2>
+              <p>Registry of approved tradesmen, technicians, and specialized contractors with verified contact information, KRA PIN compliance, and payment details.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_Vendor / dbo_Vendor_Creditor</span>
+          </div>
+
+          <!-- Vendor Registration Form -->
+          <form id="form-vendor-reg" onsubmit="handleVendorSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Vendor / Enterprise Name</label>
+                <input type="text" class="form-input" id="vendor-name-input" required placeholder="e.g. Aquaflow Plumbing Specialists">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Trade Speciality</label>
+                <select class="form-input" id="vendor-trade-select" required>
+                  <option value="Plumbing">Plumbing & Drainage</option>
+                  <option value="Electrical">Electrical & Lighting</option>
+                  <option value="Carpentry">Carpentry & Joinery</option>
+                  <option value="Painting">Painting & Decorating</option>
+                  <option value="Masonry">Masonry & Civil Works</option>
+                  <option value="Roofing">Roofing & Waterproofing</option>
+                  <option value="HVAC / Aircon">HVAC & Air Conditioning</option>
+                  <option value="Landscaping">Landscaping & Grounds</option>
+                  <option value="General Contracting">General Building Contracting</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Lead Contact Person</label>
+                <input type="text" class="form-input" id="vendor-contact-input" required placeholder="e.g. Dennis Gitau">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Primary Phone (M-Pesa / Call)</label>
+                <input type="tel" class="form-input" id="vendor-phone-input" required placeholder="+254 722 000 000">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="vendor-email-input" placeholder="vendor@example.co.ke">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">KRA PIN Number</label>
+                <input type="text" class="form-input" id="vendor-pin-input" placeholder="P051000000X">
+              </div>
+
+              <div class="form-group span-full">
+                <label class="form-label">Remittance & Payment Details (Bank / M-Pesa Till)</label>
+                <input type="text" class="form-input" id="vendor-payment-input" placeholder="e.g. M-Pesa Till: 892019 or Equity Bank • Thika Branch • Acc: 0140291829">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+              <button type="submit" class="btn-elevated-primary">✓ Register Approved Contractor</button>
+            </div>
+          </form>
+
+          <!-- Vendors Directory Table -->
+          <div style="margin-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Approved Contractors & Service Directory</h3>
+              <span class="badge-status" id="vendors-count-badge" style="color: var(--accent-primary);">0 Vendors</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Vendor / Business Name</th>
+                    <th>Trade Category</th>
+                    <th>Contact Person</th>
+                    <th>Phone</th>
+                    <th>Email & KRA PIN</th>
+                    <th>Payment Details</th>
+                    <th>Status</th>
+                    <th>Assigned LPOs</th>
+                  </tr>
+                </thead>
+                <tbody id="table-vendors-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 3-WAY COST ALLOCATION LEDGER PANEL -->
+      <div class="repair-panel" id="panel-repair-allocation">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>3-Way Cost Allocation & Financial Reconciliation Ledger</h2>
+              <p>Reconcile maintenance expenditures against target financial balances: Landlord Statement Deductions, Tenant Damage Surcharges, and Common Area Service Charge Pools.</p>
+            </div>
+            <span class="live-pulse-badge">Statutory 3-Way Financial Routing</span>
+          </div>
+
+          <!-- 4 Summary Stat Pills -->
+          <div class="stat-pill-group">
+            <div class="stat-pill">
+              <div class="stat-pill-title">Total Maintenance Spent</div>
+              <div class="stat-pill-value" id="stat-total-repairs" style="color: var(--text-primary);">KES 0.00</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">All completed & approved work orders</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-title">Landlord Deductible Sum</div>
+              <div class="stat-pill-value" id="stat-landlord-deductible" style="color: #6D28D9;">KES 0.00</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Offset against gross rent payouts</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-title">Tenant Damage Billed</div>
+              <div class="stat-pill-value" id="stat-tenant-damage" style="color: #DC2626;">KES 0.00</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Surcharged to tenant debit ledgers</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-title">Service Charge Pool Absorbed</div>
+              <div class="stat-pill-value" id="stat-pool-absorbed" style="color: var(--accent-secondary);">KES 0.00</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Funded from common reserve pool</div>
+            </div>
+          </div>
+
+          <!-- Allocation Reconciliation Table -->
+          <div style="margin-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Financial Reconciliation & Audit Trail</h3>
+              <span class="badge-status" id="allocation-count-badge" style="color: var(--accent-secondary);">0 Records</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>LPO # & Date</th>
+                    <th>Property & Unit</th>
+                    <th>Vendor / Contractor</th>
+                    <th>Actual Amount</th>
+                    <th>Cost Allocation</th>
+                    <th>Target Debited Entity</th>
+                    <th>Accounting Impact</th>
+                    <th>Approval Status</th>
+                  </tr>
+                </thead>
+                <tbody id="table-cost-allocation-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MODAL: LPO PURCHASE ORDER VOUCHER PREVIEW -->
+    <div class="modal-overlay" id="lpo-preview-modal">
+      <div class="modal-card" style="max-width: 680px;">
+        <div class="modal-header-strip">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800;">Local Purchase Order (LPO) Voucher</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Official Procurement & Work Order Authorization Voucher</p>
+          </div>
+          <button class="modal-close-btn" onclick="closeLpoModal()">&times;</button>
+        </div>
+
+        <div id="lpo-modal-content-wrap" style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="btn-action-pill" onclick="closeLpoModal()" style="padding: 10px 18px;">Close</button>
+          <button type="button" class="btn-elevated-primary" onclick="printLpoVoucher()">🖨️ Print / Export LPO Voucher</button>
+        </div>
+      </div>
+    </div>
