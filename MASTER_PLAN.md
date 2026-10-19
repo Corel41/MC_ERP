@@ -2,17 +2,17 @@
 
 ## MC ERP Architecture Tree:
 ├── 01. Estate Management
-│   ├── 1.1 Registration (Properties, Units, Landlords, Tenants)
-│   ├── 1.2 Tenants (Leases, Metering, Rent & Service Charge Ledgers)
-│   ├── 1.3 Landlords (Mandates, Commissions, Tax, Remittances)
-│   ├── 1.4 Repairs & Maintenance (Requests, Work Orders, LPOs, 3-Way Allocations)
+│   ├── 1.1 Registration (Properties, Units, Landlords, Tenants) [Complete]
+│   ├── 1.2 Tenants (Leases, Metering, Rent & Service Charge Ledgers) [Complete]
+│   ├── 1.3 Landlords (Mandates, Commissions, Tax, Remittances) [Complete]
+│   ├── 1.4 Repairs & Maintenance (Requests, Work Orders, LPOs, 3-Way Allocations) [Complete]
 │   └── 1.5 Admin (Billing Periods, Tariffs, Notice Templates, Audit Logs)
 ├── 02. Agency CRM
 ├── 03. Valuation
 ├── 04. Administration
 ├── 05. Finance
 ├── 06. Workplace Operations
-└── 07. Settings
+└── 07. Settings [Active]
 
 ---
 
@@ -73,6 +73,6 @@ MC ERP is the consolidated next-generation enterprise property management and fi
 - Document Archive: Physical and digital archive tracking with barcode indexing.
 
 ### 07. Settings
-- Multi-Theme Engine: Frosted Iridescent (Flowly), Cobalt Bloom (Windows 11), Modern SaaS Iris (Hireism), and Obsidian & Emerald Executive.
+- Multi-Theme Engine: Developer Plain (High-Contrast Solid Default), Frosted Iridescent (Flowly), Cobalt Bloom (Windows 11), Modern SaaS Iris (Hireism), and Obsidian & Emerald Executive.
 - Multi-Branch Hierarchy: Nairobi Head Office, Thika Branch, Westlands Branch, Mombasa Coastal Branch.
 - Integration Gateways: Safaricom Daraja M-Pesa C2B, KRA eTIMS, MobileSasa SMS Gateway, Google Drive Cloud Storage.

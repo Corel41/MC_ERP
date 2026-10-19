@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="flowly">
+<html lang="en" data-theme="developer">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +8,40 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    [data-theme="developer"] {
+      --bg-base: #F3F4F6;
+      --glass-panel: #FFFFFF;
+      --glass-card: #FFFFFF;
+      --glass-card-hover: #F9FAFB;
+      --glass-border: #D1D5DB;
+      --glass-border-specular-top: #D1D5DB;
+      --glass-border-specular-bottom: #D1D5DB;
+      --glass-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+      --glass-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --nav-active-bg: #E5E7EB;
+      --nav-active-color: #111827;
+      --nav-active-shadow: none;
+      --nav-text: #4B5563;
+      --nav-text-hover: #111827;
+      --nav-icon-color: #6B7280;
+      --nav-icon-active: #111827;
+      --notch-color-top: #374151;
+      --notch-color-bottom: #1F2937;
+      --notch-glow: transparent;
+      --show-notch: none;
+      --show-window-dots: none;
+      --accent-primary: #1F2937;
+      --accent-secondary: #059669;
+      --accent-tertiary: #4B5563;
+      --accent-amber: #D97706;
+      --text-primary: #111827;
+      --text-secondary: #4B5563;
+      --text-muted: #6B7280;
+      --divider-color: #E5E7EB;
+      --table-border: #D1D5DB;
+      --table-hover: #F9FAFB;
+    }
+
     [data-theme="flowly"] {
       --bg-base: #E8E5F2;
       --glass-panel: rgba(255, 255, 255, 0.48);
@@ -1249,6 +1283,180 @@
       main#workspace { margin-left: 0 !important; padding: 12px; }
       .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
     }
+    /* Sub-Module 1.4 Repairs & Maintenance Navigation & Styles */
+    .repair-nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: var(--nav-active-bg);
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow-sm);
+    }
+
+    .repair-tab-btn {
+      padding: 9px 18px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .repair-tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .repair-tab-btn.active {
+      background: var(--accent-primary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .repair-panel { display: none; }
+    .repair-panel.active {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    /* Badges for Priority, Status & Cost Allocation */
+    .badge-priority-low { background: rgba(59, 130, 246, 0.12); color: #2563EB; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-priority-medium { background: rgba(245, 158, 11, 0.12); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-priority-high { background: rgba(249, 115, 22, 0.12); color: #EA580C; border: 1px solid rgba(249, 115, 22, 0.3); }
+    .badge-priority-emergency { background: rgba(239, 68, 68, 0.15); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.4); font-weight: 800; }
+
+    .badge-status-reported { background: rgba(245, 158, 11, 0.12); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-status-assigned { background: rgba(59, 130, 246, 0.12); color: #2563EB; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-status-inprogress { background: rgba(139, 92, 246, 0.12); color: #7C3AED; border: 1px solid rgba(139, 92, 246, 0.3); }
+    .badge-status-completed { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    .badge-alloc-landlord { background: rgba(139, 92, 246, 0.12); color: #7C3AED; border: 1px solid rgba(139, 92, 246, 0.3); }
+    .badge-alloc-tenant { background: rgba(239, 68, 68, 0.12); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-alloc-pool { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    /* Developer Plain Mode Overrides */
+    [data-theme="developer"] body::before {
+      display: none !important;
+      background: none !important;
+    }
+
+    [data-theme="developer"] .glass-surface,
+    [data-theme="developer"] .glass-card,
+    [data-theme="developer"] aside#sidebar,
+    [data-theme="developer"] header#top-nav,
+    [data-theme="developer"] .modal-card,
+    [data-theme="developer"] .theme-card,
+    [data-theme="developer"] .clean-module-container,
+    [data-theme="developer"] .builder-table-wrap,
+    [data-theme="developer"] .stat-pill,
+    [data-theme="developer"] .toast-bubble {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: #FFFFFF !important;
+      border: 1px solid #D1D5DB !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    [data-theme="developer"] .form-input,
+    [data-theme="developer"] .pill-select,
+    [data-theme="developer"] .pill-btn-icon,
+    [data-theme="developer"] input,
+    [data-theme="developer"] select,
+    [data-theme="developer"] textarea {
+      background: #FFFFFF !important;
+      border: 1px solid #D1D5DB !important;
+      color: #111827 !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    [data-theme="developer"] .form-input:focus,
+    [data-theme="developer"] .pill-select:focus,
+    [data-theme="developer"] input:focus,
+    [data-theme="developer"] select:focus,
+    [data-theme="developer"] textarea:focus {
+      border-color: #1F2937 !important;
+      box-shadow: 0 0 0 2px rgba(31, 41, 55, 0.2) !important;
+    }
+
+    [data-theme="developer"] table.builder-table,
+    [data-theme="developer"] .builder-table th,
+    [data-theme="developer"] .builder-table td {
+      border-color: #D1D5DB !important;
+    }
+
+    [data-theme="developer"] .builder-table th {
+      background: #F9FAFB !important;
+      color: #374151 !important;
+      font-weight: 700 !important;
+    }
+
+    [data-theme="developer"] .builder-table tr:hover td {
+      background: #F3F4F6 !important;
+    }
+
+    [data-theme="developer"] .reg-nav-tabs,
+    [data-theme="developer"] .tenant-nav-tabs,
+    [data-theme="developer"] .landlord-nav-tabs,
+    [data-theme="developer"] .repair-nav-tabs {
+      background: #E5E7EB !important;
+      border: 1px solid #D1D5DB !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    [data-theme="developer"] .reg-tab-btn.active,
+    [data-theme="developer"] .tenant-tab-btn.active,
+    [data-theme="developer"] .landlord-tab-btn.active,
+    [data-theme="developer"] .repair-tab-btn.active {
+      background: #1F2937 !important;
+      color: #FFFFFF !important;
+    }
+
+    [data-theme="developer"] .btn-elevated-primary {
+      background: #1F2937 !important;
+      color: #FFFFFF !important;
+      border: 1px solid #111827 !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    [data-theme="developer"] .btn-action-pill {
+      background: #FFFFFF !important;
+      border: 1px solid #D1D5DB !important;
+      color: #374151 !important;
+    }
+
+    [data-theme="developer"] .btn-action-pill:hover {
+      background: #F3F4F6 !important;
+      color: #111827 !important;
+      border-color: #9CA3AF !important;
+    }
+
+    [data-theme="developer"] .badge-priority-low { background: #EFF6FF !important; color: #1D4ED8 !important; border-color: #BFDBFE !important; }
+    [data-theme="developer"] .badge-priority-medium { background: #FFFBEB !important; color: #B45309 !important; border-color: #FDE68A !important; }
+    [data-theme="developer"] .badge-priority-high { background: #FFF7ED !important; color: #C2410C !important; border-color: #FED7AA !important; }
+    [data-theme="developer"] .badge-priority-emergency { background: #FEF2F2 !important; color: #B91C1C !important; border-color: #FECACA !important; }
+
+    [data-theme="developer"] .badge-status-reported { background: #FFFBEB !important; color: #B45309 !important; border-color: #FDE68A !important; }
+    [data-theme="developer"] .badge-status-assigned { background: #EFF6FF !important; color: #1D4ED8 !important; border-color: #BFDBFE !important; }
+    [data-theme="developer"] .badge-status-inprogress { background: #F5F3FF !important; color: #6D28D9 !important; border-color: #DDD6FE !important; }
+    [data-theme="developer"] .badge-status-completed { background: #ECFDF5 !important; color: #047857 !important; border-color: #A7F3D0 !important; }
+
+    [data-theme="developer"] .badge-alloc-landlord { background: #F5F3FF !important; color: #6D28D9 !important; border-color: #DDD6FE !important; }
+    [data-theme="developer"] .badge-alloc-tenant { background: #FEF2F2 !important; color: #B91C1C !important; border-color: #FECACA !important; }
+    [data-theme="developer"] .badge-alloc-pool { background: #ECFDF5 !important; color: #047857 !important; border-color: #A7F3D0 !important; }
   </style>
 </head>
 <body>
@@ -1414,13 +1622,14 @@
           <span id="current-page-title">1.1 Registration</span>
           <span class="live-pulse-badge">
             <span class="pulse-dot"></span>
-            <span id="header-theme-indicator">Flowly Iridescent</span>
+            <span id="header-theme-indicator">Developer Plain</span>
           </span>
         </div>
       </div>
 
       <div class="header-controls">
         <select class="pill-select" id="quick-theme-dropdown" title="Theme Selector">
+          <option value="developer" selected>⚡ Developer Plain (High-Contrast Solid)</option>
           <option value="flowly">🌸 Frosted Iridescent (Flowly)</option>
           <option value="cobalt">💎 Cobalt Bloom (Windows 11)</option>
           <option value="hireism">🦄 Modern SaaS Iris (Hireism)</option>
@@ -2719,10 +2928,427 @@
       </div>
     </div>
 
+    <!-- SUB-MODULE 1.4: REPAIRS & MAINTENANCE (INCIDENT TICKETING, WORK ORDERS/LPOS, VENDORS, 3-WAY COST ALLOCATION) -->
     <div class="view-content" id="view-estate-repairs">
-      <div class="glass-card clean-module-container">
-        <h2>01. Estate Management — 1.4 Repairs & Maintenance</h2>
-        <p>Incident Ticketing, Work Orders, Vendor LPOs, and 3-Way Cost Allocation.</p>
+
+      <!-- Navigation Segment Tabs for 1.4 Repairs -->
+      <div class="repair-nav-tabs">
+        <button class="repair-tab-btn active" data-repair-target="tickets">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>1. Incident Ticketing</span>
+        </button>
+        <button class="repair-tab-btn" data-repair-target="work-orders">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <span>2. Work Orders & LPO Engine</span>
+        </button>
+        <button class="repair-tab-btn" data-repair-target="vendors">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>3. Vendors & Contractors</span>
+        </button>
+        <button class="repair-tab-btn" data-repair-target="allocation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span>4. 3-Way Cost Allocation Ledger</span>
+        </button>
+      </div>
+
+      <!-- 1. INCIDENT TICKETING & MAINTENANCE REQUESTS PANEL -->
+      <div class="repair-panel active" id="panel-repair-tickets">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Incident Ticketing & Maintenance Requests</h2>
+              <p>Log reactive maintenance faults, assign trade categories and urgency priority ratings, link affected tenancy units, and dispatch work orders.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_Pro_Tasks Sync Engine</span>
+          </div>
+
+          <!-- Ticket Creation Form -->
+          <form id="form-maintenance-ticket" onsubmit="handleTicketSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Managed Property</label>
+                <select class="form-input" id="ticket-property-select" required onchange="handleTicketPropertyChange(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Unit / Location</label>
+                <select class="form-input" id="ticket-unit-select" onchange="handleTicketUnitChange(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Tenancy / Occupant</label>
+                <select class="form-input" id="ticket-tenant-select">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Trade / Defect Category</label>
+                <select class="form-input" id="ticket-category-select" required>
+                  <option value="Plumbing">Plumbing & Drainage</option>
+                  <option value="Electrical">Electrical & Lighting</option>
+                  <option value="Carpentry">Carpentry & Joinery</option>
+                  <option value="Masonry">Masonry & Tiling</option>
+                  <option value="Painting">Painting & Wall Finishes</option>
+                  <option value="Roofing">Roofing & Gutters</option>
+                  <option value="Appliance">Appliances & Fixtures</option>
+                  <option value="General">General Repairs</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Severity Priority</label>
+                <select class="form-input" id="ticket-priority-select" required>
+                  <option value="Low">Low (Routine maintenance within 7 days)</option>
+                  <option value="Medium" selected>Medium (Standard defect within 48 hrs)</option>
+                  <option value="High">High (Urgent disruption within 24 hrs)</option>
+                  <option value="Emergency">Emergency (Immediate hazard / water leak / fire risk)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Reported By</label>
+                <select class="form-input" id="ticket-reported-by-select" required>
+                  <option value="Tenant">Tenant</option>
+                  <option value="Caretaker">Estate Caretaker</option>
+                  <option value="Landlord">Landlord</option>
+                  <option value="Inspection">Routine Inspection</option>
+                </select>
+              </div>
+
+              <div class="form-group span-full">
+                <label class="form-label">Defect Description & Incident Notes</label>
+                <textarea class="form-input" id="ticket-desc-input" rows="3" required placeholder="Describe specific defects, symptoms, location within unit (e.g., master bath valve leaking heavily), and any immediate precautions taken..."></textarea>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+              <button type="submit" class="btn-elevated-primary">✓ Log Maintenance Incident Ticket</button>
+            </div>
+          </form>
+
+          <!-- Tickets Directory Table -->
+          <div style="margin-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Active Maintenance Tickets & Defect Log</h3>
+              <span class="badge-status" id="tickets-count-badge" style="color: var(--accent-primary);">0 Tickets</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Ticket #</th>
+                    <th>Reported Date</th>
+                    <th>Property & Unit</th>
+                    <th>Tenant / Reporter</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-maintenance-tickets-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. WORK ORDERS & LPO ENGINE PANEL -->
+      <div class="repair-panel" id="panel-repair-work-orders">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Local Purchase Orders (LPO) & Contractor Work Orders</h2>
+              <p>Issue binding purchase orders to certified vendors, define work scopes, fix estimated budgets, and designate the 3-way cost allocation route.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_PR_LPO Procurement Sync</span>
+          </div>
+
+          <!-- LPO Creation Form -->
+          <form id="form-work-order" onsubmit="handleWorkOrderSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Linked Incident Ticket</label>
+                <select class="form-input" id="wo-ticket-select" onchange="handleWoTicketSelect(this.value)">
+                  <!-- Dynamically populated with open tickets -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Assigned Vendor / Contractor</label>
+                <select class="form-input" id="wo-vendor-select" required>
+                  <!-- Dynamically populated from vendors list -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Property</label>
+                <select class="form-input" id="wo-property-select" required onchange="handleWoPropertyChange(this.value)">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Unit / Common Zone</label>
+                <select class="form-input" id="wo-unit-select">
+                  <!-- Dynamically populated -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Estimated Cost (KES)</label>
+                <input type="number" step="0.01" min="0" class="form-input" id="wo-est-cost-input" required placeholder="0.00" oninput="if(!document.getElementById('wo-act-cost-input').value) document.getElementById('wo-act-cost-input').value = this.value;">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Actual / Invoiced Cost (KES)</label>
+                <input type="number" step="0.01" min="0" class="form-input" id="wo-act-cost-input" required placeholder="0.00">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">3-Way Cost Allocation Route</label>
+                <select class="form-input" id="wo-allocation-select" required>
+                  <option value="Landlord Deductible" selected>Landlord Deductible (Deducted from Landlord Monthly Remittance)</option>
+                  <option value="Tenant Damage Recovery">Tenant Damage Recovery (Billed to Tenant Debit Ledger / Invoice Surcharge)</option>
+                  <option value="Common Service Charge Pool">Common Service Charge Pool (Absorbed by Estate Service Charge Reserve Pool)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Approval Status</label>
+                <select class="form-input" id="wo-status-select" required>
+                  <option value="Approved" selected>Approved (Issued to Contractor)</option>
+                  <option value="Draft">Draft (Pending Verification)</option>
+                  <option value="Fulfilled">Fulfilled (Work Completed & Certified)</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Authorizing Officer</label>
+                <input type="text" class="form-input" id="wo-approved-by-input" required value="Eng. Dennis Mugo / Property Manager">
+              </div>
+
+              <div class="form-group span-full">
+                <label class="form-label">Scope of Work & Technical Specifications</label>
+                <textarea class="form-input" id="wo-scope-input" rows="3" required placeholder="Detail specific contractor scope, required parts, warranty terms, and agreed completion deadlines..."></textarea>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+              <button type="submit" class="btn-elevated-primary">✓ Issue & Authorize Local Purchase Order (LPO)</button>
+            </div>
+          </form>
+
+          <!-- Work Orders Directory Table -->
+          <div style="margin-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Issued Work Orders & Contractor LPOs</h3>
+              <span class="badge-status" id="work-orders-count-badge" style="color: var(--accent-secondary);">0 LPOs</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>LPO #</th>
+                    <th>Issued Date</th>
+                    <th>Vendor / Contractor</th>
+                    <th>Property & Unit</th>
+                    <th>Scope of Work</th>
+                    <th>Est. Cost</th>
+                    <th>Actual Cost</th>
+                    <th>Cost Allocation</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="table-work-orders-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. VENDORS & CONTRACTORS REGISTRY PANEL -->
+      <div class="repair-panel" id="panel-repair-vendors">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Vendors & Approved Contractors Registry</h2>
+              <p>Registry of approved tradesmen, technicians, and specialized contractors with verified contact information, KRA PIN compliance, and payment details.</p>
+            </div>
+            <span class="live-pulse-badge">dbo_Vendor / dbo_Vendor_Creditor</span>
+          </div>
+
+          <!-- Vendor Registration Form -->
+          <form id="form-vendor-reg" onsubmit="handleVendorSubmit(event)">
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label class="form-label">Vendor / Enterprise Name</label>
+                <input type="text" class="form-input" id="vendor-name-input" required placeholder="e.g. Aquaflow Plumbing Specialists">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Trade Speciality</label>
+                <select class="form-input" id="vendor-trade-select" required>
+                  <option value="Plumbing">Plumbing & Drainage</option>
+                  <option value="Electrical">Electrical & Lighting</option>
+                  <option value="Carpentry">Carpentry & Joinery</option>
+                  <option value="Painting">Painting & Decorating</option>
+                  <option value="Masonry">Masonry & Civil Works</option>
+                  <option value="Roofing">Roofing & Waterproofing</option>
+                  <option value="HVAC / Aircon">HVAC & Air Conditioning</option>
+                  <option value="Landscaping">Landscaping & Grounds</option>
+                  <option value="General Contracting">General Building Contracting</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Lead Contact Person</label>
+                <input type="text" class="form-input" id="vendor-contact-input" required placeholder="e.g. Dennis Gitau">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Primary Phone (M-Pesa / Call)</label>
+                <input type="tel" class="form-input" id="vendor-phone-input" required placeholder="+254 722 000 000">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="vendor-email-input" placeholder="vendor@example.co.ke">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">KRA PIN Number</label>
+                <input type="text" class="form-input" id="vendor-pin-input" placeholder="P051000000X">
+              </div>
+
+              <div class="form-group span-full">
+                <label class="form-label">Remittance & Payment Details (Bank / M-Pesa Till)</label>
+                <input type="text" class="form-input" id="vendor-payment-input" placeholder="e.g. M-Pesa Till: 892019 or Equity Bank • Thika Branch • Acc: 0140291829">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+              <button type="submit" class="btn-elevated-primary">✓ Register Approved Contractor</button>
+            </div>
+          </form>
+
+          <!-- Vendors Directory Table -->
+          <div style="margin-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Approved Contractors & Service Directory</h3>
+              <span class="badge-status" id="vendors-count-badge" style="color: var(--accent-primary);">0 Vendors</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>Vendor / Business Name</th>
+                    <th>Trade Category</th>
+                    <th>Contact Person</th>
+                    <th>Phone</th>
+                    <th>Email & KRA PIN</th>
+                    <th>Payment Details</th>
+                    <th>Status</th>
+                    <th>Assigned LPOs</th>
+                  </tr>
+                </thead>
+                <tbody id="table-vendors-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 3-WAY COST ALLOCATION LEDGER PANEL -->
+      <div class="repair-panel" id="panel-repair-allocation">
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>3-Way Cost Allocation & Financial Reconciliation Ledger</h2>
+              <p>Reconcile maintenance expenditures against target financial balances: Landlord Statement Deductions, Tenant Damage Surcharges, and Common Area Service Charge Pools.</p>
+            </div>
+            <span class="live-pulse-badge">Statutory 3-Way Financial Routing</span>
+          </div>
+
+          <!-- 4 Summary Stat Pills -->
+          <div class="stat-pill-group">
+            <div class="stat-pill">
+              <div class="stat-pill-title">Total Maintenance Spent</div>
+              <div class="stat-pill-value" id="stat-total-repairs" style="color: var(--text-primary);">KES 0.00</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">All completed & approved work orders</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-title">Landlord Deductible Sum</div>
+              <div class="stat-pill-value" id="stat-landlord-deductible" style="color: #6D28D9;">KES 0.00</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Offset against gross rent payouts</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-title">Tenant Damage Billed</div>
+              <div class="stat-pill-value" id="stat-tenant-damage" style="color: #DC2626;">KES 0.00</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Surcharged to tenant debit ledgers</div>
+            </div>
+            <div class="stat-pill">
+              <div class="stat-pill-title">Service Charge Pool Absorbed</div>
+              <div class="stat-pill-value" id="stat-pool-absorbed" style="color: var(--accent-secondary);">KES 0.00</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Funded from common reserve pool</div>
+            </div>
+          </div>
+
+          <!-- Allocation Reconciliation Table -->
+          <div style="margin-top: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h3 style="font-size: 1.05rem; font-weight: 700;">Financial Reconciliation & Audit Trail</h3>
+              <span class="badge-status" id="allocation-count-badge" style="color: var(--accent-secondary);">0 Records</span>
+            </div>
+            <div class="builder-table-wrap">
+              <table class="builder-table">
+                <thead>
+                  <tr>
+                    <th>LPO # & Date</th>
+                    <th>Property & Unit</th>
+                    <th>Vendor / Contractor</th>
+                    <th>Actual Amount</th>
+                    <th>Cost Allocation</th>
+                    <th>Target Debited Entity</th>
+                    <th>Accounting Impact</th>
+                    <th>Approval Status</th>
+                  </tr>
+                </thead>
+                <tbody id="table-cost-allocation-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MODAL: LPO PURCHASE ORDER VOUCHER PREVIEW -->
+    <div class="modal-overlay" id="lpo-preview-modal">
+      <div class="modal-card" style="max-width: 680px;">
+        <div class="modal-header-strip">
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800;">Local Purchase Order (LPO) Voucher</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Official Procurement & Work Order Authorization Voucher</p>
+          </div>
+          <button class="modal-close-btn" onclick="closeLpoModal()">&times;</button>
+        </div>
+
+        <div id="lpo-modal-content-wrap" style="display: flex; flex-direction: column; gap: 16px;">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="btn-action-pill" onclick="closeLpoModal()" style="padding: 10px 18px;">Close</button>
+          <button type="button" class="btn-elevated-primary" onclick="printLpoVoucher()">🖨️ Print / Export LPO Voucher</button>
+        </div>
       </div>
     </div>
 
@@ -2777,6 +3403,28 @@
         </p>
 
         <div class="settings-grid">
+          <div class="glass-surface theme-card" data-theme-target="developer">
+            <span class="theme-badge-applied">✓ Active Theme</span>
+            <div class="theme-preview-box" style="background: #F3F4F6;">
+              <div class="theme-mini-sidebar" style="background: #FFFFFF; border: 1px solid #D1D5DB;">
+                <div style="width: 14px; height: 14px; border-radius: 4px; background: #1F2937;"></div>
+                <div style="width: 28px; height: 10px; border-radius: 4px; background: #E5E7EB; border-left: 2px solid #1F2937;"></div>
+              </div>
+              <div class="theme-mini-canvas">
+                <div style="height: 18px; border-radius: 4px; background: #FFFFFF; border: 1px solid #D1D5DB;"></div>
+                <div style="height: 48px; border-radius: 4px; background: #FFFFFF; border: 1px solid #D1D5DB;"></div>
+              </div>
+            </div>
+            <div class="theme-info-header"><div class="theme-title">⚡ Developer Plain (High-Contrast Solid)</div></div>
+            <div class="theme-description">Zero blur, solid #FFFFFF cards, #F3F4F6 neutral canvas, and sharp 1px solid #D1D5DB borders for unmistakable clarity and rapid operational data entry.</div>
+            <div class="theme-swatches">
+              <span class="swatch" style="background: #1F2937;"></span>
+              <span class="swatch" style="background: #FFFFFF; border: 1px solid #D1D5DB;"></span>
+              <span class="swatch" style="background: #F3F4F6; border: 1px solid #D1D5DB;"></span>
+              <span class="swatch" style="background: #D1D5DB;"></span>
+            </div>
+          </div>
+
           <div class="glass-surface theme-card" data-theme-target="flowly">
             <span class="theme-badge-applied">✓ Active Theme</span>
             <div class="theme-preview-box" style="background: repeating-linear-gradient(90deg, rgba(255,255,255,0.4) 0px, rgba(255,255,255,0.18) 4px, rgba(0,0,0,0.02) 10px, rgba(255,255,255,0.3) 18px), linear-gradient(135deg, #DDD6FE, #CFFAFE, #FCE7F3);">
@@ -3252,6 +3900,171 @@
           date: '2026-10-06',
           notes: 'October 2026 Net Rental Proceeds Disbursed via KCB EFT'
         }
+      ],
+      activeRepairTab: 'tickets',
+      vendors: [
+        {
+          id: 'VND-001',
+          name: 'Aquaflow Plumbing Specialists',
+          tradeCategory: 'Plumbing',
+          contactPerson: 'Dennis Gitau',
+          phone: '+254722550011',
+          email: 'info@aquaflow.co.ke',
+          kraPin: 'P051928371M',
+          paymentDetails: 'M-Pesa Till: 892019 / Equity Bank Acc: 0140291829',
+          isActive: true
+        },
+        {
+          id: 'VND-002',
+          name: 'Voltcraft Electrical Engineering Ltd',
+          tradeCategory: 'Electrical',
+          contactPerson: 'Erick Otieno',
+          phone: '+254733440022',
+          email: 'repairs@voltcraft.co.ke',
+          kraPin: 'P051283940L',
+          paymentDetails: 'Co-op Bank • Westlands • Acc: 01129384758',
+          isActive: true
+        },
+        {
+          id: 'VND-003',
+          name: 'PrimeWood Carpentry & Joinery',
+          tradeCategory: 'Carpentry',
+          contactPerson: 'Simon Njoroge',
+          phone: '+254721334455',
+          email: 'primewood@gmail.com',
+          kraPin: 'A009384729P',
+          paymentDetails: 'M-Pesa Paybill: 247247, Acc: 721334455',
+          isActive: true
+        },
+        {
+          id: 'VND-004',
+          name: 'CrownShield Painting & Finishes',
+          tradeCategory: 'Painting',
+          contactPerson: 'Grace Muthoni',
+          phone: '+254728990011',
+          email: 'sales@crownshield.co.ke',
+          kraPin: 'P051829401N',
+          paymentDetails: 'Absa Bank Kenya • Acc: 0309182910',
+          isActive: true
+        }
+      ],
+      maintenanceRequests: [
+        {
+          id: 'REQ-2026-001',
+          ticketNumber: 'TKT-2026-001',
+          propertyId: 'PROP-01',
+          propertyName: 'Chania Falls View Courts',
+          unitId: 'UNIT-01',
+          unitCode: 'A-01',
+          tenantId: 'TEN-01',
+          tenantName: 'Grace Wanjiru Ndungu',
+          category: 'Plumbing',
+          priority: 'High',
+          reportedBy: 'Tenant',
+          description: 'Master bathroom shower mixer valve leaking heavily into floor trap causing water pooling.',
+          status: 'In_Progress',
+          createdAt: '2026-10-08 09:15'
+        },
+        {
+          id: 'REQ-2026-002',
+          ticketNumber: 'TKT-2026-002',
+          propertyId: 'PROP-01',
+          propertyName: 'Chania Falls View Courts',
+          unitId: 'UNIT-02',
+          unitCode: 'A-02',
+          tenantId: null,
+          tenantName: 'Vacant / Caretaker Turnaround',
+          category: 'Painting',
+          priority: 'Medium',
+          reportedBy: 'Caretaker',
+          description: 'Repaint living room and hallway walls ahead of prospective tenant handover.',
+          status: 'Reported',
+          createdAt: '2026-10-10 11:30'
+        },
+        {
+          id: 'REQ-2026-003',
+          ticketNumber: 'TKT-2026-003',
+          propertyId: 'PROP-02',
+          propertyName: 'Kilimani Crest Executive Apartments',
+          unitId: null,
+          unitCode: 'Common Area',
+          tenantId: null,
+          tenantName: 'Estate Common Area',
+          category: 'Electrical',
+          priority: 'Medium',
+          reportedBy: 'Caretaker',
+          description: 'Parking lot floodlight LED driver burned out; requires replacement.',
+          status: 'Completed',
+          createdAt: '2026-10-05 14:00'
+        }
+      ],
+      maintenanceWorkOrders: [
+        {
+          id: 'LPO-2026-001',
+          lpoNumber: 'LPO-2026-001',
+          ticketId: 'REQ-2026-001',
+          ticketNumber: 'TKT-2026-001',
+          vendorId: 'VND-001',
+          vendorName: 'Aquaflow Plumbing Specialists',
+          propertyId: 'PROP-01',
+          propertyName: 'Chania Falls View Courts',
+          unitId: 'UNIT-01',
+          unitCode: 'A-01',
+          scopeOfWork: 'Replace master bath concealed shower mixer valve and pressure test pipework.',
+          estimatedCost: 8500.00,
+          actualCost: 8500.00,
+          costAllocation: 'Landlord Deductible',
+          approvalStatus: 'Approved',
+          approvedBy: 'Eng. Dennis Mugo',
+          issuedDate: '2026-10-09',
+          completionDate: '2026-10-12',
+          targetAccount: 'Mugo Investments Ltd',
+          accountingImpact: 'Deducted from Landlord Monthly Remittance'
+        },
+        {
+          id: 'LPO-2026-002',
+          lpoNumber: 'LPO-2026-002',
+          ticketId: 'REQ-2026-003',
+          ticketNumber: 'TKT-2026-003',
+          vendorId: 'VND-002',
+          vendorName: 'Voltcraft Electrical Engineering Ltd',
+          propertyId: 'PROP-02',
+          propertyName: 'Kilimani Crest Executive Apartments',
+          unitId: null,
+          unitCode: 'Common Area',
+          scopeOfWork: 'Supply and fit 150W waterproof outdoor LED floodlight and photocell sensor.',
+          estimatedCost: 12000.00,
+          actualCost: 11500.00,
+          costAllocation: 'Common Service Charge Pool',
+          approvalStatus: 'Fulfilled',
+          approvedBy: 'Alex Kamau',
+          issuedDate: '2026-10-05',
+          completionDate: '2026-10-06',
+          targetAccount: 'Kilimani SC Reserve Pool',
+          accountingImpact: 'Absorbed into Common Service Charge Pool'
+        },
+        {
+          id: 'LPO-2026-003',
+          lpoNumber: 'LPO-2026-003',
+          ticketId: null,
+          ticketNumber: 'Direct / Tenant Surcharge',
+          vendorId: 'VND-003',
+          vendorName: 'PrimeWood Carpentry & Joinery',
+          propertyId: 'PROP-01',
+          propertyName: 'Chania Falls View Courts',
+          unitId: 'UNIT-01',
+          unitCode: 'A-01',
+          scopeOfWork: 'Repair fractured mahogany main entrance lockset & architrave (tenant damage).',
+          estimatedCost: 4500.00,
+          actualCost: 4500.00,
+          costAllocation: 'Tenant Damage Recovery',
+          approvalStatus: 'Approved',
+          approvedBy: 'Samuel Mwangi',
+          issuedDate: '2026-10-14',
+          completionDate: '2026-10-15',
+          targetAccount: 'Grace Wanjiru Ndungu',
+          accountingImpact: 'Billed to Tenant Debit Ledger / Invoice Surcharge'
+        }
       ]
     };
 
@@ -3285,6 +4098,7 @@
       });
 
       const themeNames = {
+        developer: 'Developer Plain',
         flowly: 'Flowly Iridescent',
         cobalt: 'Cobalt Bloom Azure',
         hireism: 'Hireism Modern SaaS',
@@ -4685,6 +5499,613 @@
       showToast(`Payout recorded: KES ${statement.netPayable.toLocaleString()} disbursed to ${statement.landlordName} (Ref: ${refNo})`);
     }
 
+    /* SUB-MODULE 1.4: REPAIRS & MAINTENANCE LOGIC & ENGINES */
+
+    // Tab switching for 1.4 Repairs
+    function setupRepairTabs() {
+      const repairTabBtns = document.querySelectorAll('.repair-tab-btn');
+      repairTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          repairTabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const target = btn.getAttribute('data-repair-target');
+          AppState.activeRepairTab = target;
+          document.querySelectorAll('.repair-panel').forEach(p => p.classList.remove('active'));
+          const targetPanel = document.getElementById(`panel-repair-${target}`);
+          if (targetPanel) targetPanel.classList.add('active');
+        });
+      });
+    }
+
+    function populateRepairDropdowns() {
+      // Properties for Ticket Form
+      const ticketPropSelect = document.getElementById('ticket-property-select');
+      const woPropSelect = document.getElementById('wo-property-select');
+      if (ticketPropSelect && woPropSelect) {
+        const propOptions = AppState.properties.map(p => `<option value="${p.id}">${p.name} (${p.prefix})</option>`).join('');
+        ticketPropSelect.innerHTML = propOptions;
+        woPropSelect.innerHTML = propOptions;
+
+        if (AppState.properties.length > 0) {
+          handleTicketPropertyChange(AppState.properties[0].id);
+          handleWoPropertyChange(AppState.properties[0].id);
+        }
+      }
+
+      // Vendors for Work Order Form
+      populateWoVendorDropdown();
+
+      // Open Tickets for Work Order Form
+      populateWoTicketDropdown();
+    }
+
+    function populateWoVendorDropdown() {
+      const woVendorSelect = document.getElementById('wo-vendor-select');
+      if (!woVendorSelect) return;
+      woVendorSelect.innerHTML = AppState.vendors
+        .filter(v => v.isActive)
+        .map(v => `<option value="${v.id}">${v.name} [${v.tradeCategory}]</option>`)
+        .join('');
+    }
+
+    function populateWoTicketDropdown() {
+      const woTicketSelect = document.getElementById('wo-ticket-select');
+      if (!woTicketSelect) return;
+      const openTickets = AppState.maintenanceRequests.filter(t => t.status !== 'Completed');
+      let options = `<option value="">Direct Work Order (No Ticket Reference)</option>`;
+      options += openTickets.map(t => `<option value="${t.id}">${t.ticketNumber} — ${t.category} (${t.propertyName} • ${t.unitCode})</option>`).join('');
+      woTicketSelect.innerHTML = options;
+    }
+
+    function handleTicketPropertyChange(propId) {
+      const unitSelect = document.getElementById('ticket-unit-select');
+      if (!unitSelect) return;
+      const propUnits = AppState.units.filter(u => u.propertyId === propId);
+      let options = `<option value="COMMON">Common Area / External Facade</option>`;
+      options += propUnits.map(u => `<option value="${u.id}">${u.code} (${u.floor} • ${u.config.replace('_', ' ')})</option>`).join('');
+      unitSelect.innerHTML = options;
+      handleTicketUnitChange(unitSelect.value);
+    }
+
+    function handleTicketUnitChange(unitId) {
+      const tenantSelect = document.getElementById('ticket-tenant-select');
+      if (!tenantSelect) return;
+
+      if (!unitId || unitId === 'COMMON') {
+        tenantSelect.innerHTML = `<option value="">Estate Common Area / Not Tenancy-Specific</option>`;
+        return;
+      }
+
+      const activeLease = AppState.leases.find(l => l.unitId === unitId && l.status === 'Active');
+      if (activeLease) {
+        tenantSelect.innerHTML = `<option value="${activeLease.tenantId}" selected>${activeLease.tenantName} (Active Lease)</option>`;
+      } else {
+        tenantSelect.innerHTML = `<option value="">Vacant Unit / Turnaround Inspection</option>`;
+      }
+    }
+
+    function handleWoPropertyChange(propId) {
+      const unitSelect = document.getElementById('wo-unit-select');
+      if (!unitSelect) return;
+      const propUnits = AppState.units.filter(u => u.propertyId === propId);
+      let options = `<option value="COMMON">Common Area / External Grounds</option>`;
+      options += propUnits.map(u => `<option value="${u.id}">${u.code} (${u.floor})</option>`).join('');
+      unitSelect.innerHTML = options;
+    }
+
+    function handleWoTicketSelect(ticketId) {
+      if (!ticketId) return;
+      const ticket = AppState.maintenanceRequests.find(t => t.id === ticketId);
+      if (!ticket) return;
+
+      const propSelect = document.getElementById('wo-property-select');
+      if (propSelect) {
+        propSelect.value = ticket.propertyId;
+        handleWoPropertyChange(ticket.propertyId);
+      }
+
+      const unitSelect = document.getElementById('wo-unit-select');
+      if (unitSelect) {
+        unitSelect.value = ticket.unitId || 'COMMON';
+      }
+
+      const scopeInput = document.getElementById('wo-scope-input');
+      if (scopeInput && !scopeInput.value) {
+        scopeInput.value = `Remediate ${ticket.category.toLowerCase()} defect: ${ticket.description}`;
+      }
+
+      // Recommend vendor by trade category
+      const matchedVendor = AppState.vendors.find(v => v.tradeCategory.toLowerCase() === ticket.category.toLowerCase() && v.isActive);
+      if (matchedVendor) {
+        const vendorSelect = document.getElementById('wo-vendor-select');
+        if (vendorSelect) vendorSelect.value = matchedVendor.id;
+      }
+    }
+
+    function handleTicketSubmit(e) {
+      e.preventDefault();
+      const propSelect = document.getElementById('ticket-property-select');
+      const propId = propSelect.value;
+      const property = AppState.properties.find(p => p.id === propId);
+
+      const unitSelect = document.getElementById('ticket-unit-select');
+      const unitId = unitSelect.value === 'COMMON' ? null : unitSelect.value;
+      const unit = unitId ? AppState.units.find(u => u.id === unitId) : null;
+
+      const tenantSelect = document.getElementById('ticket-tenant-select');
+      const tenantId = tenantSelect.value || null;
+      const tenant = tenantId ? AppState.tenants.find(t => t.id === tenantId) : null;
+
+      const category = document.getElementById('ticket-category-select').value;
+      const priority = document.getElementById('ticket-priority-select').value;
+      const reportedBy = document.getElementById('ticket-reported-by-select').value;
+      const description = document.getElementById('ticket-desc-input').value.trim();
+
+      const newId = `REQ-2026-${String(AppState.maintenanceRequests.length + 1).padStart(3, '0')}`;
+      const ticketNum = `TKT-2026-${String(AppState.maintenanceRequests.length + 1).padStart(3, '0')}`;
+      const now = new Date();
+      const createdAt = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+      AppState.maintenanceRequests.unshift({
+        id: newId,
+        ticketNumber: ticketNum,
+        propertyId: propId,
+        propertyName: property ? property.name : 'Unknown Property',
+        unitId: unitId,
+        unitCode: unit ? unit.code : 'Common Area',
+        tenantId: tenantId,
+        tenantName: tenant ? tenant.name : (unitId ? 'Vacant Turnaround' : 'Estate Common Area'),
+        category: category,
+        priority: priority,
+        reportedBy: reportedBy,
+        description: description,
+        status: 'Reported',
+        createdAt: createdAt
+      });
+
+      document.getElementById('form-maintenance-ticket').reset();
+      populateRepairDropdowns();
+      renderMaintenanceTicketsTable();
+      showToast(`Incident ticket ${ticketNum} logged under priority: ${priority}`);
+    }
+
+    function convertTicketToLpo(ticketId) {
+      const ticket = AppState.maintenanceRequests.find(t => t.id === ticketId);
+      if (!ticket) return;
+
+      // Switch to Work Orders tab
+      const woTabBtn = document.querySelector('[data-repair-target="work-orders"]');
+      if (woTabBtn) woTabBtn.click();
+
+      // Populate dropdowns & select this ticket
+      const ticketSelect = document.getElementById('wo-ticket-select');
+      if (ticketSelect) {
+        ticketSelect.value = ticketId;
+        handleWoTicketSelect(ticketId);
+      }
+
+      showToast(`Loaded ${ticket.ticketNumber} into Work Order generator.`);
+    }
+
+    function handleWorkOrderSubmit(e) {
+      e.preventDefault();
+      const ticketId = document.getElementById('wo-ticket-select').value || null;
+      const ticket = ticketId ? AppState.maintenanceRequests.find(t => t.id === ticketId) : null;
+
+      const vendorId = document.getElementById('wo-vendor-select').value;
+      const vendor = AppState.vendors.find(v => v.id === vendorId);
+
+      const propId = document.getElementById('wo-property-select').value;
+      const property = AppState.properties.find(p => p.id === propId);
+
+      const unitId = document.getElementById('wo-unit-select').value === 'COMMON' ? null : document.getElementById('wo-unit-select').value;
+      const unit = unitId ? AppState.units.find(u => u.id === unitId) : null;
+
+      const estCost = parseFloat(document.getElementById('wo-est-cost-input').value) || 0;
+      const actCost = parseFloat(document.getElementById('wo-act-cost-input').value) || estCost;
+      const allocation = document.getElementById('wo-allocation-select').value;
+      const status = document.getElementById('wo-status-select').value;
+      const approvedBy = document.getElementById('wo-approved-by-input').value;
+      const scope = document.getElementById('wo-scope-input').value.trim();
+
+      // Determine Target Account & Financial Accounting Impact
+      let targetAccount = 'Common Reserve Pool';
+      let accountingImpact = 'Absorbed into Common Service Charge Pool';
+
+      if (allocation === 'Landlord Deductible') {
+        const mandate = AppState.mandates.find(m => m.propertyName === (property ? property.name : ''));
+        targetAccount = mandate ? mandate.landlordName : 'Property Landlord';
+        accountingImpact = `Deducted from ${targetAccount} Monthly Remittance Statement`;
+
+        // Update landlord statement maintenance deduction if statement exists
+        const stmt = AppState.landlordStatements.find(s => s.propertyName === (property ? property.name : ''));
+        if (stmt) {
+          stmt.maintenance += actCost;
+          stmt.netPayable = Math.max(0, stmt.grossRent - stmt.commAmount - stmt.vatAmount - stmt.maintenance - stmt.mriTax);
+          renderLandlordStatementsTable();
+        }
+      } else if (allocation === 'Tenant Damage Recovery') {
+        const lease = unitId ? AppState.leases.find(l => l.unitId === unitId && l.status === 'Active') : null;
+        targetAccount = lease ? lease.tenantName : (ticket ? ticket.tenantName : 'Occupant Tenant');
+        accountingImpact = `Billed to Tenant Debit Ledger / Invoice Surcharge`;
+      } else {
+        targetAccount = `${property ? property.name : 'Estate'} SC Reserve Pool`;
+        accountingImpact = `Absorbed into Common Area Expense Pool`;
+      }
+
+      const lpoNum = `LPO-2026-${String(AppState.maintenanceWorkOrders.length + 1).padStart(3, '0')}`;
+      const issuedDate = new Date().toISOString().slice(0, 10);
+
+      // Update ticket status if linked
+      if (ticket) {
+        ticket.status = (status === 'Fulfilled') ? 'Completed' : 'In_Progress';
+      }
+
+      AppState.maintenanceWorkOrders.unshift({
+        id: lpoNum,
+        lpoNumber: lpoNum,
+        ticketId: ticketId,
+        ticketNumber: ticket ? ticket.ticketNumber : 'Direct Work Order',
+        vendorId: vendorId,
+        vendorName: vendor ? vendor.name : 'Contractor',
+        propertyId: propId,
+        propertyName: property ? property.name : 'Property',
+        unitId: unitId,
+        unitCode: unit ? unit.code : 'Common Area',
+        scopeOfWork: scope,
+        estimatedCost: estCost,
+        actualCost: actCost,
+        costAllocation: allocation,
+        approvalStatus: status,
+        approvedBy: approvedBy,
+        issuedDate: issuedDate,
+        completionDate: (status === 'Fulfilled') ? issuedDate : null,
+        targetAccount: targetAccount,
+        accountingImpact: accountingImpact
+      });
+
+      document.getElementById('form-work-order').reset();
+      populateWoTicketDropdown();
+      renderWorkOrdersTable();
+      renderMaintenanceTicketsTable();
+      renderCostAllocationLedger();
+      showToast(`Work Order & LPO ${lpoNum} authorized (KES ${actCost.toLocaleString()})`);
+    }
+
+    function handleVendorSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('vendor-name-input').value.trim();
+      const trade = document.getElementById('vendor-trade-select').value;
+      const contact = document.getElementById('vendor-contact-input').value.trim();
+      const phone = document.getElementById('vendor-phone-input').value.trim();
+      const email = document.getElementById('vendor-email-input').value.trim() || '—';
+      const pin = document.getElementById('vendor-pin-input').value.trim() || '—';
+      const payment = document.getElementById('vendor-payment-input').value.trim() || 'Pending Account Verification';
+
+      const vendorId = `VND-${String(AppState.vendors.length + 1).padStart(3, '0')}`;
+
+      AppState.vendors.push({
+        id: vendorId,
+        name: name,
+        tradeCategory: trade,
+        contactPerson: contact,
+        phone: phone,
+        email: email,
+        kraPin: pin,
+        paymentDetails: payment,
+        isActive: true
+      });
+
+      document.getElementById('form-vendor-reg').reset();
+      populateWoVendorDropdown();
+      renderVendorsTable();
+      showToast(`Vendor ${name} registered in trade: ${trade}`);
+    }
+
+    function toggleVendorStatus(vendorId) {
+      const vendor = AppState.vendors.find(v => v.id === vendorId);
+      if (!vendor) return;
+      vendor.isActive = !vendor.isActive;
+      populateWoVendorDropdown();
+      renderVendorsTable();
+      showToast(`${vendor.name} status updated: ${vendor.isActive ? 'Active' : 'Inactive'}`);
+    }
+
+    function renderMaintenanceTicketsTable() {
+      const tbody = document.getElementById('table-maintenance-tickets-body');
+      const badge = document.getElementById('tickets-count-badge');
+      if (!tbody) return;
+
+      if (badge) badge.textContent = `${AppState.maintenanceRequests.length} Incident Tickets`;
+
+      if (AppState.maintenanceRequests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">No incident tickets recorded.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = AppState.maintenanceRequests.map(t => {
+        const priorityClass = {
+          Low: 'badge-priority-low',
+          Medium: 'badge-priority-medium',
+          High: 'badge-priority-high',
+          Emergency: 'badge-priority-emergency'
+        }[t.priority] || 'badge-priority-medium';
+
+        const statusClass = {
+          Reported: 'badge-status-reported',
+          Assigned: 'badge-status-assigned',
+          In_Progress: 'badge-status-inprogress',
+          Completed: 'badge-status-completed'
+        }[t.status] || 'badge-status-reported';
+
+        const isConverted = AppState.maintenanceWorkOrders.some(w => w.ticketId === t.id);
+
+        return `
+          <tr>
+            <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">${t.ticketNumber}</td>
+            <td style="font-size: 0.8rem; color: var(--text-secondary);">${t.createdAt}</td>
+            <td>
+              <div style="font-weight: 700;">${t.propertyName}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${t.unitCode}</div>
+            </td>
+            <td>
+              <div style="font-weight: 600;">${t.tenantName}</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Reported via: ${t.reportedBy}</div>
+            </td>
+            <td>
+              <span class="badge-status" style="font-size: 0.72rem;">${t.category}</span>
+            </td>
+            <td>
+              <span class="badge-status ${priorityClass}">${t.priority}</span>
+            </td>
+            <td>
+              <span class="badge-status ${statusClass}">${t.status.replace('_', ' ')}</span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                ${isConverted 
+                  ? `<span style="font-size: 0.75rem; color: var(--accent-secondary); font-weight: 700;">✓ LPO Active</span>`
+                  : `<button class="btn-action-pill" onclick="convertTicketToLpo('${t.id}')">Convert to LPO</button>`
+                }
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderWorkOrdersTable() {
+      const tbody = document.getElementById('table-work-orders-body');
+      const badge = document.getElementById('work-orders-count-badge');
+      if (!tbody) return;
+
+      if (badge) badge.textContent = `${AppState.maintenanceWorkOrders.length} Issued LPOs`;
+
+      if (AppState.maintenanceWorkOrders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 24px;">No work orders or LPOs issued.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = AppState.maintenanceWorkOrders.map(w => {
+        const allocClass = {
+          'Landlord Deductible': 'badge-alloc-landlord',
+          'Tenant Damage Recovery': 'badge-alloc-tenant',
+          'Common Service Charge Pool': 'badge-alloc-pool'
+        }[w.costAllocation] || 'badge-alloc-pool';
+
+        const statusClass = {
+          Draft: 'badge-status-reported',
+          Approved: 'badge-status-assigned',
+          Fulfilled: 'badge-status-completed',
+          Rejected: 'badge-priority-emergency'
+        }[w.approvalStatus] || 'badge-status-assigned';
+
+        return `
+          <tr>
+            <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">${w.lpoNumber}</td>
+            <td style="font-size: 0.8rem; color: var(--text-secondary);">${w.issuedDate}</td>
+            <td>
+              <div style="font-weight: 700;">${w.vendorName}</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Ref: ${w.ticketNumber}</div>
+            </td>
+            <td>
+              <div>${w.propertyName}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${w.unitCode}</div>
+            </td>
+            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${w.scopeOfWork}">${w.scopeOfWork}</td>
+            <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">KES ${w.estimatedCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+            <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-primary);">KES ${w.actualCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+            <td>
+              <span class="badge-status ${allocClass}" style="font-size: 0.7rem;">${w.costAllocation}</span>
+            </td>
+            <td>
+              <span class="badge-status ${statusClass}">${w.approvalStatus}</span>
+            </td>
+            <td>
+              <button class="btn-action-pill" onclick="viewLpoDetails('${w.id}')">View LPO</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderVendorsTable() {
+      const tbody = document.getElementById('table-vendors-body');
+      const badge = document.getElementById('vendors-count-badge');
+      if (!tbody) return;
+
+      if (badge) badge.textContent = `${AppState.vendors.length} Contractors`;
+
+      if (AppState.vendors.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">No contractors registered.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = AppState.vendors.map(v => {
+        const lposCount = AppState.maintenanceWorkOrders.filter(w => w.vendorId === v.id).length;
+        return `
+          <tr>
+            <td>
+              <div style="font-weight: 800; color: var(--text-primary);">${v.name}</div>
+              <div style="font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; color: var(--text-muted);">${v.id}</div>
+            </td>
+            <td>
+              <span class="badge-status" style="font-size: 0.74rem;">${v.tradeCategory}</span>
+            </td>
+            <td>
+              <div style="font-weight: 600;">${v.contactPerson}</div>
+            </td>
+            <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;">${v.phone}</td>
+            <td>
+              <div style="font-size: 0.8rem;">${v.email}</div>
+              <div style="font-size: 0.74rem; font-family: 'JetBrains Mono', monospace; color: var(--text-muted);">PIN: ${v.kraPin}</div>
+            </td>
+            <td style="font-size: 0.8rem; max-width: 180px;">${v.paymentDetails}</td>
+            <td>
+              <button class="btn-action-pill" onclick="toggleVendorStatus('${v.id}')" style="color: ${v.isActive ? 'var(--accent-secondary)' : '#DC2626'};">
+                ${v.isActive ? '● Active' : '○ Suspended'}
+              </button>
+            </td>
+            <td style="text-align: center; font-weight: 700; font-family: 'JetBrains Mono', monospace;">${lposCount}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderCostAllocationLedger() {
+      const tbody = document.getElementById('table-cost-allocation-body');
+      const badge = document.getElementById('allocation-count-badge');
+      if (!tbody) return;
+
+      let totalSpent = 0;
+      let landlordSum = 0;
+      let tenantSum = 0;
+      let poolSum = 0;
+
+      AppState.maintenanceWorkOrders.forEach(w => {
+        totalSpent += w.actualCost;
+        if (w.costAllocation === 'Landlord Deductible') landlordSum += w.actualCost;
+        else if (w.costAllocation === 'Tenant Damage Recovery') tenantSum += w.actualCost;
+        else if (w.costAllocation === 'Common Service Charge Pool') poolSum += w.actualCost;
+      });
+
+      document.getElementById('stat-total-repairs').textContent = `KES ${totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('stat-landlord-deductible').textContent = `KES ${landlordSum.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('stat-tenant-damage').textContent = `KES ${tenantSum.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      document.getElementById('stat-pool-absorbed').textContent = `KES ${poolSum.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+
+      if (badge) badge.textContent = `${AppState.maintenanceWorkOrders.length} Reconciliation Records`;
+
+      if (AppState.maintenanceWorkOrders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 24px;">No cost allocation entries available.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = AppState.maintenanceWorkOrders.map(w => {
+        const allocClass = {
+          'Landlord Deductible': 'badge-alloc-landlord',
+          'Tenant Damage Recovery': 'badge-alloc-tenant',
+          'Common Service Charge Pool': 'badge-alloc-pool'
+        }[w.costAllocation] || 'badge-alloc-pool';
+
+        return `
+          <tr>
+            <td>
+              <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700;">${w.lpoNumber}</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">${w.issuedDate}</div>
+            </td>
+            <td>
+              <div style="font-weight: 600;">${w.propertyName}</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">${w.unitCode}</div>
+            </td>
+            <td>${w.vendorName}</td>
+            <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text-primary);">KES ${w.actualCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+            <td>
+              <span class="badge-status ${allocClass}">${w.costAllocation}</span>
+            </td>
+            <td style="font-weight: 700; color: var(--accent-primary);">${w.targetAccount}</td>
+            <td style="font-size: 0.8rem; color: var(--text-secondary);">${w.accountingImpact}</td>
+            <td>
+              <span class="badge-status badge-status-completed">${w.approvalStatus}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function viewLpoDetails(lpoId) {
+      const lpo = AppState.maintenanceWorkOrders.find(w => w.id === lpoId);
+      if (!lpo) return;
+
+      const vendor = AppState.vendors.find(v => v.id === lpo.vendorId);
+      const prop = AppState.properties.find(p => p.id === lpo.propertyId);
+      const wrap = document.getElementById('lpo-modal-content-wrap');
+      if (!wrap) return;
+
+      wrap.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 14px; background: var(--nav-active-bg); border-radius: 14px; border: 1px solid var(--glass-border);">
+          <div>
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Official Purchase Order</div>
+            <div style="font-size: 1.35rem; font-weight: 800; font-family: 'JetBrains Mono', monospace;">${lpo.lpoNumber}</div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">Issued: ${lpo.issuedDate} • Authorized By: ${lpo.approvedBy}</div>
+          </div>
+          <div style="text-align: right;">
+            <span class="badge-status badge-status-completed" style="font-size: 0.8rem; padding: 6px 12px;">${lpo.approvalStatus}</span>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Ticket Ref: ${lpo.ticketNumber}</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div style="padding: 12px; background: var(--nav-active-bg); border-radius: 12px; border: 1px solid var(--glass-border);">
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Certified Contractor</div>
+            <div style="font-weight: 800; font-size: 0.95rem; margin-top: 3px;">${lpo.vendorName}</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">Contact: ${vendor ? vendor.contactPerson : 'Contractor'} (${vendor ? vendor.phone : '—'})</div>
+            <div style="font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); margin-top: 2px;">KRA PIN: ${vendor ? vendor.kraPin : '—'}</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">Remit: ${vendor ? vendor.paymentDetails : 'Pending'}</div>
+          </div>
+
+          <div style="padding: 12px; background: var(--nav-active-bg); border-radius: 12px; border: 1px solid var(--glass-border);">
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Estate Asset Location</div>
+            <div style="font-weight: 800; font-size: 0.95rem; margin-top: 3px;">${lpo.propertyName}</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">LR No: ${prop ? prop.lr : '—'}</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">Designated Space: <strong>${lpo.unitCode}</strong></div>
+          </div>
+        </div>
+
+        <div style="padding: 14px; background: var(--nav-active-bg); border-radius: 12px; border: 1px solid var(--glass-border);">
+          <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Authorized Scope of Work & Deliverables</div>
+          <div style="font-size: 0.88rem; line-height: 1.5; margin-top: 6px; white-space: pre-wrap;">${lpo.scopeOfWork}</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px; background: var(--nav-active-bg); border-radius: 14px; border: 1px solid var(--glass-border);">
+          <div>
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">3-Way Cost Allocation Route</div>
+            <div style="font-weight: 800; font-size: 0.95rem; margin-top: 2px; color: var(--accent-primary);">${lpo.costAllocation}</div>
+            <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">Debited: <strong>${lpo.targetAccount}</strong> • ${lpo.accountingImpact}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted);">Authorized Amount</div>
+            <div style="font-size: 1.45rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--text-primary);">KES ${lpo.actualCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+            <div style="font-size: 0.72rem; color: var(--text-muted);">Budget Cap: KES ${lpo.estimatedCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          </div>
+        </div>
+      `;
+
+      const modal = document.getElementById('lpo-preview-modal');
+      if (modal) modal.classList.add('active');
+    }
+
+    function closeLpoModal() {
+      const modal = document.getElementById('lpo-preview-modal');
+      if (modal) modal.classList.remove('active');
+    }
+
+    function printLpoVoucher() {
+      showToast('Dispatching LPO Purchase Voucher to printer...');
+      window.print();
+    }
+
     function showToast(msg) {
       const bubble = document.createElement('div');
       bubble.className = 'toast-bubble';
@@ -4701,7 +6122,7 @@
     }
 
     // Initialize Sub-Module 1.1 & 1.2 UI
-    const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'flowly';
+    const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'developer';
     setTheme(savedTheme);
     renderLandlordsTable();
     renderTenantsTable();
@@ -4725,6 +6146,14 @@
     renderLandlordPortfolioTable();
     renderLandlordStatementsTable();
     renderLandlordPayoutQueueTable();
+
+    // 1.4 Repairs Initialization
+    setupRepairTabs();
+    populateRepairDropdowns();
+    renderMaintenanceTicketsTable();
+    renderWorkOrdersTable();
+    renderVendorsTable();
+    renderCostAllocationLedger();
   </script>
 </body>
 </html>
