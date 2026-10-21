@@ -1286,7 +1286,6 @@ const AppState = {
           setupTenantTabs();
           initSingleTenantBilling();
           initBulkTenantsBilling();
-          initArrearsBilling();
           renderLeasesTable();
           renderReadingsTable();
           renderInvoicesTable();
@@ -3311,8 +3310,8 @@ const AppState = {
 
     function switchTenantTab(targetTabId) {
       // Legacy redirects to the grouped invoices tab
-      if (targetTabId === 'tab-single-tenant' || targetTabId === 'tab-bulk-tenants' || targetTabId === 'tab-previous-arrears') {
-        const sub = targetTabId === 'tab-single-tenant' ? 'single' : (targetTabId === 'tab-bulk-tenants' ? 'bulk' : 'arrears');
+      if (targetTabId === 'tab-single-tenant' || targetTabId === 'tab-bulk-tenants') {
+        const sub = targetTabId === 'tab-single-tenant' ? 'single' : 'bulk';
         switchTenantTab('tab-invoices');
         switchInvoiceSubTab(sub);
         return;
@@ -3389,8 +3388,6 @@ const AppState = {
         initSingleTenantBilling();
       } else if (subTabId === 'bulk') {
         initBulkTenantsBilling();
-      } else if (subTabId === 'arrears') {
-        initArrearsBilling();
       }
     }
 
@@ -3416,11 +3413,6 @@ const AppState = {
       propSel.innerHTML = AppState.properties.map(p => 
         `<option value="${p.id}" ${p.name.includes('CHIMNEY RISE') ? 'selected' : ''}>${p.name}</option>`
       ).join('');
-
-      const descInput = document.getElementById('single-invoice-description');
-      if (descInput && !descInput.value) {
-        descInput.value = 'October 2026 Billing';
-      }
 
       onSinglePropertyChange(propSel.value);
     }
@@ -3491,11 +3483,16 @@ const AppState = {
     function executeSingleTenantBilling() {
       const propSel = document.getElementById('single-invoice-property-select');
       const tenantSel = document.getElementById('single-invoice-tenant-select');
-      const descInput = document.getElementById('single-invoice-description');
+      const monthSel = document.getElementById('single-invoice-month-select');
+      const yearSel = document.getElementById('single-invoice-year-select');
 
       const propertyId = propSel ? propSel.value : '';
       const tenantId = tenantSel ? tenantSel.value : '';
-      const desc = descInput ? descInput.value.trim() : 'Single Tenant Billing';
+      const monthVal = monthSel ? monthSel.value : '10';
+      const yearVal = yearSel ? yearSel.value : '2026';
+      const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthName = monthNames[parseInt(monthVal, 10)] || 'Oct';
+      const periodLabel = `${monthName} ${yearVal}`;
 
       if (!tenantId) {
         showToast('Please select a tenant to bill.');
@@ -3530,12 +3527,13 @@ const AppState = {
       const totalBilled = selectedItems.reduce((acc, item) => acc + item.amount, 0);
 
       confirmAction(
-        `Are you sure you want to bill <strong>${tenant.name} (${tenant.tenantCode || ''})</strong> a total of <strong>KES ${totalBilled.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> across ${selectedItems.length} payable(s)?`,
+        `Are you sure you want to bill <strong>${tenant.name} (${tenant.tenantCode || ''})</strong> a total of <strong>KES ${totalBilled.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> for <strong>${periodLabel}</strong> across ${selectedItems.length} payable(s)?`,
         async () => {
           const nowIso = new Date().toISOString();
           let postedCount = 0;
 
           for (const item of selectedItems) {
+            const autoDesc = `${item.description} - ${periodLabel}`;
             const invoiceRecord = {
               id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + postedCount).toString(16).padStart(12, '0'),
               organization_id: getActiveOrgId(),
@@ -3547,11 +3545,11 @@ const AppState = {
               unit_code: tenant.unitCode || '',
               property_name: prop ? prop.name : '',
               payable_code: item.code,
-              description: desc ? `${desc} - ${item.description}` : item.description,
+              description: autoDesc,
               amount: item.amount,
               billing_type: 'Single',
-              period_month: '10',
-              period_year: 2026,
+              period_month: monthVal,
+              period_year: parseInt(yearVal, 10),
               is_paid: false,
               created_at: nowIso
             };
@@ -3584,14 +3582,14 @@ const AppState = {
             tenantName: tenant.name,
             unitCode: tenant.unitCode || '',
             type: 'Invoice',
-            description: `${desc || 'Single Tenant Billing'} (${selectedItems.map(i => i.description).join(', ')})`,
+            description: selectedItems.map(i => `${i.description} - ${periodLabel}`).join(', '),
             debit: totalBilled,
             credit: 0,
             balanceAfter: totalBilled
           });
 
           renderLedgerTable();
-          showToast(`✓ Billed KES ${totalBilled.toLocaleString()} to ${tenant.name} (${postedCount} payables) successfully.`);
+          showToast(`✓ Billed KES ${totalBilled.toLocaleString()} to ${tenant.name} (${postedCount} payables for ${periodLabel}) successfully.`);
         },
         'Single Tenant Billing Confirmation',
         'Bill Tenant'
@@ -3604,7 +3602,6 @@ const AppState = {
     function initBulkTenantsBilling() {
       const propSel = document.getElementById('bulk-invoice-property-select');
       const payableSel = document.getElementById('bulk-invoice-payable-select');
-      const descInput = document.getElementById('bulk-invoice-description');
       if (!propSel || !payableSel) return;
 
       propSel.innerHTML = AppState.properties.map(p => 
@@ -3621,10 +3618,6 @@ const AppState = {
         <option value="008">008 Tenancy Agreement</option>
       `;
 
-      if (descInput && !descInput.value) {
-        descInput.value = 'October 2026 Bulk Rent Run';
-      }
-
       renderBulkTenantsTable();
     }
 
@@ -3633,12 +3626,6 @@ const AppState = {
     }
 
     function onBulkPayableChange(payableCode) {
-      const payableSel = document.getElementById('bulk-invoice-payable-select');
-      const payableText = payableSel ? payableSel.options[payableSel.selectedIndex].text : '';
-      const descInput = document.getElementById('bulk-invoice-description');
-      if (descInput) {
-        descInput.value = `October 2026 Bulk ${payableText} Run`;
-      }
       renderBulkTenantsTable();
     }
 
@@ -3684,12 +3671,18 @@ const AppState = {
     function executeBulkTenantsBilling() {
       const propSel = document.getElementById('bulk-invoice-property-select');
       const payableSel = document.getElementById('bulk-invoice-payable-select');
-      const descInput = document.getElementById('bulk-invoice-description');
+      const monthSel = document.getElementById('bulk-invoice-month-select');
+      const yearSel = document.getElementById('bulk-invoice-year-select');
 
       const propertyId = propSel ? propSel.value : '';
       const payableCode = payableSel ? payableSel.value : '001';
       const payableText = payableSel ? payableSel.options[payableSel.selectedIndex].text.replace(/^[0-9]+\s*/, '') : 'Rent';
-      const desc = descInput ? descInput.value.trim() : `Bulk ${payableText} Billing`;
+      const monthVal = monthSel ? monthSel.value : '10';
+      const yearVal = yearSel ? yearSel.value : '2026';
+      const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthName = monthNames[parseInt(monthVal, 10)] || 'Oct';
+      const periodLabel = `${monthName} ${yearVal}`;
+      const autoDesc = `${payableText} - ${periodLabel}`;
       const prop = AppState.properties.find(p => p.id === propertyId);
 
       const billedItems = [];
@@ -3715,7 +3708,7 @@ const AppState = {
       const totalAmount = billedItems.reduce((acc, i) => acc + i.amount, 0);
 
       confirmAction(
-        `Are you sure you want to execute Bulk Billing for <strong>${billedItems.length} tenant(s)</strong> totaling <strong>KES ${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> under <strong>${payableText}</strong>?`,
+        `Are you sure you want to execute Bulk Billing for <strong>${billedItems.length} tenant(s)</strong> totaling <strong>KES ${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> for <strong>${periodLabel}</strong> under <strong>${payableText}</strong>?`,
         async () => {
           const nowIso = new Date().toISOString();
           let count = 0;
@@ -3732,11 +3725,11 @@ const AppState = {
               unit_code: item.tenant.unitCode || '',
               property_name: prop ? prop.name : '',
               payable_code: payableCode,
-              description: desc || `Bulk ${payableText} Billing`,
+              description: autoDesc,
               amount: item.amount,
               billing_type: 'Bulk',
-              period_month: '10',
-              period_year: 2026,
+              period_month: monthVal,
+              period_year: parseInt(yearVal, 10),
               is_paid: false,
               created_at: nowIso
             };
@@ -3767,7 +3760,7 @@ const AppState = {
               tenantName: item.tenant.name,
               unitCode: item.tenant.unitCode || '',
               type: 'Invoice',
-              description: desc || `Bulk ${payableText} Billing`,
+              description: autoDesc,
               debit: item.amount,
               credit: 0,
               balanceAfter: item.amount
@@ -3777,186 +3770,10 @@ const AppState = {
           }
 
           renderLedgerTable();
-          showToast(`✓ Bulk billing executed: ${count} tenants billed KES ${totalAmount.toLocaleString()} successfully.`);
+          showToast(`✓ Bulk billing executed: ${count} tenants billed KES ${totalAmount.toLocaleString()} for ${periodLabel} successfully.`);
         },
         'Bulk Tenants Billing Confirmation',
         'Bill All Selected'
-      );
-    }
-
-    /* --------------------------------------------------------------------------
-       3. PREVIOUS ARREARS INVOICING ENGINE (image_7362b5.png)
-       -------------------------------------------------------------------------- */
-    function initArrearsBilling() {
-      const propSel = document.getElementById('arrears-property-select');
-      const payableSel = document.getElementById('arrears-payable-select');
-      const descInput = document.getElementById('arrears-description');
-      if (!propSel || !payableSel) return;
-
-      propSel.innerHTML = AppState.properties.map(p => 
-        `<option value="${p.id}" ${p.name.includes('CHIMNEY RISE') ? 'selected' : ''}>${p.name}</option>`
-      ).join('');
-
-      payableSel.innerHTML = `
-        <option value="001" selected>001 Rent</option>
-        <option value="002">002 Water Bill</option>
-        <option value="009">009 Service Charge</option>
-        <option value="015">015 Security</option>
-        <option value="017">017 Garbage</option>
-        <option value="035">035 Penalty</option>
-      `;
-
-      if (descInput && !descInput.value) {
-        descInput.value = 'Opening Arrears Balance';
-      }
-
-      renderArrearsTable();
-    }
-
-    function onArrearsPropertyChange(propertyId) {
-      renderArrearsTable();
-    }
-
-    function onArrearsPayableChange(payableCode) {
-      renderArrearsTable();
-    }
-
-    function renderArrearsTable() {
-      const tbody = document.getElementById('arrears-table-body');
-      if (!tbody) return;
-
-      const propSel = document.getElementById('arrears-property-select');
-      const payableSel = document.getElementById('arrears-payable-select');
-      const propertyId = propSel ? propSel.value : 'PROP-03';
-      const payableText = payableSel ? payableSel.options[payableSel.selectedIndex].text.replace(/^[0-9]+\s*/, '') : 'Rent';
-
-      const filteredTenants = AppState.tenants.filter(t => t.isActive && (t.propertyId === propertyId || !t.propertyId));
-
-      tbody.innerHTML = filteredTenants.map((t, idx) => {
-        return `
-          <tr class="pm-table-row">
-            <td style="padding: 5px 10px; width: 90px; text-align: left; border-right: 1px solid #E5E7EB; font-weight: 600;">${t.tenantCode || 'T' + (10000 + idx)}</td>
-            <td style="padding: 5px 12px; text-align: left; border-right: 1px solid #E5E7EB;">${t.name}</td>
-            <td style="padding: 5px 10px; width: 60px; text-align: center; border-right: 1px solid #E5E7EB;">${t.unitCode || (idx + 1)}</td>
-            <td style="padding: 5px 12px; width: 100px; text-align: left; border-right: 1px solid #E5E7EB; color: #4B5563;">${payableText}</td>
-            <td style="padding: 4px 12px; width: 140px; text-align: right; border-right: 1px solid #E5E7EB;">
-              <input type="number" step="0.01" class="pm-legacy-input arrears-bill-amount" data-tenant-id="${t.id}" placeholder="0.00" style="width: 110px; text-align: right;">
-            </td>
-            <td style="padding: 5px 12px; width: 100px; text-align: right; border-right: 1px solid #E5E7EB; color: #6B7280;">0.00</td>
-            <td style="padding: 5px 10px; width: 85px; text-align: center; border-right: 1px solid #E5E7EB;">
-              <input type="checkbox" class="arrears-tenant-checkbox" data-tenant-id="${t.id}" style="accent-color: #008080; cursor: pointer; width: 16px; height: 16px;">
-            </td>
-            <td style="padding: 5px 10px; width: 45px; text-align: center; color: #6B7280;">${idx + 1}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function toggleArrearsSelectAll(checked) {
-      const checkboxes = document.querySelectorAll('.arrears-tenant-checkbox');
-      checkboxes.forEach(cb => { cb.checked = checked; });
-    }
-
-    function executeArrearsBilling() {
-      const propSel = document.getElementById('arrears-property-select');
-      const payableSel = document.getElementById('arrears-payable-select');
-      const descInput = document.getElementById('arrears-description');
-
-      const propertyId = propSel ? propSel.value : '';
-      const payableCode = payableSel ? payableSel.value : '001';
-      const payableText = payableSel ? payableSel.options[payableSel.selectedIndex].text.replace(/^[0-9]+\s*/, '') : 'Rent';
-      const desc = descInput ? descInput.value.trim() : 'Previous Arrears Balance';
-      const prop = AppState.properties.find(p => p.id === propertyId);
-
-      const arrearsItems = [];
-      const rows = document.querySelectorAll('#arrears-table-body tr');
-      rows.forEach(tr => {
-        const chk = tr.querySelector('.arrears-tenant-checkbox');
-        const input = tr.querySelector('.arrears-bill-amount');
-        if (chk && chk.checked) {
-          const tenantId = chk.getAttribute('data-tenant-id');
-          const amt = parseFloat(input.value) || 0;
-          const tenant = AppState.tenants.find(t => t.id === tenantId);
-          if (tenant && amt > 0) {
-            arrearsItems.push({ tenant, amount: amt });
-          }
-        }
-      });
-
-      if (arrearsItems.length === 0) {
-        showToast('Please check at least one tenant checkbox and enter an arrear amount > 0.');
-        return;
-      }
-
-      const totalAmount = arrearsItems.reduce((acc, i) => acc + i.amount, 0);
-
-      confirmAction(
-        `Are you sure you want to commit Previous Arrears for <strong>${arrearsItems.length} tenant(s)</strong> totaling <strong>KES ${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> under <strong>${payableText}</strong>?<br><br><span style="color: #DC2626; font-size: 11.5px;">NB: Billing Arrears of a New Property must only be run once before regular monthly bills are posted.</span>`,
-        async () => {
-          const nowIso = new Date().toISOString();
-          let count = 0;
-
-          for (const item of arrearsItems) {
-            const invoiceRecord = {
-              id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + count).toString(16).padStart(12, '0'),
-              organization_id: getActiveOrgId(),
-              tenant_id: item.tenant.id,
-              property_id: propertyId,
-              unit_id: item.tenant.unitId || null,
-              tenant_code: item.tenant.tenantCode || '',
-              tenant_name: item.tenant.name,
-              unit_code: item.tenant.unitCode || '',
-              property_name: prop ? prop.name : '',
-              payable_code: payableCode,
-              description: desc || `Previous Arrears - ${payableText}`,
-              amount: item.amount,
-              billing_type: 'Arrears',
-              period_month: '10',
-              period_year: 2026,
-              is_paid: false,
-              created_at: nowIso
-            };
-
-            AppState.tenantInvoices.unshift(invoiceRecord);
-
-            try {
-              await fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices`, {
-                method: 'POST',
-                headers: {
-                  'apikey': SUPABASE_CONFIG.anonKey,
-                  'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
-                  'Content-Type': 'application/json',
-                  'Prefer': 'return=minimal'
-                },
-                body: JSON.stringify(invoiceRecord)
-              });
-            } catch (err) {
-              console.warn('Supabase arrears insert warning:', err);
-            }
-
-            // Post opening balance debit to ledger
-            AppState.ledger.push({
-              id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
-              timestamp: nowIso.replace('T', ' ').substring(0, 16),
-              refNo: `ARR-${Date.now().toString().slice(-6)}`,
-              tenantId: item.tenant.id,
-              tenantName: item.tenant.name,
-              unitCode: item.tenant.unitCode || '',
-              type: 'Invoice',
-              description: `Previous Arrears - ${payableText}`,
-              debit: item.amount,
-              credit: 0,
-              balanceAfter: item.amount
-            });
-
-            count++;
-          }
-
-          renderLedgerTable();
-          showToast(`✓ Previous arrears committed: ${count} tenant(s) billed KES ${totalAmount.toLocaleString()} successfully.`);
-        },
-        'Previous Arrears Confirmation',
-        'Post Arrears'
       );
     }
 
@@ -7421,12 +7238,6 @@ const AppState = {
     window.renderBulkTenantsTable = renderBulkTenantsTable;
     window.toggleBulkSelectAll = toggleBulkSelectAll;
     window.executeBulkTenantsBilling = executeBulkTenantsBilling;
-    window.initArrearsBilling = initArrearsBilling;
-    window.onArrearsPropertyChange = onArrearsPropertyChange;
-    window.onArrearsPayableChange = onArrearsPayableChange;
-    window.renderArrearsTable = renderArrearsTable;
-    window.toggleArrearsSelectAll = toggleArrearsSelectAll;
-    window.executeArrearsBilling = executeArrearsBilling;
     window.loadAccountingPeriods = loadAccountingPeriods;
     window.renderAccountingPeriodsTable = renderAccountingPeriodsTable;
     window.executePeriodRollOver = executePeriodRollOver;
