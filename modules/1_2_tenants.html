@@ -287,7 +287,7 @@
       <legend style="color: #F97316; font-size: 12px; font-weight: 700; padding: 0 6px;">
         — Record Tenant Payment / Receipt Voucher —
       </legend>
-      <form id="form-tenant-receipt" onsubmit="event.preventDefault(); executePaymentReceipt();">
+      <form id="form-tenant-receipt" onsubmit="event.preventDefault(); executePaymentReceipt('save');">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px 24px; max-width: 1100px;">
           
           <!-- Property -->
@@ -428,14 +428,36 @@
           </div>
         </fieldset>
 
-        <!-- Action Buttons -->
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
-          <button type="button" class="btn-action-pill" onclick="resetReceiptForm()" style="padding: 6px 20px; font-size: 12.5px;">
-            Reset Form
-          </button>
-          <button type="submit" class="pm-btn-orange" style="padding: 6px 36px; font-size: 13px;">
-            + Post Payment & Issue Official Receipt
-          </button>
+        <!-- Action Footer: SMS Checkbox & 3 Cashier Workflow Buttons ([Save], [Save & Print], [Save & Send SMS]) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 16px; border-top: 1px dashed #CBD5E1; padding-top: 14px;">
+          <!-- Left: Send SMS Checkbox & Reset Form -->
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #1F2937; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="receipt-send-sms" checked style="accent-color: #008080; width: 17px; height: 17px; cursor: pointer;">
+              <span>Send SMS Receipt to Tenant</span>
+            </label>
+            <button type="button" class="btn-action-pill" onclick="resetReceiptForm()" style="padding: 6px 18px; font-size: 12px; color: #4B5563;">
+              Reset Form
+            </button>
+          </div>
+
+          <!-- Right: 3 Cashier Workflow Action Buttons -->
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <!-- 1. [Save] -->
+            <button type="button" class="pm-btn-orange" onclick="executePaymentReceipt('save')" style="padding: 6px 26px; font-size: 13px; background: #374151; border-color: #1F2937;" onmouseover="this.style.background='#1F2937'" onmouseout="this.style.background='#374151'">
+              Save
+            </button>
+
+            <!-- 2. [Save & Print] -->
+            <button type="button" class="pm-btn-orange" onclick="executePaymentReceipt('print')" style="padding: 6px 26px; font-size: 13px;">
+              Save &amp; Print
+            </button>
+
+            <!-- 3. [Save & Send SMS] -->
+            <button type="button" class="pm-btn-orange" onclick="executePaymentReceipt('send_sms')" style="padding: 6px 26px; font-size: 13px; background: #008080; border-color: #006666;" onmouseover="this.style.background='#006666'" onmouseout="this.style.background='#008080'">
+              Save &amp; Send SMS
+            </button>
+          </div>
         </div>
       </form>
     </fieldset>

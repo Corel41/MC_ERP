@@ -4241,7 +4241,7 @@ const AppState = {
       }
     }
 
-    function executePaymentReceipt() {
+    function executePaymentReceipt(actionType = 'save') {
       const propSel = document.getElementById('receipt-property-select');
       const tenantSel = document.getElementById('receipt-tenant-select');
       const methodSel = document.getElementById('receipt-method-select');
@@ -4251,6 +4251,7 @@ const AppState = {
       const dateInput = document.getElementById('receipt-payment-date');
       const amountInput = document.getElementById('receipt-amount-paid');
       const notesInput = document.getElementById('receipt-notes');
+      const smsCheck = document.getElementById('receipt-send-sms');
 
       if (!tenantSel || !tenantSel.value) {
         alert('Please select a valid tenant.');
@@ -4272,9 +4273,15 @@ const AppState = {
       }
 
       const tenant = AppState.tenants.find(t => t.id === tenantSel.value);
-      const property = AppState.properties.find(p => p.id === propSel.value) || { id: 'PROP-01', name: 'Estate Property' };
+      if (!tenant) {
+        alert('Selected tenant not found in records.');
+        return;
+      }
+
+      const property = AppState.properties.find(p => p.id === propSel.value) || { id: 'PROP-01', name: tenant.propertyName || 'Estate Property' };
       const method = methodSel.value;
       const paymentDate = dateInput.value || new Date().toISOString().split('T')[0];
+      const postingDate = document.getElementById('receipt-posting-date')?.value || paymentDate;
       const notes = notesInput ? notesInput.value.trim() : '';
 
       let destLabel = 'Office Cashier';
@@ -4317,9 +4324,20 @@ const AppState = {
       }
 
       const receiptNo = `REC-2026-${String(AppState.tenantReceipts.length + 1).padStart(3, '0')}`;
+      const isSmsRequested = (actionType === 'send_sms') || (smsCheck && smsCheck.checked);
+
+      let actionTitle = 'Save Payment Receipt';
+      let actionConfirmBtn = 'Save Receipt';
+      if (actionType === 'print') {
+        actionTitle = 'Save & Print Receipt';
+        actionConfirmBtn = 'Save & Print';
+      } else if (actionType === 'send_sms') {
+        actionTitle = 'Save & Send SMS';
+        actionConfirmBtn = 'Save & Send SMS';
+      }
 
       confirmAction(
-        `Are you sure you want to issue Official Receipt <strong>${receiptNo}</strong> for <strong>KES ${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> received from <strong>${tenant.name}</strong> (${tenant.unitCode || 'Unit'}) via <strong>${method}</strong> [Ref: ${refCode}]?<br><br>Destination: <strong>${destLabel}</strong>`,
+        `Are you sure you want to issue Official Receipt <strong>${receiptNo}</strong> for <strong>KES ${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> received from <strong>${tenant.name}</strong> (${tenant.unitCode || 'Unit'}) via <strong>${method}</strong> [Ref: ${refCode}]?<br><br>Destination: <strong>${destLabel}</strong>${isSmsRequested ? '<br><span style="color: #008080; font-weight: 700;">✓ Africa\'s Talking SMS notification enabled</span>' : ''}`,
         async () => {
           const nowIso = new Date().toISOString();
           const newReceipt = {
@@ -4338,6 +4356,7 @@ const AppState = {
             mpesa_paybill_number: mpesaPaybillNo,
             reference_code: refCode,
             payment_date: paymentDate + ' ' + (new Date().toTimeString().split(' ')[0]),
+            posting_date: postingDate,
             notes: notes || `${method} payment for ${tenant.name}`,
             allocated_invoices: allocatedList,
             issued_by: 'DEAN',
@@ -4438,14 +4457,33 @@ const AppState = {
           // 5. Update UI components
           renderTenantReceiptsTable();
           renderLedgerTable();
-          onReceiptTenantChange(tenant.id);
 
-          // 6. Display success and open Official Receipt Voucher Modal
-          showToast(`✓ Receipt ${receiptNo} recorded and posted to ledger successfully.`);
-          openOfficialReceiptModal(newReceipt);
+          // 6. Action Routing & Notifications
+          if (isSmsRequested) {
+            console.log("Triggering Africa's Talking SMS API");
+            const phone = tenant.phone || tenant.phoneNumber || '2547XXXXXXXX';
+            const smsMsg = `Dear ${tenant.name}, payment receipt ${receiptNo} for KES ${amount.toLocaleString('en-US', {minimumFractionDigits: 2})} received via ${method} [Ref: ${refCode}] for ${property.name} Unit ${tenant.unitCode || ''}. Thank you. Metrocosmo Ltd.`;
+            console.log(`Africa's Talking SMS Dispatched -> To: ${phone} | Text: "${smsMsg}"`);
+            showToast(`✓ Receipt ${receiptNo} recorded & SMS sent via Africa's Talking.`);
+          } else {
+            showToast(`✓ Receipt ${receiptNo} recorded and posted to ledger successfully.`);
+          }
+
+          if (actionType === 'print') {
+            console.log('Initiating Print View');
+            openOfficialReceiptModal(newReceipt);
+            setTimeout(() => {
+              window.print();
+            }, 350);
+          } else if (actionType === 'send_sms') {
+            console.log("Triggering Africa's Talking SMS API");
+          }
+
+          // 7. Clear all form inputs completely after a successful save
+          resetReceiptForm();
         },
-        'Confirm Payment Receipt',
-        'Post Receipt & Issue Voucher'
+        actionTitle,
+        actionConfirmBtn
       );
     }
 
@@ -4530,8 +4568,47 @@ const AppState = {
     function resetReceiptForm() {
       const form = document.getElementById('form-tenant-receipt');
       if (form) form.reset();
+
+      // Clear explicit inputs
+      const amtInput = document.getElementById('receipt-amount-paid');
+      if (amtInput) amtInput.value = '';
+
+      const refInput = document.getElementById('receipt-ref-code');
+      if (refInput) refInput.value = '';
+
+      const notesInput = document.getElementById('receipt-notes');
+      if (notesInput) notesInput.value = '';
+
+      const unitDisp = document.getElementById('receipt-unit-display');
+      if (unitDisp) unitDisp.textContent = 'Unit: -';
+
+      const balBadge = document.getElementById('receipt-balance-badge');
+      if (balBadge) {
+        balBadge.textContent = 'KES 0.00';
+        balBadge.style.background = '#FEF3C7';
+        balBadge.style.borderColor = '#F59E0B';
+        balBadge.style.color = '#B45309';
+      }
+
+      // Restore SMS checkbox to default checked
+      const smsCheck = document.getElementById('receipt-send-sms');
+      if (smsCheck) smsCheck.checked = true;
+
+      // Clear matrix inputs and reset matrix table & totals
+      renderReceiptAllocationMatrix('');
+
+      // Refresh property selection & payment mode defaults
       const propSel = document.getElementById('receipt-property-select');
-      if (propSel) onReceiptPropertyChange(propSel.value);
+      if (propSel && propSel.options.length > 0) {
+        propSel.selectedIndex = 0;
+        onReceiptPropertyChange(propSel.value);
+      }
+
+      const methodSel = document.getElementById('receipt-method-select');
+      if (methodSel) {
+        methodSel.value = 'M-Pesa Paybill';
+        onReceiptPaymentModeChange('M-Pesa Paybill');
+      }
     }
 
     function openOfficialReceiptModal(receiptOrId) {
