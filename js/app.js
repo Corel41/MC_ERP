@@ -87,6 +87,64 @@ const AppState = {
         { id: '00000000-0000-0000-0000-000000000132', period_no: 32, period_month: '8', period_year: 2025, description: 'August', status: 'Closed', opened_at: '2025-08-01 07:46:25.427', closed_at: '2025-08-30 14:33:43.997', opened_by: 'MARGARET' }
       ],
       tenantInvoices: [],
+      tenantReceipts: [
+        {
+          id: '00000000-0000-0000-0000-000000000201',
+          receipt_number: 'REC-2026-001',
+          tenant_id: 'TEN-CRE-01',
+          tenant_code: 'T16557',
+          tenant_name: 'Nancy Jacqueline Njuhi Kamau',
+          property_id: 'PROP-03',
+          property_name: 'CHIMNEY RISE ESTATE -',
+          unit_code: '1',
+          amount_paid: 35000.00,
+          payment_method: 'M-Pesa Paybill',
+          bank_account_name: '',
+          mpesa_paybill_number: '522522',
+          reference_code: 'QKD829104A',
+          payment_date: '2026-10-03 11:20:00',
+          notes: 'October 2026 Rent settlement via M-Pesa Paybill',
+          issued_by: 'DEAN'
+        },
+        {
+          id: '00000000-0000-0000-0000-000000000202',
+          receipt_number: 'REC-2026-002',
+          tenant_id: 'TEN-CRE-02',
+          tenant_code: 'T00186',
+          tenant_name: 'Deep Shah And Nirah Shah',
+          property_id: 'PROP-03',
+          property_name: 'CHIMNEY RISE ESTATE -',
+          unit_code: '2',
+          amount_paid: 38000.00,
+          payment_method: 'Bank Deposit',
+          bank_account_name: 'ABSA BANK - RUIRU (0311121448)',
+          mpesa_paybill_number: '',
+          reference_code: 'BNK-782910',
+          payment_date: '2026-10-04 09:45:00',
+          notes: 'Direct deposit to ABSA Bank for October Rent',
+          issued_by: 'DEAN'
+        },
+        {
+          id: '00000000-0000-0000-0000-000000000203',
+          receipt_number: 'REC-2026-003',
+          tenant_id: 'TEN-01',
+          tenant_code: 'T001',
+          tenant_name: 'Grace Wanjiru Ndungu',
+          property_id: 'PROP-01',
+          property_name: 'Chania Falls View Courts',
+          unit_code: 'A-01',
+          amount_paid: 37525.00,
+          payment_method: 'M-Pesa Paybill',
+          bank_account_name: '',
+          mpesa_paybill_number: '522522',
+          reference_code: 'MPX-SK981240',
+          payment_date: '2026-10-03 14:22:00',
+          notes: 'October Rent, Service Charge, and Water settlement',
+          issued_by: 'DEAN'
+        }
+      ],
+      activeTenantTab: 'tab-invoices',
+      activeInvoiceSubTab: 'single',
       landlords: [
         {
           id: 'LL-01',
@@ -1169,7 +1227,7 @@ const AppState = {
     });
 
     if (quickSettingsBtn) {
-      quickSettingsBtn.addEventListener('click', () => switchView('settings', '07. Settings'));
+      quickSettingsBtn.addEventListener('click', () => switchView('settings', 'Settings'));
     }
 
     function setupRegistrationTabs() {
@@ -1233,7 +1291,8 @@ const AppState = {
           renderReadingsTable();
           renderInvoicesTable();
           renderLedgerTable();
-          switchTenantTab(AppState.activeTenantTab || 'tab-single-tenant');
+          loadTenantReceipts();
+          switchTenantTab(AppState.activeTenantTab || 'tab-invoices');
           break;
 
         case 'estate-landlords':
@@ -2675,7 +2734,7 @@ const AppState = {
     function openBulkUnitEditor(propId) {
       const currentView = AppState.currentView || 'estate-reg';
       if (currentView !== 'estate-reg') {
-        switchView('estate-reg', '01. Estate Management - 1.1 Registration');
+        switchView('estate-reg', 'Registration');
         setTimeout(() => openBulkUnitEditor(propId), 150);
         return;
       }
@@ -2929,7 +2988,7 @@ const AppState = {
     function openPropertyPayables(propId) {
       const currentView = AppState.currentView || 'estate-reg';
       if (currentView !== 'estate-reg') {
-        switchView('estate-reg', '01. Estate Management - 1.1 Registration');
+        switchView('estate-reg', 'Registration');
         setTimeout(() => openPropertyPayables(propId), 150);
         return;
       }
@@ -3248,9 +3307,17 @@ const AppState = {
       };
     }
 
-    /* SUB-MODULE 1.2: TENANTS LOGIC & INTERACTION ENGINES */
+    /* TENANTS LOGIC & INTERACTION ENGINES */
 
     function switchTenantTab(targetTabId) {
+      // Legacy redirects to the grouped invoices tab
+      if (targetTabId === 'tab-single-tenant' || targetTabId === 'tab-bulk-tenants' || targetTabId === 'tab-previous-arrears') {
+        const sub = targetTabId === 'tab-single-tenant' ? 'single' : (targetTabId === 'tab-bulk-tenants' ? 'bulk' : 'arrears');
+        switchTenantTab('tab-invoices');
+        switchInvoiceSubTab(sub);
+        return;
+      }
+
       AppState.activeTenantTab = targetTabId;
 
       // Update button visual styles
@@ -3276,12 +3343,10 @@ const AppState = {
       });
 
       // Trigger data binding for the active tab
-      if (targetTabId === 'tab-single-tenant') {
-        initSingleTenantBilling();
-      } else if (targetTabId === 'tab-bulk-tenants') {
-        initBulkTenantsBilling();
-      } else if (targetTabId === 'tab-previous-arrears') {
-        initArrearsBilling();
+      if (targetTabId === 'tab-invoices' || targetTabId === 'invoices') {
+        switchInvoiceSubTab(AppState.activeInvoiceSubTab || 'single');
+      } else if (targetTabId === 'tab-receipting' || targetTabId === 'receipting') {
+        initTenantReceipting();
       } else if (targetTabId === 'tab-leases' || targetTabId === 'leases') {
         populateTenantDropdowns();
         renderLeasesTable();
@@ -3291,6 +3356,41 @@ const AppState = {
       } else if (targetTabId === 'tab-ledger' || targetTabId === 'ledger') {
         populateTenantDropdowns();
         renderLedgerTable();
+      }
+    }
+
+    function switchInvoiceSubTab(subTabId) {
+      AppState.activeInvoiceSubTab = subTabId;
+
+      // Update subtab button visual styles
+      const subBtns = document.querySelectorAll('.inv-subtab-btn');
+      subBtns.forEach(btn => {
+        if (btn.id === `btn-subtab-${subTabId}`) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Update subpanel visibility
+      const subPanels = document.querySelectorAll('.invoice-subpanel');
+      subPanels.forEach(p => {
+        if (p.id === `subpanel-inv-${subTabId}`) {
+          p.style.display = 'block';
+          p.classList.add('active');
+        } else {
+          p.style.display = 'none';
+          p.classList.remove('active');
+        }
+      });
+
+      // Initialize specific invoice engine
+      if (subTabId === 'single') {
+        initSingleTenantBilling();
+      } else if (subTabId === 'bulk') {
+        initBulkTenantsBilling();
+      } else if (subTabId === 'arrears') {
+        initArrearsBilling();
       }
     }
 
@@ -3858,6 +3958,689 @@ const AppState = {
         'Previous Arrears Confirmation',
         'Post Arrears'
       );
+    }
+
+    /* --------------------------------------------------------------------------
+       TENANT PAYMENT RECEIPTING & ALLOCATION ENGINE
+       -------------------------------------------------------------------------- */
+
+    async function loadTenantReceipts() {
+      try {
+        const cached = localStorage.getItem('mc_erp_tenant_receipts');
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              AppState.tenantReceipts = parsed;
+              renderTenantReceiptsTable();
+            }
+          } catch (e) {}
+        }
+
+        const orgId = getActiveOrgId();
+        const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_receipts?organization_id=eq.${orgId}&order=created_at.desc`, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_CONFIG.anonKey,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            AppState.tenantReceipts = data;
+            localStorage.setItem('mc_erp_tenant_receipts', JSON.stringify(data));
+            renderTenantReceiptsTable();
+          }
+        }
+      } catch (err) {
+        console.warn('loadTenantReceipts network fetch failed; using local state:', err);
+      }
+    }
+
+    function initTenantReceipting() {
+      // 1. Populate Property Dropdowns
+      const propSel = document.getElementById('receipt-property-select');
+      const filterPropSel = document.getElementById('receipt-filter-property');
+      if (propSel) {
+        propSel.innerHTML = AppState.properties.map(p => 
+          `<option value="${p.id}" ${p.name.includes('CHIMNEY RISE') ? 'selected' : ''}>${p.name}</option>`
+        ).join('');
+      }
+      if (filterPropSel) {
+        filterPropSel.innerHTML = '<option value="ALL">All Properties</option>' + AppState.properties.map(p => 
+          `<option value="${p.id}">${p.name}</option>`
+        ).join('');
+      }
+
+      // 2. Populate Bank Accounts
+      const bankSel = document.getElementById('receipt-bank-account-select');
+      if (bankSel) {
+        if (AppState.bankAccounts && AppState.bankAccounts.length > 0) {
+          bankSel.innerHTML = AppState.bankAccounts.map(b => 
+            `<option value="${b.id}">${b.bank_name || b.bankName} - ${b.branch_name || b.branchName || ''} (${b.account_no || b.accountNo})</option>`
+          ).join('');
+        } else {
+          bankSel.innerHTML = '<option value="">No Bank Accounts Configured (Add in Admin)</option>';
+        }
+      }
+
+      // 3. Populate M-Pesa Paybills
+      const mpesaSel = document.getElementById('receipt-mpesa-paybill-select');
+      if (mpesaSel) {
+        if (AppState.mpesaPaybills && AppState.mpesaPaybills.length > 0) {
+          mpesaSel.innerHTML = AppState.mpesaPaybills.map(m => 
+            `<option value="${m.id}">${m.paybill_number || m.paybillNumber} - ${m.business_name || m.businessName}</option>`
+          ).join('');
+        } else {
+          mpesaSel.innerHTML = '<option value="">No M-Pesa Paybills Configured (Add in Admin)</option>';
+        }
+      }
+
+      // 4. Default Date
+      const dateInput = document.getElementById('receipt-payment-date');
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+      }
+
+      // 5. Default Payment Method & Trigger Handlers
+      const methodSel = document.getElementById('receipt-method-select');
+      if (methodSel) {
+        onReceiptPaymentModeChange(methodSel.value);
+      }
+      if (propSel) {
+        onReceiptPropertyChange(propSel.value);
+      }
+
+      // 6. Render Directory Table
+      renderTenantReceiptsTable();
+    }
+
+    function onReceiptPropertyChange(propertyId) {
+      const tenantSel = document.getElementById('receipt-tenant-select');
+      if (!tenantSel) return;
+
+      const filteredTenants = AppState.tenants.filter(t => t.isActive && (t.propertyId === propertyId || !t.propertyId));
+      if (filteredTenants.length > 0) {
+        tenantSel.innerHTML = filteredTenants.map((t, idx) => 
+          `<option value="${t.id}" ${idx === 0 ? 'selected' : ''}>${t.tenantCode ? t.tenantCode + ' - ' : ''}${t.name}</option>`
+        ).join('');
+      } else {
+        tenantSel.innerHTML = '<option value="">-No active tenants in this property-</option>';
+      }
+
+      onReceiptTenantChange(tenantSel.value);
+    }
+
+    function onReceiptTenantChange(tenantId) {
+      const unitDisplay = document.getElementById('receipt-unit-display');
+      const balanceBadge = document.getElementById('receipt-balance-badge');
+      const amountInput = document.getElementById('receipt-amount-paid');
+      const notesInput = document.getElementById('receipt-notes');
+
+      if (!tenantId) {
+        if (unitDisplay) unitDisplay.textContent = 'Unit: -';
+        if (balanceBadge) {
+          balanceBadge.textContent = 'KES 0.00';
+          balanceBadge.style.background = '#F3F4F6';
+          balanceBadge.style.color = '#374151';
+          balanceBadge.style.borderColor = '#D1D5DB';
+        }
+        renderReceiptAllocationMatrix('');
+        return;
+      }
+
+      const tenant = AppState.tenants.find(t => t.id === tenantId);
+
+      // Unit display
+      if (unitDisplay) {
+        unitDisplay.textContent = `Unit: ${tenant && tenant.unitCode ? tenant.unitCode : 'Assigned'}`;
+      }
+
+      // Calculate Tenant Balance from double-entry ledger
+      const tenantEntries = AppState.ledger.filter(l => l.tenantId === tenantId);
+      const debits = tenantEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
+      const credits = tenantEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
+      const balance = Math.max(0, debits - credits);
+
+      if (balanceBadge) {
+        if (balance > 0) {
+          balanceBadge.textContent = `KES ${balance.toLocaleString('en-US', {minimumFractionDigits: 2})} (Arrears)`;
+          balanceBadge.style.background = '#FEF2F2';
+          balanceBadge.style.color = '#B91C1C';
+          balanceBadge.style.borderColor = '#FCA5A5';
+        } else {
+          balanceBadge.textContent = 'KES 0.00 (Current / Balanced)';
+          balanceBadge.style.background = '#ECFDF5';
+          balanceBadge.style.color = '#047857';
+          balanceBadge.style.borderColor = '#6EE7B7';
+        }
+      }
+
+      // Suggested amount
+      if (amountInput) {
+        if (balance > 0) {
+          amountInput.value = balance.toFixed(2);
+        } else if (tenant && tenant.rentAmount) {
+          amountInput.value = Number(tenant.rentAmount).toFixed(2);
+        } else {
+          amountInput.value = '35000.00';
+        }
+      }
+
+      // Default notes
+      if (notesInput && tenant) {
+        notesInput.value = `October 2026 Rent settlement - ${tenant.name}`;
+      }
+
+      renderReceiptAllocationMatrix(tenantId);
+    }
+
+    function renderReceiptAllocationMatrix(tenantId) {
+      const tbody = document.getElementById('receipt-invoices-allocation-body');
+      if (!tbody) return;
+
+      if (!tenantId) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 14px; color: #6B7280;">Please select a tenant to view outstanding payables.</td></tr>';
+        return;
+      }
+
+      const tenant = AppState.tenants.find(t => t.id === tenantId);
+      const unpaidInvoices = AppState.tenantInvoices.filter(i => 
+        (i.tenant_id === tenantId || (tenant && i.tenant_code === tenant.tenantCode)) && !i.is_paid
+      );
+
+      let rowsHtml = '';
+
+      if (unpaidInvoices.length > 0) {
+        unpaidInvoices.forEach((inv, idx) => {
+          const invAmt = Number(inv.amount || 0);
+          rowsHtml += `
+            <tr class="pm-table-row">
+              <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">
+                <input type="checkbox" class="receipt-alloc-check" checked data-idx="${idx}" data-invid="${inv.id}" data-amount="${invAmt}" onchange="recalculateReceiptAllocations()" style="accent-color: #008080; cursor: pointer;">
+              </td>
+              <td style="padding: 6px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">${inv.description || 'Monthly Invoicing'}</td>
+              <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">${inv.period_month || '10'}/${inv.period_year || '2026'}</td>
+              <td style="padding: 6px 10px; border-right: 1px solid #E5E7EB;"><span style="background: #E0F2FE; color: #0369A1; padding: 2px 6px; border-radius: 2px; font-weight: 700; font-size: 11px;">${inv.payable_code || '001'}</span></td>
+              <td style="padding: 6px 12px; text-align: right; border-right: 1px solid #E5E7EB;">${invAmt.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+              <td style="padding: 6px 12px; text-align: right; border-right: 1px solid #E5E7EB; font-weight: 700; color: #B91C1C;">${invAmt.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+              <td style="padding: 4px 10px; text-align: right;">
+                <input type="number" step="0.01" class="pm-legacy-input receipt-alloc-input" data-invid="${inv.id}" data-max="${invAmt}" value="${invAmt.toFixed(2)}" style="width: 110px; text-align: right; font-weight: 700;">
+              </td>
+            </tr>
+          `;
+        });
+      } else {
+        // Fallback: Default standard cycle payable
+        const rentAmt = tenant && tenant.rentAmount ? Number(tenant.rentAmount) : 35000;
+        rowsHtml = `
+          <tr class="pm-table-row">
+            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">
+              <input type="checkbox" class="receipt-alloc-check" checked data-invid="AUTO-RENT" data-amount="${rentAmt}" onchange="recalculateReceiptAllocations()" style="accent-color: #008080; cursor: pointer;">
+            </td>
+            <td style="padding: 6px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">Rent Billing - Current Period</td>
+            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">10/2026</td>
+            <td style="padding: 6px 10px; border-right: 1px solid #E5E7EB;"><span style="background: #E0F2FE; color: #0369A1; padding: 2px 6px; border-radius: 2px; font-weight: 700; font-size: 11px;">001 Rent</span></td>
+            <td style="padding: 6px 12px; text-align: right; border-right: 1px solid #E5E7EB;">${rentAmt.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+            <td style="padding: 6px 12px; text-align: right; border-right: 1px solid #E5E7EB; font-weight: 700; color: #008080;">${rentAmt.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+            <td style="padding: 4px 10px; text-align: right;">
+              <input type="number" step="0.01" class="pm-legacy-input receipt-alloc-input" data-invid="AUTO-RENT" data-max="${rentAmt}" value="${rentAmt.toFixed(2)}" style="width: 110px; text-align: right; font-weight: 700;">
+            </td>
+          </tr>
+        `;
+      }
+
+      tbody.innerHTML = rowsHtml;
+      const amtInput = document.getElementById('receipt-amount-paid');
+      if (amtInput && amtInput.value) {
+        autoAllocateReceiptAmount(amtInput.value);
+      }
+    }
+
+    function autoAllocateReceiptAmount(amountVal) {
+      let remaining = parseFloat(amountVal) || 0;
+      const rows = document.querySelectorAll('#receipt-invoices-allocation-body tr');
+      rows.forEach(row => {
+        const check = row.querySelector('.receipt-alloc-check');
+        const input = row.querySelector('.receipt-alloc-input');
+        if (!check || !input) return;
+
+        if (!check.checked) {
+          input.value = '0.00';
+          return;
+        }
+
+        const max = parseFloat(input.getAttribute('data-max')) || 0;
+        const allocated = Math.min(remaining, max);
+        input.value = allocated.toFixed(2);
+        remaining -= allocated;
+      });
+    }
+
+    function recalculateReceiptAllocations() {
+      const amtInput = document.getElementById('receipt-amount-paid');
+      if (amtInput) {
+        autoAllocateReceiptAmount(amtInput.value);
+      }
+    }
+
+    function onReceiptPaymentModeChange(method) {
+      const bankCont = document.getElementById('receipt-dest-bank-container');
+      const mpesaCont = document.getElementById('receipt-dest-mpesa-container');
+      const cashCont = document.getElementById('receipt-dest-cash-container');
+      const refInput = document.getElementById('receipt-ref-code');
+
+      if (!bankCont || !mpesaCont || !cashCont) return;
+
+      if (method === 'M-Pesa Paybill') {
+        bankCont.style.display = 'none';
+        mpesaCont.style.display = 'flex';
+        cashCont.style.display = 'none';
+        if (refInput && (!refInput.value || refInput.value.startsWith('BNK-') || refInput.value.startsWith('CSH-'))) {
+          refInput.placeholder = 'e.g. QKD829104A';
+          refInput.value = 'QKD' + Math.floor(100000 + Math.random() * 900000);
+        }
+      } else if (method === 'Bank Deposit' || method === 'Cheque' || method === 'EFT / RTGS') {
+        bankCont.style.display = 'flex';
+        mpesaCont.style.display = 'none';
+        cashCont.style.display = 'none';
+        if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('CSH-'))) {
+          refInput.placeholder = 'e.g. BNK-782910';
+          refInput.value = 'BNK-' + Math.floor(100000 + Math.random() * 900000);
+        }
+      } else {
+        // Cash
+        bankCont.style.display = 'none';
+        mpesaCont.style.display = 'none';
+        cashCont.style.display = 'flex';
+        if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('BNK-'))) {
+          refInput.placeholder = 'e.g. CSH-001';
+          refInput.value = 'CSH-' + Math.floor(1000 + Math.random() * 9000);
+        }
+      }
+    }
+
+    function executePaymentReceipt() {
+      const propSel = document.getElementById('receipt-property-select');
+      const tenantSel = document.getElementById('receipt-tenant-select');
+      const methodSel = document.getElementById('receipt-method-select');
+      const bankSel = document.getElementById('receipt-bank-account-select');
+      const mpesaSel = document.getElementById('receipt-mpesa-paybill-select');
+      const refInput = document.getElementById('receipt-ref-code');
+      const dateInput = document.getElementById('receipt-payment-date');
+      const amountInput = document.getElementById('receipt-amount-paid');
+      const notesInput = document.getElementById('receipt-notes');
+
+      if (!tenantSel || !tenantSel.value) {
+        alert('Please select a valid tenant.');
+        return;
+      }
+
+      const amount = parseFloat(amountInput.value);
+      if (!amount || amount <= 0) {
+        alert('Please enter a valid payment amount greater than zero.');
+        amountInput.focus();
+        return;
+      }
+
+      const refCode = refInput.value.trim();
+      if (!refCode) {
+        alert('Please enter a transaction reference code.');
+        refInput.focus();
+        return;
+      }
+
+      const tenant = AppState.tenants.find(t => t.id === tenantSel.value);
+      const property = AppState.properties.find(p => p.id === propSel.value) || { id: 'PROP-01', name: 'Estate Property' };
+      const method = methodSel.value;
+      const paymentDate = dateInput.value || new Date().toISOString().split('T')[0];
+      const notes = notesInput ? notesInput.value.trim() : '';
+
+      let destLabel = 'Office Cashier';
+      let bankAccName = '';
+      let mpesaPaybillNo = '';
+
+      if (method === 'M-Pesa Paybill') {
+        const mId = mpesaSel.value;
+        const mRecord = AppState.mpesaPaybills.find(m => m.id === mId);
+        mpesaPaybillNo = mRecord ? mRecord.paybill_number : (mpesaSel.options[mpesaSel.selectedIndex]?.text || '522522');
+        destLabel = `M-Pesa Paybill (${mpesaPaybillNo})`;
+      } else if (method === 'Bank Deposit' || method === 'Cheque' || method === 'EFT / RTGS') {
+        const bId = bankSel.value;
+        const bRecord = AppState.bankAccounts.find(b => b.id === bId);
+        bankAccName = bRecord ? `${bRecord.bank_name} (${bRecord.account_no})` : (bankSel.options[bankSel.selectedIndex]?.text || 'Bank Account');
+        destLabel = bankAccName;
+      }
+
+      // Collect allocations
+      const allocatedList = [];
+      const allocInputs = document.querySelectorAll('#receipt-invoices-allocation-body .receipt-alloc-input');
+      allocInputs.forEach(inp => {
+        const val = parseFloat(inp.value) || 0;
+        if (val > 0) {
+          allocatedList.push({
+            id: inp.getAttribute('data-invid'),
+            amount: val
+          });
+        }
+      });
+
+      const receiptNo = `REC-2026-${String(AppState.tenantReceipts.length + 1).padStart(3, '0')}`;
+
+      confirmAction(
+        `Are you sure you want to issue Official Receipt <strong>${receiptNo}</strong> for <strong>KES ${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> received from <strong>${tenant.name}</strong> (${tenant.unitCode || 'Unit'}) via <strong>${method}</strong> [Ref: ${refCode}]?<br><br>Destination: <strong>${destLabel}</strong>`,
+        async () => {
+          const nowIso = new Date().toISOString();
+          const newReceipt = {
+            id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + Date.now().toString(16).padStart(12, '0'),
+            organization_id: getActiveOrgId(),
+            receipt_number: receiptNo,
+            tenant_id: tenant.id,
+            tenant_code: tenant.tenantCode || '',
+            tenant_name: tenant.name,
+            property_id: property.id,
+            property_name: property.name,
+            unit_code: tenant.unitCode || '',
+            amount_paid: amount,
+            payment_method: method,
+            bank_account_name: bankAccName,
+            mpesa_paybill_number: mpesaPaybillNo,
+            reference_code: refCode,
+            payment_date: paymentDate + ' ' + (new Date().toTimeString().split(' ')[0]),
+            notes: notes || `${method} payment for ${tenant.name}`,
+            allocated_invoices: allocatedList,
+            issued_by: 'DEAN',
+            created_at: nowIso
+          };
+
+          // 1. Unshift into AppState
+          AppState.tenantReceipts.unshift(newReceipt);
+          localStorage.setItem('mc_erp_tenant_receipts', JSON.stringify(AppState.tenantReceipts));
+
+          // 2. Post Credit to Tenant Ledger
+          const tenantEntries = AppState.ledger.filter(l => l.tenantId === tenant.id);
+          const debits = tenantEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
+          const credits = tenantEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
+          const balanceBefore = debits - credits;
+
+          AppState.ledger.push({
+            id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+            timestamp: `${paymentDate} ${new Date().toTimeString().split(' ')[0].substring(0, 5)}`,
+            refNo: receiptNo,
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            unitCode: tenant.unitCode || '',
+            type: 'Payment',
+            description: `${method} [Ref: ${refCode}] - ${notes || 'Payment Receipt'}`,
+            debit: 0,
+            credit: amount,
+            balanceAfter: Math.max(0, balanceBefore - amount)
+          });
+
+          // 3. Mark allocated invoices as paid in AppState.tenantInvoices
+          allocatedList.forEach(alloc => {
+            const inv = AppState.tenantInvoices.find(i => i.id === alloc.id);
+            if (inv) {
+              inv.is_paid = true;
+            }
+          });
+
+          // 4. Async Supabase POST
+          try {
+            await fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_receipts`, {
+              method: 'POST',
+              headers: {
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal'
+              },
+              body: JSON.stringify(newReceipt)
+            });
+          } catch (e) {
+            console.warn('Supabase tenant_receipts post failed; persisted in local state:', e);
+          }
+
+          // 5. Update UI components
+          renderTenantReceiptsTable();
+          renderLedgerTable();
+          onReceiptTenantChange(tenant.id);
+
+          // 6. Display success and open Official Receipt Voucher Modal
+          showToast(`✓ Receipt ${receiptNo} recorded and posted to ledger successfully.`);
+          openOfficialReceiptModal(newReceipt);
+        },
+        'Confirm Payment Receipt',
+        'Post Receipt & Issue Voucher'
+      );
+    }
+
+    function renderTenantReceiptsTable() {
+      const tbody = document.getElementById('tenant-receipts-table-body');
+      if (!tbody) return;
+
+      const filterProp = document.getElementById('receipt-filter-property') ? document.getElementById('receipt-filter-property').value : 'ALL';
+      const search = document.getElementById('receipt-filter-search') ? document.getElementById('receipt-filter-search').value.toLowerCase().trim() : '';
+
+      let list = [...(AppState.tenantReceipts || [])];
+
+      if (filterProp !== 'ALL') {
+        list = list.filter(r => r.property_id === filterProp);
+      }
+      if (search) {
+        list = list.filter(r => 
+          (r.receipt_number && r.receipt_number.toLowerCase().includes(search)) ||
+          (r.tenant_name && r.tenant_name.toLowerCase().includes(search)) ||
+          (r.reference_code && r.reference_code.toLowerCase().includes(search)) ||
+          (r.payment_method && r.payment_method.toLowerCase().includes(search))
+        );
+      }
+
+      // Update stat totals
+      const totalCol = (AppState.tenantReceipts || []).reduce((acc, r) => acc + (Number(r.amount_paid) || 0), 0);
+      const mpesaCol = (AppState.tenantReceipts || []).filter(r => r.payment_method === 'M-Pesa Paybill').reduce((acc, r) => acc + (Number(r.amount_paid) || 0), 0);
+      const bankCol = (AppState.tenantReceipts || []).filter(r => r.payment_method !== 'M-Pesa Paybill' && r.payment_method !== 'Cash').reduce((acc, r) => acc + (Number(r.amount_paid) || 0), 0);
+
+      const stTot = document.getElementById('stat-receipts-total');
+      const stMpesa = document.getElementById('stat-receipts-mpesa');
+      const stBank = document.getElementById('stat-receipts-bank');
+      const stCount = document.getElementById('stat-receipts-count');
+
+      if (stTot) stTot.textContent = `KES ${totalCol.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      if (stMpesa) stMpesa.textContent = `KES ${mpesaCol.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      if (stBank) stBank.textContent = `KES ${bankCol.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      if (stCount) stCount.textContent = `${(AppState.tenantReceipts || []).length}`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="11" style="text-align: center; padding: 24px; color: #6B7280; font-style: italic;">
+              No tenant payment receipts found matching current filters.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = list.map((item, idx) => {
+        const dest = item.mpesa_paybill_number ? `Paybill: ${item.mpesa_paybill_number}` : (item.bank_account_name || 'Cash Office');
+        const dtFormatted = item.payment_date ? item.payment_date.split('T')[0].split(' ')[0] : '-';
+        return `
+          <tr class="pm-table-row">
+            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">${idx + 1}</td>
+            <td style="padding: 6px 12px; font-weight: 700; color: #008080; border-right: 1px solid #E5E7EB;">${item.receipt_number}</td>
+            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">${dtFormatted}</td>
+            <td style="padding: 6px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">${item.tenant_name}</td>
+            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Unit ${item.unit_code || '-'}</td>
+            <td style="padding: 6px 12px; border-right: 1px solid #E5E7EB;">
+              <span style="background: ${item.payment_method === 'M-Pesa Paybill' ? '#ECFDF5' : '#EFF6FF'}; color: ${item.payment_method === 'M-Pesa Paybill' ? '#047857' : '#1D4ED8'}; padding: 2px 8px; border-radius: 2px; font-weight: 700; font-size: 11px;">
+                ${item.payment_method}
+              </span>
+            </td>
+            <td style="padding: 6px 12px; border-right: 1px solid #E5E7EB; font-size: 11.5px; color: #4B5563;">${dest}</td>
+            <td style="padding: 6px 12px; font-family: monospace; font-weight: 600; border-right: 1px solid #E5E7EB;">${item.reference_code || '-'}</td>
+            <td style="padding: 6px 12px; text-align: right; font-weight: 800; color: #111827; border-right: 1px solid #E5E7EB;">
+              ${Number(item.amount_paid || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
+            </td>
+            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB; font-size: 11.5px;">${item.issued_by || 'DEAN'}</td>
+            <td style="padding: 4px 8px; text-align: center;">
+              <button type="button" class="btn-action-pill" onclick="openOfficialReceiptModal('${item.id}')" style="padding: 3px 10px; font-size: 11px; font-weight: 700; color: #008080;">
+                🖨️ Voucher
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function resetReceiptForm() {
+      const form = document.getElementById('form-tenant-receipt');
+      if (form) form.reset();
+      const propSel = document.getElementById('receipt-property-select');
+      if (propSel) onReceiptPropertyChange(propSel.value);
+    }
+
+    function openOfficialReceiptModal(receiptOrId) {
+      let receipt = typeof receiptOrId === 'object' ? receiptOrId : (AppState.tenantReceipts || []).find(r => r.id === receiptOrId);
+      if (!receipt) {
+        receipt = (AppState.tenantReceipts || [])[0];
+      }
+      if (!receipt) return;
+
+      const modal = document.getElementById('modal-official-receipt');
+      if (!modal) return;
+
+      // Populate Company Profile
+      const cp = AppState.companyProfile || {};
+      const cName = document.getElementById('receipt-modal-company-name');
+      const cSlogan = document.getElementById('receipt-modal-slogan');
+      const cAddress = document.getElementById('receipt-modal-address');
+      const cPin = document.getElementById('receipt-modal-pin');
+      const cLogo = document.getElementById('receipt-modal-logo');
+
+      if (cName) cName.textContent = cp.company_name || 'METROCOSMO ENTERPRISE';
+      if (cSlogan) cSlogan.textContent = cp.slogan || 'Professional Property Management & Valuation Services';
+      if (cAddress) cAddress.textContent = `${cp.address1 || 'P.O. Box 48190'} ${cp.postal_code || '00100'} ${cp.city_town || 'Nairobi'} | Tel: ${cp.phone || '+254 722 000 000'}`;
+      if (cPin) cPin.textContent = `P.I.N: ${cp.pin_no || 'P051189201A'} | Email: ${cp.email || 'accounts@metrocosmo.com'}`;
+      if (cLogo && (cp.logo_url || cp.tempLogoBase64)) {
+        cLogo.src = cp.tempLogoBase64 || cp.logo_url;
+      }
+
+      // Populate Receipt Details
+      const rNum = document.getElementById('receipt-modal-number');
+      const rDate = document.getElementById('receipt-modal-date');
+      const rTenant = document.getElementById('receipt-modal-tenant-name');
+      const rCode = document.getElementById('receipt-modal-tenant-code');
+      const rProp = document.getElementById('receipt-modal-property-name');
+      const rUnit = document.getElementById('receipt-modal-unit-code');
+      const rMethod = document.getElementById('receipt-modal-payment-method');
+      const rRef = document.getElementById('receipt-modal-ref-code');
+      const rDest = document.getElementById('receipt-modal-dest-account');
+      const rTot = document.getElementById('receipt-modal-total-amount');
+      const rWords = document.getElementById('receipt-modal-amount-words');
+      const rUser = document.getElementById('receipt-modal-issued-by');
+
+      const amountVal = Number(receipt.amount_paid || 0);
+      const destText = receipt.mpesa_paybill_number ? `Paybill: ${receipt.mpesa_paybill_number}` : (receipt.bank_account_name || 'Main Cashier Safe');
+
+      if (rNum) rNum.textContent = receipt.receipt_number;
+      if (rDate) rDate.textContent = receipt.payment_date ? receipt.payment_date.split('T')[0] : new Date().toISOString().split('T')[0];
+      if (rTenant) rTenant.textContent = receipt.tenant_name;
+      if (rCode) rCode.textContent = receipt.tenant_code || '-';
+      if (rProp) rProp.textContent = receipt.property_name || '-';
+      if (rUnit) rUnit.textContent = receipt.unit_code ? `Unit ${receipt.unit_code}` : '-';
+      if (rMethod) rMethod.textContent = receipt.payment_method;
+      if (rRef) rRef.textContent = receipt.reference_code || '-';
+      if (rDest) rDest.textContent = destText;
+      if (rTot) rTot.textContent = `KES ${amountVal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      if (rWords) rWords.textContent = numberToWords(amountVal);
+      if (rUser) rUser.textContent = receipt.issued_by || 'DEAN';
+
+      // Breakdown rows
+      const tbody = document.getElementById('receipt-modal-breakdown-body');
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td style="padding: 8px 12px; border-bottom: 1px solid #E5E7EB; font-weight: 600;">
+              ${receipt.notes || `${receipt.payment_method} settlement received for ${receipt.tenant_name}`}
+            </td>
+            <td style="padding: 8px 12px; text-align: right; border-bottom: 1px solid #E5E7EB; font-weight: 700;">
+              ${amountVal.toLocaleString('en-US', {minimumFractionDigits: 2})}
+            </td>
+          </tr>
+        `;
+      }
+
+      // Balance Summary
+      const pBal = document.getElementById('receipt-modal-prev-balance');
+      const pPaid = document.getElementById('receipt-modal-paid-summary');
+      const pNet = document.getElementById('receipt-modal-net-balance');
+
+      if (pBal) pBal.textContent = `KES ${amountVal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      if (pPaid) pPaid.textContent = `KES ${amountVal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      if (pNet) pNet.textContent = `KES 0.00`;
+
+      modal.style.display = 'flex';
+    }
+
+    function closeOfficialReceiptModal() {
+      const modal = document.getElementById('modal-official-receipt');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function printOfficialReceipt() {
+      window.print();
+    }
+
+    function numberToWords(num) {
+      if (isNaN(num) || num === null) return '';
+      const integerPart = Math.floor(Math.abs(num));
+      const decimalPart = Math.round((Math.abs(num) - integerPart) * 100);
+
+      const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+                    'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
+                    'Seventeen', 'Eighteen', 'Nineteen'];
+      const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+      function convertGroup(n) {
+        let str = '';
+        if (n >= 100) {
+          str += ones[Math.floor(n / 100)] + ' Hundred ';
+          n %= 100;
+        }
+        if (n >= 20) {
+          str += tens[Math.floor(n / 10)] + (n % 10 > 0 ? ' ' + ones[n % 10] : '') + ' ';
+        } else if (n > 0) {
+          str += ones[n] + ' ';
+        }
+        return str.trim();
+      }
+
+      if (integerPart === 0) {
+        return decimalPart > 0 ? `Zero Shillings and ${decimalPart}/100 Cents Only` : 'Zero Kenya Shillings Only';
+      }
+
+      const millions = Math.floor(integerPart / 1000000);
+      const thousands = Math.floor((integerPart % 1000000) / 1000);
+      const remainder = integerPart % 1000;
+
+      let result = '';
+      if (millions > 0) {
+        result += convertGroup(millions) + ' Million ';
+      }
+      if (thousands > 0) {
+        result += convertGroup(thousands) + ' Thousand ';
+      }
+      if (remainder > 0) {
+        result += convertGroup(remainder) + ' ';
+      }
+
+      result = result.trim() + ' Kenya Shillings';
+      if (decimalPart > 0) {
+        result += ` and ${decimalPart}/100 Cents`;
+      }
+      return result + ' Only';
     }
 
     // Populate dropdowns for Sub-Module 1.2
@@ -6648,18 +7431,37 @@ const AppState = {
     window.renderAccountingPeriodsTable = renderAccountingPeriodsTable;
     window.executePeriodRollOver = executePeriodRollOver;
 
+    // Tenant Receipting & Invoicing Handlers
+    window.switchInvoiceSubTab = switchInvoiceSubTab;
+    window.loadTenantReceipts = loadTenantReceipts;
+    window.initTenantReceipting = initTenantReceipting;
+    window.onReceiptPropertyChange = onReceiptPropertyChange;
+    window.onReceiptTenantChange = onReceiptTenantChange;
+    window.renderReceiptAllocationMatrix = renderReceiptAllocationMatrix;
+    window.autoAllocateReceiptAmount = autoAllocateReceiptAmount;
+    window.recalculateReceiptAllocations = recalculateReceiptAllocations;
+    window.onReceiptPaymentModeChange = onReceiptPaymentModeChange;
+    window.executePaymentReceipt = executePaymentReceipt;
+    window.renderTenantReceiptsTable = renderTenantReceiptsTable;
+    window.resetReceiptForm = resetReceiptForm;
+    window.openOfficialReceiptModal = openOfficialReceiptModal;
+    window.closeOfficialReceiptModal = closeOfficialReceiptModal;
+    window.printOfficialReceipt = printOfficialReceipt;
+    window.numberToWords = numberToWords;
+
     // Initialize Theme and Load Active Module
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'developer';
     setTheme(savedTheme);
 
-    // Initial boot load for Company Profile, Bank Accounts, M-Pesa, Accounting Periods & Global Sidebar Branding
+    // Initial boot load for Company Profile, Bank Accounts, M-Pesa, Accounting Periods, Receipts & Global Sidebar Branding
     updateSidebarBranding(AppState.companyProfile);
     loadAdminCompanyProfile();
     loadBankAccounts();
     loadMpesaPaybills();
     loadAccountingPeriods();
+    loadTenantReceipts();
 
     const initialView = AppState.activeView || 'estate-reg';
     const initialNav = document.querySelector(`.nav-item[data-view="${initialView}"]`);
-    const initialTitle = initialNav ? initialNav.getAttribute('data-tooltip') : '1.1 Registration';
+    const initialTitle = initialNav ? initialNav.getAttribute('data-tooltip') : 'Registration';
     loadModule(initialView, initialTitle);

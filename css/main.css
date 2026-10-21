@@ -1472,3 +1472,35 @@
     [data-theme="developer"] .badge-alloc-landlord { background: #F5F3FF !important; color: #6D28D9 !important; border-color: #DDD6FE !important; }
     [data-theme="developer"] .badge-alloc-tenant { background: #FEF2F2 !important; color: #B91C1C !important; border-color: #FECACA !important; }
     [data-theme="developer"] .badge-alloc-pool { background: #ECFDF5 !important; color: #047857 !important; border-color: #A7F3D0 !important; }
+
+/* Print styles for Official Receipt and Financial Vouchers */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #modal-official-receipt,
+  #modal-official-receipt * {
+    visibility: visible;
+  }
+  #modal-official-receipt {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+  #modal-official-receipt button,
+  #modal-official-receipt div[style*="background: #008080"] {
+    display: none !important;
+  }
+  #printable-receipt-content {
+    padding: 10px !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
