@@ -73,11 +73,8 @@
   <!-- Top ProMatrix Sub-Tab Navigation Strip (image_729c63.png) -->
   <div style="background: transparent; margin-bottom: 16px;">
     <div style="display: flex; gap: 4px; padding-left: 2px;">
-      <button type="button" class="admin-subtab-btn active" id="btn-tab-bank-accounts" onclick="switchAdminTab('tab-bank-accounts')">
-        Bank Accounts
-      </button>
-      <button type="button" class="admin-subtab-btn" id="btn-tab-mpesa-paybills" onclick="switchAdminTab('tab-mpesa-paybills')">
-        M-Pesa Paybill Nos
+      <button type="button" class="admin-subtab-btn active" id="btn-tab-payment-channels" onclick="switchAdminTab('tab-payment-channels')">
+        Payment Channels
       </button>
       <button type="button" class="admin-subtab-btn" id="btn-tab-transaction-periods" onclick="switchAdminTab('tab-transaction-periods')">
         Transaction Periods
@@ -90,8 +87,9 @@
     <div style="height: 4px; background: #008080; width: 100%;"></div>
   </div>
 
-  <!-- TAB 1: BANK ACCOUNTS (Default / Active matching image_729c63.png) -->
-  <div id="panel-tab-bank-accounts" class="admin-tab-panel" style="display: block;">
+  <!-- TAB 1: UNIFIED PAYMENT CHANNELS (Bank Accounts Top Half, M-Pesa Paybills Bottom Half) -->
+  <div id="panel-tab-payment-channels" class="admin-tab-panel" style="display: block;">
+    <!-- TOP HALF: BANK ACCOUNTS -->
     <!-- Fieldset: Bank Accounts Form -->
     <fieldset style="border: 1px solid #D1D5DB; border-radius: 2px; padding: 12px 20px 16px 20px; margin-bottom: 20px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
       <legend style="color: #F97316; font-size: 12px; font-weight: 700; padding: 0 6px;">— Bank Accounts —</legend>
@@ -160,7 +158,7 @@
     </fieldset>
 
     <!-- Fieldset: List of Account Payables Directory Table -->
-    <fieldset style="border: 1px solid #D1D5DB; border-radius: 2px; padding: 12px 18px 16px 18px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+    <fieldset style="border: 1px solid #D1D5DB; border-radius: 2px; padding: 12px 18px 16px 18px; margin-bottom: 26px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
       <legend style="color: #F97316; font-size: 12px; font-weight: 700; padding: 0 6px;">— List of Account Payables —</legend>
       <div style="overflow-x: auto; border: 1px solid #CBD5E1;">
         <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #FFFFFF;">
@@ -182,10 +180,8 @@
         </table>
       </div>
     </fieldset>
-  </div>
 
-  <!-- TAB 2: M-PESA PAYBILL NOS -->
-  <div id="panel-tab-mpesa-paybills" class="admin-tab-panel" style="display: none;">
+    <!-- BOTTOM HALF: M-PESA PAYBILLS -->
     <!-- Fieldset: M-Pesa Paybill Form -->
     <fieldset style="border: 1px solid #D1D5DB; border-radius: 2px; padding: 12px 20px 16px 20px; margin-bottom: 20px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
       <legend style="color: #F97316; font-size: 12px; font-weight: 700; padding: 0 6px;">— M-Pesa Paybill Nos —</legend>

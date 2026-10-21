@@ -30,7 +30,7 @@ const AppState = {
         logoUrl: '',
         tempLogoBase64: null
       },
-      activeAdminTab: 'tab-bank-accounts',
+      activeAdminTab: 'tab-payment-channels',
       bankAccounts: [
         {
           id: '00000000-0000-0000-0000-000000000010',
@@ -3958,87 +3958,250 @@ const AppState = {
       if (!tbody) return;
 
       if (!tenantId) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 14px; color: #6B7280;">Please select a tenant to view outstanding payables.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 16px; color: #6B7280;">Please select a tenant to view outstanding payables.</td></tr>';
+        const sumMbEl = document.getElementById('receipt-matrix-sum-month-bill');
+        if (sumMbEl) sumMbEl.textContent = '0.00';
+        const sumBalEl = document.getElementById('receipt-matrix-sum-balance');
+        if (sumBalEl) sumBalEl.textContent = '0.00';
+        const totalEl = document.getElementById('receipt-matrix-allocated-total');
+        if (totalEl) totalEl.textContent = '0.00';
         return;
       }
 
       const tenant = AppState.tenants.find(t => t.id === tenantId);
+      const property = (tenant && AppState.properties.find(p => p.id === tenant.propertyId)) || { name: tenant ? tenant.propertyName : 'Estate Property' };
       const unpaidInvoices = AppState.tenantInvoices.filter(i => 
         (i.tenant_id === tenantId || (tenant && i.tenant_code === tenant.tenantCode)) && !i.is_paid
       );
 
-      let rowsHtml = '';
+      const payables = [];
 
+      // 1. Unpaid invoices recorded in AppState.tenantInvoices
       if (unpaidInvoices.length > 0) {
-        unpaidInvoices.forEach((inv, idx) => {
+        unpaidInvoices.forEach(inv => {
           const invAmt = Number(inv.amount || 0);
-          rowsHtml += `
-            <tr class="pm-table-row">
-              <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">
-                <input type="checkbox" class="receipt-alloc-check" checked data-idx="${idx}" data-invid="${inv.id}" data-amount="${invAmt}" onchange="recalculateReceiptAllocations()" style="accent-color: #008080; cursor: pointer;">
-              </td>
-              <td style="padding: 6px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">${inv.description || 'Monthly Invoicing'}</td>
-              <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">${inv.period_month || '10'}/${inv.period_year || '2026'}</td>
-              <td style="padding: 6px 10px; border-right: 1px solid #E5E7EB;"><span style="background: #E0F2FE; color: #0369A1; padding: 2px 6px; border-radius: 2px; font-weight: 700; font-size: 11px;">${inv.payable_code || '001'}</span></td>
-              <td style="padding: 6px 12px; text-align: right; border-right: 1px solid #E5E7EB;">${invAmt.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-              <td style="padding: 6px 12px; text-align: right; border-right: 1px solid #E5E7EB; font-weight: 700; color: #B91C1C;">${invAmt.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-              <td style="padding: 4px 10px; text-align: right;">
-                <input type="number" step="0.01" class="pm-legacy-input receipt-alloc-input" data-invid="${inv.id}" data-max="${invAmt}" value="${invAmt.toFixed(2)}" style="width: 110px; text-align: right; font-weight: 700;">
-              </td>
-            </tr>
-          `;
+          payables.push({
+            invId: inv.id,
+            propName: property.name || inv.property_name || 'Property',
+            unit: tenant ? (tenant.unitCode || '1') : (inv.unit_id || '1'),
+            payableCode: inv.payable_code || '001',
+            desc: inv.description || 'Monthly Invoicing',
+            monthBill: invAmt,
+            balance: invAmt,
+            priority: 1
+          });
         });
-      } else {
-        // Fallback: Default standard cycle payable
-        const rentAmt = tenant && tenant.rentAmount ? Number(tenant.rentAmount) : 35000;
-        rowsHtml = `
-          <tr class="pm-table-row">
-            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">
-              <input type="checkbox" class="receipt-alloc-check" checked data-invid="AUTO-RENT" data-amount="${rentAmt}" onchange="recalculateReceiptAllocations()" style="accent-color: #008080; cursor: pointer;">
-            </td>
-            <td style="padding: 6px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">Rent Billing - Current Period</td>
-            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">10/2026</td>
-            <td style="padding: 6px 10px; border-right: 1px solid #E5E7EB;"><span style="background: #E0F2FE; color: #0369A1; padding: 2px 6px; border-radius: 2px; font-weight: 700; font-size: 11px;">001 Rent</span></td>
-            <td style="padding: 6px 12px; text-align: right; border-right: 1px solid #E5E7EB;">${rentAmt.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-            <td style="padding: 6px 12px; text-align: right; border-right: 1px solid #E5E7EB; font-weight: 700; color: #008080;">${rentAmt.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+      }
+
+      // 2. Ensure Rent row is present if not already in unpaidInvoices
+      const hasRentRow = payables.some(p => p.payableCode === '001');
+      if (!hasRentRow) {
+        const rentAmt = tenant && tenant.rentAmount ? Number(tenant.rentAmount) : 30000;
+        const tenantBal = tenant && Number(tenant.balance || 0) > 0 ? Number(tenant.balance) : 0;
+        payables.push({
+          invId: 'AUTO-RENT',
+          propName: property.name || (tenant ? tenant.propertyName : 'Property'),
+          unit: tenant ? (tenant.unitCode || '1') : '1',
+          payableCode: '001',
+          desc: 'Rent',
+          monthBill: rentAmt,
+          balance: tenantBal,
+          priority: 2
+        });
+      }
+
+      // 3. Ancillary ProMatrix payables (image_5dea6a.png: Padlocks / Unlocking Fees & Penalty)
+      payables.push({
+        invId: 'FEE-012',
+        propName: property.name || (tenant ? tenant.propertyName : 'Property'),
+        unit: tenant ? (tenant.unitCode || '1') : '1',
+        payableCode: '012',
+        desc: 'Padlocks / Unlocking Fees',
+        monthBill: 450.00,
+        balance: 0.00,
+        priority: 3
+      });
+
+      payables.push({
+        invId: 'FEE-035',
+        propName: property.name || (tenant ? tenant.propertyName : 'Property'),
+        unit: tenant ? (tenant.unitCode || '1') : '1',
+        payableCode: '035',
+        desc: 'Penalty',
+        monthBill: 500.00,
+        balance: 0.00,
+        priority: 4
+      });
+
+      // Render Matrix Rows matching image_5dea6a.png
+      let rowsHtml = '';
+      payables.forEach(p => {
+        rowsHtml += `
+          <tr class="pm-table-row" style="background: #FAF8E8;" data-priority="${p.priority}" data-month-bill="${p.monthBill}" data-balance="${p.balance}" data-invid="${p.invId}">
+            <td style="padding: 6px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">${p.propName}</td>
+            <td style="padding: 6px 8px; text-align: center; border-right: 1px solid #E5E7EB;">${p.unit}</td>
+            <td style="padding: 6px 10px; text-align: center; font-weight: 700; border-right: 1px solid #E5E7EB;">${p.payableCode}</td>
+            <td style="padding: 6px 14px; border-right: 1px solid #E5E7EB;">${p.desc}</td>
+            <td style="padding: 6px 14px; text-align: right; font-weight: 700; border-right: 1px solid #E5E7EB;">${p.monthBill.toFixed(2)}</td>
+            <td style="padding: 6px 14px; text-align: right; font-weight: 700; border-right: 1px solid #E5E7EB; color: #DC2626;">${p.balance.toFixed(2)}</td>
             <td style="padding: 4px 10px; text-align: right;">
-              <input type="number" step="0.01" class="pm-legacy-input receipt-alloc-input" data-invid="AUTO-RENT" data-max="${rentAmt}" value="${rentAmt.toFixed(2)}" style="width: 110px; text-align: right; font-weight: 700;">
+              <input type="number" step="0.01" class="pm-legacy-input receipt-alloc-input" data-invid="${p.invId}" data-payable-code="${p.payableCode}" data-description="${p.desc}" data-month-bill="${p.monthBill}" data-balance="${p.balance}" data-priority="${p.priority}" value="" placeholder="0.00" oninput="onMatrixAllocInputChange()" style="width: 100%; text-align: right; font-weight: 700; background: #FFFFFF !important;">
             </td>
           </tr>
         `;
-      }
+      });
 
       tbody.innerHTML = rowsHtml;
+
+      // Calculate and update column totals (Month Bill & Balance)
+      const sumMonthBill = payables.reduce((acc, p) => acc + p.monthBill, 0);
+      const sumBalance = payables.reduce((acc, p) => acc + p.balance, 0);
+
+      const sumMbEl = document.getElementById('receipt-matrix-sum-month-bill');
+      if (sumMbEl) sumMbEl.textContent = sumMonthBill.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+      const sumBalEl = document.getElementById('receipt-matrix-sum-balance');
+      if (sumBalEl) sumBalEl.textContent = sumBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+      // Default dates
+      const todayIso = new Date().toISOString().split('T')[0];
+      const postDate = document.getElementById('receipt-posting-date');
+      if (postDate && !postDate.value) postDate.value = todayIso;
+      const payDateMat = document.getElementById('receipt-matrix-payment-date');
+      if (payDateMat && !payDateMat.value) payDateMat.value = todayIso;
+      const payDateHdr = document.getElementById('receipt-payment-date');
+      if (payDateHdr && !payDateHdr.value) payDateHdr.value = todayIso;
+
+      // Auto-allocate if amount paid already entered
       const amtInput = document.getElementById('receipt-amount-paid');
-      if (amtInput && amtInput.value) {
-        autoAllocateReceiptAmount(amtInput.value);
+      if (amtInput && parseFloat(amtInput.value) > 0) {
+        autoAllocateReceiptWaterfallSilently(parseFloat(amtInput.value));
+      } else {
+        const totalEl = document.getElementById('receipt-matrix-allocated-total');
+        if (totalEl) totalEl.textContent = '0.00';
       }
     }
 
-    function autoAllocateReceiptAmount(amountVal) {
-      let remaining = parseFloat(amountVal) || 0;
-      const rows = document.querySelectorAll('#receipt-invoices-allocation-body tr');
-      rows.forEach(row => {
-        const check = row.querySelector('.receipt-alloc-check');
-        const input = row.querySelector('.receipt-alloc-input');
-        if (!check || !input) return;
+    function autoAllocateReceiptWaterfallSilently(totalCash) {
+      let cash = parseFloat(totalCash) || 0;
+      const rows = Array.from(document.querySelectorAll('#receipt-invoices-allocation-body tr'));
+      if (rows.length === 0) return;
 
-        if (!check.checked) {
-          input.value = '0.00';
-          return;
-        }
-
-        const max = parseFloat(input.getAttribute('data-max')) || 0;
-        const allocated = Math.min(remaining, max);
-        input.value = allocated.toFixed(2);
-        remaining -= allocated;
+      // Reset all row inputs
+      rows.forEach(r => {
+        const inp = r.querySelector('.receipt-alloc-input');
+        if (inp) inp.value = '';
       });
+
+      // Sort rows: 1. Balances > 0 first (older arrears/overdue items), 2. Core Rent (001), 3. Ancillary fees
+      const sortedRows = [...rows].sort((a, b) => {
+        const balA = parseFloat(a.getAttribute('data-balance')) || 0;
+        const balB = parseFloat(b.getAttribute('data-balance')) || 0;
+        if (balA > 0 && balB === 0) return -1;
+        if (balB > 0 && balA === 0) return 1;
+
+        const prioA = parseInt(a.getAttribute('data-priority')) || 99;
+        const prioB = parseInt(b.getAttribute('data-priority')) || 99;
+        return prioA - prioB;
+      });
+
+      // Cascade cash down rows
+      sortedRows.forEach(r => {
+        if (cash <= 0) return;
+        const inp = r.querySelector('.receipt-alloc-input');
+        if (!inp) return;
+
+        const bal = parseFloat(r.getAttribute('data-balance')) || 0;
+        const mb = parseFloat(r.getAttribute('data-month-bill')) || 0;
+        const target = bal > 0 ? bal : mb;
+
+        if (target > 0) {
+          const allocated = Math.min(cash, target);
+          inp.value = allocated.toFixed(2);
+          cash -= allocated;
+        }
+      });
+
+      // If cash still remains (advance rent / overpayment), add excess to the Rent (001) row
+      if (cash > 0) {
+        const rentRow = rows.find(r => {
+          const inp = r.querySelector('.receipt-alloc-input');
+          return inp && inp.getAttribute('data-payable-code') === '001';
+        }) || rows[0];
+
+        if (rentRow) {
+          const rentInp = rentRow.querySelector('.receipt-alloc-input');
+          const currentVal = parseFloat(rentInp.value) || 0;
+          rentInp.value = (currentVal + cash).toFixed(2);
+          cash = 0;
+        }
+      }
+
+      onMatrixAllocInputChange();
+    }
+
+    function autoAllocateReceiptWaterfall() {
+      const amtInput = document.getElementById('receipt-amount-paid');
+      const cash = parseFloat(amtInput ? amtInput.value : 0) || 0;
+      if (cash <= 0) {
+        alert('Please enter an Amount Paid greater than zero before clicking Auto-Allocate.');
+        if (amtInput) amtInput.focus();
+        return;
+      }
+
+      const rows = document.querySelectorAll('#receipt-invoices-allocation-body tr');
+      if (rows.length === 0) {
+        alert('Please select a tenant with payables first.');
+        return;
+      }
+
+      autoAllocateReceiptWaterfallSilently(cash);
+      showToast('✓ Payment auto-allocated across payables successfully.');
+    }
+
+    function onMatrixAllocInputChange() {
+      const inputs = document.querySelectorAll('#receipt-invoices-allocation-body .receipt-alloc-input');
+      let total = 0;
+      inputs.forEach(inp => {
+        const v = parseFloat(inp.value) || 0;
+        total += v;
+      });
+
+      const totalEl = document.getElementById('receipt-matrix-allocated-total');
+      if (totalEl) {
+        totalEl.textContent = total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+
+      // Sync to header amount input if empty
+      const amtInput = document.getElementById('receipt-amount-paid');
+      if (amtInput && (!amtInput.value || parseFloat(amtInput.value) === 0)) {
+        amtInput.value = total > 0 ? total.toFixed(2) : '';
+      }
+    }
+
+    function onReceiptAmountPaidInput(val) {
+      if (parseFloat(val) > 0) {
+        autoAllocateReceiptWaterfallSilently(parseFloat(val));
+      } else {
+        const inputs = document.querySelectorAll('#receipt-invoices-allocation-body .receipt-alloc-input');
+        inputs.forEach(inp => { inp.value = ''; });
+        onMatrixAllocInputChange();
+      }
+    }
+
+    function syncReceiptPaymentDates(val) {
+      const d1 = document.getElementById('receipt-payment-date');
+      const d2 = document.getElementById('receipt-matrix-payment-date');
+      if (d1 && d1.value !== val) d1.value = val;
+      if (d2 && d2.value !== val) d2.value = val;
     }
 
     function recalculateReceiptAllocations() {
       const amtInput = document.getElementById('receipt-amount-paid');
-      if (amtInput) {
-        autoAllocateReceiptAmount(amtInput.value);
+      if (amtInput && parseFloat(amtInput.value) > 0) {
+        autoAllocateReceiptWaterfallSilently(parseFloat(amtInput.value));
+      } else {
+        onMatrixAllocInputChange();
       }
     }
 
@@ -4130,18 +4293,28 @@ const AppState = {
         destLabel = bankAccName;
       }
 
-      // Collect allocations
+      // Collect allocations from List of Payables matrix
       const allocatedList = [];
       const allocInputs = document.querySelectorAll('#receipt-invoices-allocation-body .receipt-alloc-input');
       allocInputs.forEach(inp => {
         const val = parseFloat(inp.value) || 0;
         if (val > 0) {
           allocatedList.push({
-            id: inp.getAttribute('data-invid'),
-            amount: val
+            id: inp.getAttribute('data-invid') || ('PAY-' + Date.now()),
+            payable_code: inp.getAttribute('data-payable-code') || '001',
+            description: inp.getAttribute('data-description') || 'Rent',
+            amount: val,
+            month_bill: parseFloat(inp.getAttribute('data-month-bill')) || 0,
+            balance: parseFloat(inp.getAttribute('data-balance')) || 0
           });
         }
       });
+
+      const totalAllocated = allocatedList.reduce((acc, item) => acc + item.amount, 0);
+      if (totalAllocated <= 0) {
+        alert('Please allocate payment amount to at least one payable in the matrix.');
+        return;
+      }
 
       const receiptNo = `REC-2026-${String(AppState.tenantReceipts.length + 1).padStart(3, '0')}`;
 
@@ -4195,13 +4368,56 @@ const AppState = {
             balanceAfter: Math.max(0, balanceBefore - amount)
           });
 
-          // 3. Mark allocated invoices as paid in AppState.tenantInvoices
+          // 3. Mark allocated invoices as paid in AppState.tenantInvoices and record settled items
           allocatedList.forEach(alloc => {
             const inv = AppState.tenantInvoices.find(i => i.id === alloc.id);
             if (inv) {
               inv.is_paid = true;
+              try {
+                fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices?id=eq.${inv.id}`, {
+                  method: 'PATCH',
+                  headers: {
+                    'apikey': SUPABASE_CONFIG.anonKey,
+                    'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                  },
+                  body: JSON.stringify({ is_paid: true })
+                }).catch(() => {});
+              } catch (_) {}
+            } else if (alloc.id === 'AUTO-RENT' || (typeof alloc.id === 'string' && alloc.id.startsWith('FEE-'))) {
+              const autoInv = {
+                id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + Date.now().toString(16).padStart(12, '0'),
+                organization_id: getActiveOrgId(),
+                tenant_id: tenant.id,
+                tenant_code: tenant.tenantCode || '',
+                property_id: property.id,
+                unit_id: tenant.unitId || tenant.unitCode || '',
+                payable_code: alloc.payable_code,
+                description: alloc.description,
+                amount: alloc.amount,
+                billing_type: 'Single',
+                period_month: String(new Date().getMonth() + 1),
+                period_year: new Date().getFullYear(),
+                is_paid: true,
+                created_at: nowIso
+              };
+              AppState.tenantInvoices.unshift(autoInv);
+              try {
+                fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices`, {
+                  method: 'POST',
+                  headers: {
+                    'apikey': SUPABASE_CONFIG.anonKey,
+                    'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                  },
+                  body: JSON.stringify(autoInv)
+                }).catch(() => {});
+              } catch (_) {}
             }
           });
+          localStorage.setItem('mc_erp_tenant_invoices', JSON.stringify(AppState.tenantInvoices));
 
           // 4. Async Supabase POST
           try {
@@ -4377,16 +4593,30 @@ const AppState = {
       // Breakdown rows
       const tbody = document.getElementById('receipt-modal-breakdown-body');
       if (tbody) {
-        tbody.innerHTML = `
-          <tr>
-            <td style="padding: 8px 12px; border-bottom: 1px solid #E5E7EB; font-weight: 600;">
-              ${receipt.notes || `${receipt.payment_method} settlement received for ${receipt.tenant_name}`}
-            </td>
-            <td style="padding: 8px 12px; text-align: right; border-bottom: 1px solid #E5E7EB; font-weight: 700;">
-              ${amountVal.toLocaleString('en-US', {minimumFractionDigits: 2})}
-            </td>
-          </tr>
-        `;
+        if (receipt.allocated_invoices && receipt.allocated_invoices.length > 0) {
+          tbody.innerHTML = receipt.allocated_invoices.map(alloc => `
+            <tr>
+              <td style="padding: 8px 12px; border-bottom: 1px solid #E5E7EB; font-weight: 600;">
+                <span style="background: #E0F2FE; color: #0369A1; padding: 2px 6px; border-radius: 2px; font-weight: 700; font-size: 11px; margin-right: 8px;">${alloc.payable_code || '001'}</span>
+                ${alloc.description || 'Settlement'}
+              </td>
+              <td style="padding: 8px 12px; text-align: right; border-bottom: 1px solid #E5E7EB; font-weight: 700;">
+                ${Number(alloc.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = `
+            <tr>
+              <td style="padding: 8px 12px; border-bottom: 1px solid #E5E7EB; font-weight: 600;">
+                ${receipt.notes || `${receipt.payment_method} settlement received for ${receipt.tenant_name}`}
+              </td>
+              <td style="padding: 8px 12px; text-align: right; border-bottom: 1px solid #E5E7EB; font-weight: 700;">
+                ${amountVal.toLocaleString('en-US', {minimumFractionDigits: 2})}
+              </td>
+            </tr>
+          `;
+        }
       }
 
       // Balance Summary
@@ -6452,6 +6682,9 @@ const AppState = {
        ========================================================================== */
 
     function switchAdminTab(targetTabId) {
+      if (targetTabId === 'tab-bank-accounts' || targetTabId === 'tab-mpesa-paybills') {
+        targetTabId = 'tab-payment-channels';
+      }
       AppState.activeAdminTab = targetTabId;
 
       // Update button visual styles
@@ -6475,9 +6708,8 @@ const AppState = {
       });
 
       // Trigger data binding for the active tab
-      if (targetTabId === 'tab-bank-accounts') {
+      if (targetTabId === 'tab-payment-channels') {
         renderBankAccountsTable();
-      } else if (targetTabId === 'tab-mpesa-paybills') {
         renderMpesaPaybillsTable();
         populateLinkedBankDropdown();
       } else if (targetTabId === 'tab-transaction-periods') {
@@ -7199,7 +7431,7 @@ const AppState = {
       loadBankAccounts();
       loadMpesaPaybills();
       loadAccountingPeriods();
-      switchAdminTab(AppState.activeAdminTab || 'tab-bank-accounts');
+      switchAdminTab(AppState.activeAdminTab || 'tab-payment-channels');
     }
 
     // Expose handlers globally for dynamic module binding
@@ -7249,6 +7481,11 @@ const AppState = {
     window.onReceiptPropertyChange = onReceiptPropertyChange;
     window.onReceiptTenantChange = onReceiptTenantChange;
     window.renderReceiptAllocationMatrix = renderReceiptAllocationMatrix;
+    window.autoAllocateReceiptWaterfall = autoAllocateReceiptWaterfall;
+    window.autoAllocateReceiptWaterfallSilently = autoAllocateReceiptWaterfallSilently;
+    window.onMatrixAllocInputChange = onMatrixAllocInputChange;
+    window.onReceiptAmountPaidInput = onReceiptAmountPaidInput;
+    window.syncReceiptPaymentDates = syncReceiptPaymentDates;
     window.autoAllocateReceiptAmount = autoAllocateReceiptAmount;
     window.recalculateReceiptAllocations = recalculateReceiptAllocations;
     window.onReceiptPaymentModeChange = onReceiptPaymentModeChange;
