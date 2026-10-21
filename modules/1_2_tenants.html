@@ -17,6 +17,35 @@
       box-shadow: 0 0 0 1px #008080 !important;
       outline: none !important;
     }
+
+    /* Disable number input spinners on receipt amount inputs */
+    input[type="number"].receipt-alloc-input::-webkit-outer-spin-button,
+    input[type="number"].receipt-alloc-input::-webkit-inner-spin-button,
+    #receipt-amount-paid::-webkit-outer-spin-button,
+    #receipt-amount-paid::-webkit-inner-spin-button {
+      -webkit-appearance: none !important;
+      margin: 0 !important;
+    }
+    input[type="number"].receipt-alloc-input,
+    #receipt-amount-paid {
+      -moz-appearance: textfield !important;
+      appearance: textfield !important;
+    }
+
+    /* Compact Right-Aligned Upper Section Container */
+    .receipting-upper-card {
+      max-width: 1000px;
+      width: 75%;
+      margin-left: auto;
+      margin-right: 0;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1200px) {
+      .receipting-upper-card {
+        width: 100%;
+        max-width: 100%;
+      }
+    }
     .tenant-subtab-btn {
       background: #E5E7EB;
       color: #374151;
@@ -283,290 +312,325 @@
   <!-- 2. RECEIPTING / PAYMENTS PANEL -->
   <div class="tenant-panel" id="panel-tab-receipting" style="display: none;">
 
-    <!-- TOP TITLE BANNER (matching image_6046ca.png) -->
-    <div style="background: #1E3A8A; color: #FFFFFF; padding: 10px 18px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">Receipts</span>
-        <span style="font-size: 11.5px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 3px; font-weight: 600;">Tenant Payment Intake &amp; Strict Allocation</span>
-      </div>
-      <!-- Mode Badge: Standard or Edit -->
-      <div id="receipt-mode-indicator-badge" style="display: none; background: #F59E0B; color: #78350F; font-size: 11.5px; font-weight: 800; padding: 4px 12px; border-radius: 3px; align-items: center; gap: 8px;">
-        <span>🔒 EDIT MODE (Facts Locked)</span>
-        <button type="button" onclick="cancelReceiptEditMode()" style="background: #78350F; color: #FFF; border: none; padding: 2px 8px; font-size: 10.5px; border-radius: 2px; cursor: pointer; font-weight: 700;">Cancel Edit</button>
-      </div>
-    </div>
+    <!-- COMPACT RIGHT-ALIGNED UPPER WRAPPER (75% / 1000px max-width, right-aligned) -->
+    <div class="receipting-upper-card" style="max-width: 1000px; width: 75%; margin-left: auto; margin-right: 0; margin-bottom: 24px;">
 
-    <!-- MAIN FORM CONTAINER -->
-    <form id="form-tenant-receipt" onsubmit="event.preventDefault(); executePaymentReceipt('save');" style="background: #FFFFFF; border: 1px solid #CBD5E1; border-top: none; padding: 16px 20px 20px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); margin-bottom: 24px;">
-      
-      <!-- BLOCK 1: TENANT & UNIT PROFILE (Cascading Property & Tenant Selector + Read-only Grid) -->
-      <fieldset style="border: 1px solid #D1D5DB; border-radius: 3px; padding: 12px 18px 16px 18px; margin-bottom: 18px; background: #F8FAFC;">
-        <legend style="color: #1E3A8A; font-size: 12px; font-weight: 800; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-          — Tenant &amp; Unit Profile —
-        </legend>
-
-        <!-- Cascading Selectors: Property & Tenant -->
-        <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #E2E8F0;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Select Property: <span style="color: #DC2626;">*</span></label>
-            <select id="receipt-property-select" class="pm-legacy-input" style="min-width: 250px;" onchange="onReceiptPropertyChange(this.value)" required>
-              <!-- Populated dynamically -->
-            </select>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Select Tenant: <span style="color: #DC2626;">*</span></label>
-            <select id="receipt-tenant-select" class="pm-legacy-input" style="min-width: 280px;" onchange="onReceiptTenantChange(this.value)" required>
-              <!-- Populated dynamically based on property -->
-            </select>
-          </div>
-          <div id="receipt-unit-display-container" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
-            <span id="receipt-unit-display" style="font-size: 12px; font-weight: 700; background: #EEF2F6; border: 1px solid #CBD5E1; padding: 4px 10px; border-radius: 2px; color: #1E3A8A;">Unit: -</span>
-            <span id="receipt-balance-badge" style="font-size: 12px; font-weight: 700; background: #FEF3C7; border: 1px solid #F59E0B; padding: 4px 10px; border-radius: 2px; color: #B45309;">KES 0.00</span>
-          </div>
+      <!-- TOP TITLE BANNER (matching image_6046ca.png) -->
+      <div style="background: #1E3A8A; color: #FFFFFF; padding: 10px 18px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 18px; font-weight: 800; letter-spacing: 0.5px;">Receipts</span>
+          <span style="font-size: 11.5px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 3px; font-weight: 600;">Tenant Payment Intake &amp; Strict Allocation</span>
         </div>
+        <!-- Mode Badge: Standard or Edit -->
+        <div id="receipt-mode-indicator-badge" style="display: none; background: #F59E0B; color: #78350F; font-size: 11.5px; font-weight: 800; padding: 4px 12px; border-radius: 3px; align-items: center; gap: 8px;">
+          <span>🔒 EDIT MODE (Facts Locked)</span>
+          <button type="button" onclick="cancelReceiptEditMode()" style="background: #78350F; color: #FFF; border: none; padding: 2px 8px; font-size: 10.5px; border-radius: 2px; cursor: pointer; font-weight: 700;">Cancel Edit</button>
+        </div>
+      </div>
 
-        <!-- Read-Only Profile Detail Grid (matching image_6046ca.png) -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 20px; background: #FFFFFF; border: 1px solid #CBD5E1; padding: 12px 16px; border-radius: 3px;">
-          <div>
-            <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Tenant Name</div>
-            <div id="receipt-detail-tenant-name" style="font-size: 13.5px; font-weight: 700; color: #0F172A; margin-top: 2px;">-</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Property</div>
-            <div id="receipt-detail-property" style="font-size: 13px; font-weight: 600; color: #334155; margin-top: 2px;">-</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Phone No.</div>
-            <div id="receipt-detail-phone" style="font-size: 13px; font-weight: 600; color: #334155; margin-top: 2px;">-</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Unit No.</div>
-            <div id="receipt-detail-unit" style="font-size: 13px; font-weight: 700; color: #1E3A8A; margin-top: 2px;">-</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Registration Date</div>
-            <div id="receipt-detail-reg-date" style="font-size: 12.5px; font-weight: 600; color: #334155; margin-top: 2px;">-</div>
-          </div>
-          <div>
-            <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Previous Payment</div>
-            <div style="font-size: 12.5px; font-weight: 700; color: #047857; margin-top: 2px;">
-              <span id="receipt-detail-prev-amt">-</span> <span id="receipt-detail-prev-date" style="font-size: 11px; font-weight: normal; color: #64748B;"></span>
+      <!-- MAIN FORM CONTAINER -->
+      <form id="form-tenant-receipt" onsubmit="event.preventDefault(); executePaymentReceipt('save');" style="background: #FFFFFF; border: 1px solid #CBD5E1; border-top: none; padding: 16px 20px 20px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+        
+        <!-- BLOCK 1: TENANT & UNIT PROFILE (Cascading Property & Tenant Selector + Read-only Grid) -->
+        <fieldset style="border: 1px solid #D1D5DB; border-radius: 3px; padding: 12px 18px 16px 18px; margin-bottom: 18px; background: #F8FAFC;">
+          <legend style="color: #1E3A8A; font-size: 12px; font-weight: 800; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+            — Tenant &amp; Unit Profile —
+          </legend>
+
+          <!-- Cascading Selectors: Property & Tenant -->
+          <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #E2E8F0;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Select Property: <span style="color: #DC2626;">*</span></label>
+              <select id="receipt-property-select" class="pm-legacy-input" style="min-width: 250px;" onchange="onReceiptPropertyChange(this.value)" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Select Tenant: <span style="color: #DC2626;">*</span></label>
+              <select id="receipt-tenant-select" class="pm-legacy-input" style="min-width: 280px;" onchange="onReceiptTenantChange(this.value)" required>
+                <!-- Populated dynamically based on property -->
+              </select>
+            </div>
+            <div id="receipt-unit-display-container" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+              <span id="receipt-unit-display" style="font-size: 12px; font-weight: 700; background: #EEF2F6; border: 1px solid #CBD5E1; padding: 4px 10px; border-radius: 2px; color: #1E3A8A;">Unit 1</span>
+              <span id="receipt-balance-badge" style="font-size: 12px; font-weight: 700; background: #FEF3C7; border: 1px solid #F59E0B; padding: 4px 10px; border-radius: 2px; color: #B45309;">KES 0.00</span>
             </div>
           </div>
-        </div>
-      </fieldset>
 
-      <!-- PAYMENT RECEIVED & AUTO ALLOCATE BAR (Positioned directly above Middle columns) -->
-      <div style="background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 3px; padding: 12px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-          <label style="font-size: 13px; font-weight: 800; color: #0F172A;">
-            Payment Received <span style="font-size: 11.5px; font-weight: 600; color: #64748B;">(Imported from M-Pesa / Bank):</span>
-          </label>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <input type="number" step="0.01" id="receipt-amount-paid" class="pm-legacy-input" placeholder="0.00" oninput="onPaymentReceivedInputChange(this.value)" required style="width: 170px; font-size: 15px !important; font-weight: 800 !important; color: #1E3A8A !important;">
-            <button type="button" id="btn-receipt-auto-allocate" class="pm-btn-orange" onclick="autoAllocateReceiptWaterfall()" style="background: #EAB308 !important; border-color: #CA8A04 !important; color: #000000 !important; font-weight: 800; font-size: 12.5px; height: 28px; padding: 0 16px; white-space: nowrap; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
-              ⚡ Auto Allocate
+          <!-- Read-Only Profile Detail Grid (matching image_6046ca.png without placeholder hyphens) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 20px; background: #FFFFFF; border: 1px solid #CBD5E1; padding: 12px 16px; border-radius: 3px;">
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Tenant Name</div>
+              <div id="receipt-detail-tenant-name" style="font-size: 13.5px; font-weight: 700; color: #0F172A; margin-top: 2px;">Nancy Jacqueline Kamau</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Property</div>
+              <div id="receipt-detail-property" style="font-size: 13px; font-weight: 600; color: #334155; margin-top: 2px;">CHIMNEY RISE ESTATE -</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Phone No.</div>
+              <div id="receipt-detail-phone" style="font-size: 13px; font-weight: 600; color: #334155; margin-top: 2px;">+254 722 111 001</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Unit No.</div>
+              <div id="receipt-detail-unit" style="font-size: 13px; font-weight: 700; color: #1E3A8A; margin-top: 2px;">Unit 1</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Registration Date</div>
+              <div id="receipt-detail-reg-date" style="font-size: 12.5px; font-weight: 600; color: #334155; margin-top: 2px;">2026-01-15</div>
+            </div>
+            <div>
+              <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Previous Payment</div>
+              <div style="font-size: 12.5px; font-weight: 700; color: #047857; margin-top: 2px;">
+                <span id="receipt-detail-prev-amt">KES 35,000.00</span> <span id="receipt-detail-prev-date" style="font-size: 11px; font-weight: normal; color: #64748B;">(2026-10-03)</span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- PAYMENT RECEIVED & AUTO ALLOCATE BAR (Positioned directly above Middle columns) -->
+        <div style="background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 3px; padding: 12px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <label style="font-size: 13px; font-weight: 800; color: #0F172A;">
+              Payment Received <span style="font-size: 11.5px; font-weight: 600; color: #64748B;">(Imported from M-Pesa / Bank):</span>
+            </label>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="number" step="0.01" id="receipt-amount-paid" class="pm-legacy-input" value="25000.00" placeholder="0.00" oninput="onPaymentReceivedInputChange(this.value)" required style="width: 170px; font-size: 15px !important; font-weight: 800 !important; color: #1E3A8A !important; -webkit-appearance: none; margin: 0;">
+              <button type="button" id="btn-receipt-auto-allocate" class="pm-btn-orange" onclick="autoAllocateReceiptWaterfall()" style="background: #EAB308 !important; border-color: #CA8A04 !important; color: #000000 !important; font-weight: 800; font-size: 12.5px; height: 28px; padding: 0 16px; white-space: nowrap; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                ⚡ Auto Allocate
+              </button>
+            </div>
+          </div>
+
+          <!-- Strict Real-Time Allocation Validation Indicator -->
+          <div id="receipt-allocation-validation-indicator" style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700;">
+            <span id="receipt-alloc-status-badge" style="background: #ECFDF5; color: #047857; padding: 4px 12px; border-radius: 3px; border: 1px solid #10B981;">
+              ✓ Balanced: Matrix equals Payment Received (KES 25,000.00)
+            </span>
+          </div>
+        </div>
+
+        <!-- MIDDLE SECTION: TWO COLUMNS (Middle Left: BILLING BREAKDOWN | Middle Right: STATUS SUMMARY) -->
+        <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-bottom: 18px; align-items: start;">
+          
+          <!-- MIDDLE LEFT: BILLING BREAKDOWN (Strictly 4-column Matrix Table matching headers) -->
+          <fieldset style="border: 1px solid #D1D5DB; border-radius: 3px; padding: 12px 16px 14px 16px; background: #FFFFFF; height: 100%; box-sizing: border-box;">
+            <legend style="color: #1E3A8A; font-size: 12px; font-weight: 800; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+              — Billing Breakdown —
+            </legend>
+            <div style="overflow-x: auto; border: 1px solid #CBD5E1; margin-top: 4px;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #FFFFFF; table-layout: fixed;">
+                <colgroup>
+                  <col style="width: 32%;">
+                  <col style="width: 22%;">
+                  <col style="width: 22%;">
+                  <col style="width: 24%;">
+                </colgroup>
+                <thead>
+                  <tr class="pm-table-header" style="background: #1E3A8A; height: 32px;">
+                    <th style="padding: 7px 12px; text-align: left; border-right: 1px solid #3B82F6;">Payable Item</th>
+                    <th style="padding: 7px 12px; text-align: right; border-right: 1px solid #3B82F6;">Monthly Bill</th>
+                    <th style="padding: 7px 12px; text-align: right; border-right: 1px solid #3B82F6;">Total Bill Due</th>
+                    <th style="padding: 7px 12px; text-align: right;">Amount Paid</th>
+                  </tr>
+                </thead>
+                <tbody id="receipt-invoices-allocation-body">
+                  <tr class="pm-table-row" data-item="Rent" data-code="001" data-monthly="35000" data-due="46000" data-priority="1">
+                    <td style="padding: 7px 12px; font-weight: 700; color: #1E293B; border-right: 1px solid #E2E8F0; text-align: left; vertical-align: middle;">Rent</td>
+                    <td style="padding: 7px 12px; text-align: right; font-weight: 600; color: #475569; border-right: 1px solid #E2E8F0; vertical-align: middle;">KES 35,000.00</td>
+                    <td style="padding: 7px 12px; text-align: right; font-weight: 700; color: #1E3A8A; border-right: 1px solid #E2E8F0; vertical-align: middle;">KES 46,000.00</td>
+                    <td style="padding: 4px 8px; text-align: right; vertical-align: middle;">
+                      <input type="number" step="0.01" class="pm-legacy-input receipt-alloc-input" data-item="Rent" data-code="001" data-monthly="35000" data-due="46000" data-idx="0" value="25000.00" placeholder="0.00" oninput="onMatrixAmountPaidInput(this)" style="width: 100%; text-align: right; font-weight: 700; background: #FFFFFF !important; box-sizing: border-box; -webkit-appearance: none; margin: 0;">
+                    </td>
+                  </tr>
+                  <tr class="pm-table-row" data-item="Service Charge" data-code="002" data-monthly="2500" data-due="2500" data-priority="2">
+                    <td style="padding: 7px 12px; font-weight: 700; color: #1E293B; border-right: 1px solid #E2E8F0; text-align: left; vertical-align: middle;">Service Charge</td>
+                    <td style="padding: 7px 12px; text-align: right; font-weight: 600; color: #475569; border-right: 1px solid #E2E8F0; vertical-align: middle;">KES 2,500.00</td>
+                    <td style="padding: 7px 12px; text-align: right; font-weight: 700; color: #1E3A8A; border-right: 1px solid #E2E8F0; vertical-align: middle;">KES 2,500.00</td>
+                    <td style="padding: 4px 8px; text-align: right; vertical-align: middle;">
+                      <input type="number" step="0.01" class="pm-legacy-input receipt-alloc-input" data-item="Service Charge" data-code="002" data-monthly="2500" data-due="2500" data-idx="1" value="0.00" placeholder="0.00" oninput="onMatrixAmountPaidInput(this)" style="width: 100%; text-align: right; font-weight: 700; background: #FFFFFF !important; box-sizing: border-box; -webkit-appearance: none; margin: 0;">
+                    </td>
+                  </tr>
+                  <tr class="pm-table-row" data-item="Penalty" data-code="035" data-monthly="2000" data-due="2000" data-priority="3">
+                    <td style="padding: 7px 12px; font-weight: 700; color: #1E293B; border-right: 1px solid #E2E8F0; text-align: left; vertical-align: middle;">Penalty</td>
+                    <td style="padding: 7px 12px; text-align: right; font-weight: 600; color: #475569; border-right: 1px solid #E2E8F0; vertical-align: middle;">KES 2,000.00</td>
+                    <td style="padding: 7px 12px; text-align: right; font-weight: 700; color: #1E3A8A; border-right: 1px solid #E2E8F0; vertical-align: middle;">KES 2,000.00</td>
+                    <td style="padding: 4px 8px; text-align: right; vertical-align: middle;">
+                      <input type="number" step="0.01" class="pm-legacy-input receipt-alloc-input" data-item="Penalty" data-code="035" data-monthly="2000" data-due="2000" data-idx="2" value="0.00" placeholder="0.00" oninput="onMatrixAmountPaidInput(this)" style="width: 100%; text-align: right; font-weight: 700; background: #FFFFFF !important; box-sizing: border-box; -webkit-appearance: none; margin: 0;">
+                    </td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr style="background: #F1F5F9; height: 34px; font-weight: 800; border-top: 2px solid #CBD5E1;">
+                    <td style="padding: 6px 12px; border-right: 1px solid #CBD5E1; color: #0F172A;">Total</td>
+                    <td id="receipt-matrix-sum-month-bill" style="padding: 6px 12px; text-align: right; border-right: 1px solid #CBD5E1; color: #334155;">KES 39,500.00</td>
+                    <td id="receipt-matrix-sum-total-due" style="padding: 6px 12px; text-align: right; border-right: 1px solid #CBD5E1; color: #1E3A8A;">KES 50,500.00</td>
+                    <td id="receipt-matrix-sum-amount-paid" style="padding: 6px 12px; text-align: right; color: #047857; font-weight: 800;">KES 25,000.00</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div style="margin-top: 8px; font-size: 11px; color: #64748B; font-style: italic;">
+              * Sum of "Amount Paid" column must strictly match the "Payment Received" input above.
+            </div>
+          </fieldset>
+
+          <!-- MIDDLE RIGHT: STATUS SUMMARY (Highlighted Big Stats matching image_6046ca.png) -->
+          <fieldset style="border: 1px solid #D1D5DB; border-radius: 3px; padding: 12px 18px 18px 18px; background: #FFFFFF; height: 100%; box-sizing: border-box;">
+            <legend style="color: #1E3A8A; font-size: 12px; font-weight: 800; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+              — Status Summary —
+            </legend>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 10px;">
+              
+              <!-- Invoice Total -->
+              <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 4px; padding: 14px 18px; text-align: center;">
+                <div style="font-size: 12px; font-weight: 800; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Invoice Total
+                </div>
+                <div id="receipt-status-invoice-total" style="font-size: 28px; font-weight: 900; color: #1E3A8A; margin-top: 6px; letter-spacing: -0.5px;">
+                  KES 50,500.00
+                </div>
+              </div>
+
+              <!-- Outstanding Arrears -->
+              <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 4px; padding: 14px 18px; text-align: center;">
+                <div style="font-size: 12px; font-weight: 800; color: #991B1B; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Outstanding Arrears
+                </div>
+                <div id="receipt-status-outstanding-arrears" style="font-size: 28px; font-weight: 900; color: #DC2626; margin-top: 6px; letter-spacing: -0.5px;">
+                  KES 25,500.00
+                </div>
+              </div>
+
+              <!-- Real-time Discrepancy Alert Box -->
+              <div id="receipt-strict-warning-box" style="display: none; background: #FFF1F2; border: 1px solid #F43F5E; border-radius: 3px; padding: 8px 12px; font-size: 11.5px; color: #9F1239; line-height: 1.4;">
+                <div style="font-weight: 800;">⚠️ Strict Allocation Rule:</div>
+                <div id="receipt-strict-warning-text">Matrix sum does not match Payment Received.</div>
+              </div>
+
+            </div>
+          </fieldset>
+
+        </div>
+
+        <!-- BLOCK 3: PAYMENT & TRANSACTION DETAILS (Bottom Inputs matching image_6046ca.png) -->
+        <fieldset style="border: 1px solid #D1D5DB; border-radius: 3px; padding: 14px 18px 16px 18px; margin-bottom: 20px; background: #F8FAFC;">
+          <legend style="color: #1E3A8A; font-size: 12px; font-weight: 800; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+            — Payment &amp; Transaction Details —
+          </legend>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 24px; max-width: 1100px;">
+            
+            <!-- Receipt Number -->
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Receipt Number:</label>
+              <input type="text" id="receipt-number-display" class="pm-legacy-input" readonly value="R0000001" style="background: #EEF2F6 !important; font-weight: 800; color: #1E3A8A !important;">
+            </div>
+
+            <!-- Payment Date -->
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Payment Date: <span style="color: #DC2626;">*</span></label>
+              <input type="date" id="receipt-payment-date" class="pm-legacy-input" required>
+            </div>
+
+            <!-- Payment Channel -->
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Payment Channel: <span style="color: #DC2626;">*</span></label>
+              <select id="receipt-method-select" class="pm-legacy-input" onchange="onReceiptPaymentModeChange(this.value)" required>
+                <option value="M-Pesa Paybill">M-Pesa Paybill</option>
+                <option value="Bank Deposit">Bank Deposit / Transfer</option>
+                <option value="Cash">Cash (Office Cashier)</option>
+                <option value="Cheque">Banker's Cheque</option>
+                <option value="EFT / RTGS">EFT / RTGS</option>
+              </select>
+            </div>
+
+            <!-- Ref. No -->
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Ref. No (M-Pesa / Slip #): <span style="color: #DC2626;">*</span></label>
+              <input type="text" id="receipt-ref-code" class="pm-legacy-input" placeholder="e.g. QKD829104A" required>
+            </div>
+
+            <!-- Destination Account: Dynamic M-Pesa / Bank / Cash -->
+            <div id="receipt-dest-mpesa-container" style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Destination: <span style="color: #DC2626;">*</span></label>
+              <select id="receipt-mpesa-paybill-select" class="pm-legacy-input">
+                <!-- Dynamically populated from AppState.mpesaPaybills -->
+              </select>
+            </div>
+
+            <div id="receipt-dest-bank-container" style="display: none; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Destination Bank Account: <span style="color: #DC2626;">*</span></label>
+              <select id="receipt-bank-account-select" class="pm-legacy-input">
+                <!-- Dynamically populated from AppState.bankAccounts -->
+              </select>
+            </div>
+
+            <div id="receipt-dest-cash-container" style="display: none; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Destination:</label>
+              <input type="text" class="pm-legacy-input" value="Main Office Petty Cash / Cashier Safe" readonly style="background: #EEF2F6 !important; color: #4B5563 !important;">
+            </div>
+
+            <!-- Received By -->
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Received By:</label>
+              <input type="text" id="receipt-received-by" class="pm-legacy-input" value="DEAN" readonly style="background: #EEF2F6 !important; font-weight: 700; color: #334155 !important;">
+            </div>
+
+            <!-- Notes / Particulars -->
+            <div style="display: flex; flex-direction: column; gap: 4px; grid-column: 1 / -1;">
+              <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Payment Particulars / Notes:</label>
+              <input type="text" id="receipt-notes" class="pm-legacy-input" placeholder="e.g. October Rent &amp; Service Charge settlement">
+            </div>
+
+          </div>
+        </fieldset>
+
+        <!-- BLOCK 4: ACTION FOOTER (Three Buttons Centered + SMS Checkbox matching image_6046ca.png) -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 10px;">
+          
+          <!-- Three Cashier Workflow Buttons Centered -->
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            
+            <!-- 1. [Save] (Blue) -->
+            <button type="button" id="btn-receipt-save" class="pm-btn-orange" onclick="executePaymentReceipt('save')" style="background: #2563EB !important; border-color: #1D4ED8 !important; padding: 7px 34px; font-size: 13.5px; font-weight: 800; min-width: 110px;">
+              Save
+            </button>
+
+            <!-- 2. [Save & Print] (Dark Navy) -->
+            <button type="button" id="btn-receipt-save-print" class="pm-btn-orange" onclick="executePaymentReceipt('print')" style="background: #1E293B !important; border-color: #0F172A !important; padding: 7px 34px; font-size: 13.5px; font-weight: 800; min-width: 140px;">
+              Save &amp; Print
+            </button>
+
+            <!-- 3. [Save & Send] (Green) -->
+            <button type="button" id="btn-receipt-save-send" class="pm-btn-orange" onclick="executePaymentReceipt('send_sms')" style="background: #059669 !important; border-color: #047857 !important; padding: 7px 34px; font-size: 13.5px; font-weight: 800; min-width: 140px;">
+              Save &amp; Send
+            </button>
+
+            <!-- Reset Form / Cancel button -->
+            <button type="button" class="btn-action-pill" onclick="resetReceiptForm()" style="padding: 7px 18px; font-size: 12.5px; margin-left: 8px;">
+              Reset Form
             </button>
           </div>
-        </div>
 
-        <!-- Strict Real-Time Allocation Validation Indicator -->
-        <div id="receipt-allocation-validation-indicator" style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700;">
-          <span id="receipt-alloc-status-badge" style="background: #E2E8F0; color: #475569; padding: 4px 12px; border-radius: 3px; border: 1px solid #CBD5E1;">
-            Enter payment amount to allocate
-          </span>
-        </div>
-      </div>
-
-      <!-- MIDDLE SECTION: TWO COLUMNS (Middle Left: BILLING BREAKDOWN | Middle Right: STATUS SUMMARY) -->
-      <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-bottom: 18px; align-items: start;">
-        
-        <!-- MIDDLE LEFT: BILLING BREAKDOWN (Matrix Table matching image_6046ca.png) -->
-        <fieldset style="border: 1px solid #D1D5DB; border-radius: 3px; padding: 12px 16px 14px 16px; background: #FFFFFF; height: 100%; box-sizing: border-box;">
-          <legend style="color: #1E3A8A; font-size: 12px; font-weight: 800; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-            — Billing Breakdown —
-          </legend>
-          <div style="overflow-x: auto; border: 1px solid #CBD5E1; margin-top: 4px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #FFFFFF;">
-              <thead>
-                <tr class="pm-table-header" style="background: #1E3A8A;">
-                  <th style="padding: 7px 12px; text-align: left; border-right: 1px solid #3B82F6;">Payable Item</th>
-                  <th style="padding: 7px 12px; width: 110px; text-align: right; border-right: 1px solid #3B82F6;">Monthly Bill</th>
-                  <th style="padding: 7px 12px; width: 110px; text-align: right; border-right: 1px solid #3B82F6;">Total Bill Due</th>
-                  <th style="padding: 7px 14px; width: 130px; text-align: right;">Amount Paid</th>
-                </tr>
-              </thead>
-              <tbody id="receipt-invoices-allocation-body">
-                <!-- Dynamically populated rows -->
-              </tbody>
-              <tfoot>
-                <tr style="background: #F1F5F9; height: 32px; font-weight: 800; border-top: 2px solid #CBD5E1;">
-                  <td style="padding: 6px 12px; border-right: 1px solid #CBD5E1; color: #0F172A;">Total</td>
-                  <td id="receipt-matrix-sum-month-bill" style="padding: 6px 12px; text-align: right; border-right: 1px solid #CBD5E1; color: #334155;">KES 0.00</td>
-                  <td id="receipt-matrix-sum-total-due" style="padding: 6px 12px; text-align: right; border-right: 1px solid #CBD5E1; color: #1E3A8A;">KES 0.00</td>
-                  <td id="receipt-matrix-sum-amount-paid" style="padding: 6px 14px; text-align: right; color: #047857; font-weight: 800;">KES 0.00</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          <div style="margin-top: 8px; font-size: 11px; color: #64748B; font-style: italic;">
-            * Sum of "Amount Paid" column must strictly match the "Payment Received" input above.
-          </div>
-        </fieldset>
-
-        <!-- MIDDLE RIGHT: STATUS SUMMARY (Highlighted Big Stats matching image_6046ca.png) -->
-        <fieldset style="border: 1px solid #D1D5DB; border-radius: 3px; padding: 12px 18px 18px 18px; background: #FFFFFF; height: 100%; box-sizing: border-box;">
-          <legend style="color: #1E3A8A; font-size: 12px; font-weight: 800; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-            — Status Summary —
-          </legend>
-          
-          <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 10px;">
-            
-            <!-- Invoice Total -->
-            <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 4px; padding: 14px 18px; text-align: center;">
-              <div style="font-size: 12px; font-weight: 800; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.5px;">
-                Invoice Total
-              </div>
-              <div id="receipt-status-invoice-total" style="font-size: 28px; font-weight: 900; color: #1E3A8A; margin-top: 6px; letter-spacing: -0.5px;">
-                KES 0.00
-              </div>
-            </div>
-
-            <!-- Outstanding Arrears -->
-            <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 4px; padding: 14px 18px; text-align: center;">
-              <div style="font-size: 12px; font-weight: 800; color: #991B1B; text-transform: uppercase; letter-spacing: 0.5px;">
-                Outstanding Arrears
-              </div>
-              <div id="receipt-status-outstanding-arrears" style="font-size: 28px; font-weight: 900; color: #DC2626; margin-top: 6px; letter-spacing: -0.5px;">
-                KES 0.00
-              </div>
-            </div>
-
-            <!-- Real-time Discrepancy Alert Box -->
-            <div id="receipt-strict-warning-box" style="display: none; background: #FFF1F2; border: 1px solid #F43F5E; border-radius: 3px; padding: 8px 12px; font-size: 11.5px; color: #9F1239; line-height: 1.4;">
-              <div style="font-weight: 800;">⚠️ Strict Allocation Rule:</div>
-              <div id="receipt-strict-warning-text">Matrix sum does not match Payment Received.</div>
-            </div>
-
-          </div>
-        </fieldset>
-
-      </div>
-
-      <!-- BLOCK 3: PAYMENT & TRANSACTION DETAILS (Bottom Inputs matching image_6046ca.png) -->
-      <fieldset style="border: 1px solid #D1D5DB; border-radius: 3px; padding: 14px 18px 16px 18px; margin-bottom: 20px; background: #F8FAFC;">
-        <legend style="color: #1E3A8A; font-size: 12px; font-weight: 800; padding: 0 8px; text-transform: uppercase; letter-spacing: 0.5px;">
-          — Payment &amp; Transaction Details —
-        </legend>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 24px; max-width: 1100px;">
-          
-          <!-- Receipt Number -->
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Receipt Number:</label>
-            <input type="text" id="receipt-number-display" class="pm-legacy-input" readonly value="R0000001" style="background: #EEF2F6 !important; font-weight: 800; color: #1E3A8A !important;">
-          </div>
-
-          <!-- Payment Date -->
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Payment Date: <span style="color: #DC2626;">*</span></label>
-            <input type="date" id="receipt-payment-date" class="pm-legacy-input" required>
-          </div>
-
-          <!-- Payment Channel -->
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Payment Channel: <span style="color: #DC2626;">*</span></label>
-            <select id="receipt-method-select" class="pm-legacy-input" onchange="onReceiptPaymentModeChange(this.value)" required>
-              <option value="M-Pesa Paybill">M-Pesa Paybill</option>
-              <option value="Bank Deposit">Bank Deposit / Transfer</option>
-              <option value="Cash">Cash (Office Cashier)</option>
-              <option value="Cheque">Banker's Cheque</option>
-              <option value="EFT / RTGS">EFT / RTGS</option>
-            </select>
-          </div>
-
-          <!-- Ref. No -->
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Ref. No (M-Pesa / Slip #): <span style="color: #DC2626;">*</span></label>
-            <input type="text" id="receipt-ref-code" class="pm-legacy-input" placeholder="e.g. QKD829104A" required>
-          </div>
-
-          <!-- Destination Account: Dynamic M-Pesa / Bank / Cash -->
-          <div id="receipt-dest-mpesa-container" style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Destination: <span style="color: #DC2626;">*</span></label>
-            <select id="receipt-mpesa-paybill-select" class="pm-legacy-input">
-              <!-- Dynamically populated from AppState.mpesaPaybills -->
-            </select>
-          </div>
-
-          <div id="receipt-dest-bank-container" style="display: none; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Destination Bank Account: <span style="color: #DC2626;">*</span></label>
-            <select id="receipt-bank-account-select" class="pm-legacy-input">
-              <!-- Dynamically populated from AppState.bankAccounts -->
-            </select>
-          </div>
-
-          <div id="receipt-dest-cash-container" style="display: none; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Destination:</label>
-            <input type="text" class="pm-legacy-input" value="Main Office Petty Cash / Cashier Safe" readonly style="background: #EEF2F6 !important; color: #4B5563 !important;">
-          </div>
-
-          <!-- Received By -->
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Received By:</label>
-            <input type="text" id="receipt-received-by" class="pm-legacy-input" value="DEAN" readonly style="background: #EEF2F6 !important; font-weight: 700; color: #334155 !important;">
-          </div>
-
-          <!-- Notes / Particulars -->
-          <div style="display: flex; flex-direction: column; gap: 4px; grid-column: 1 / -1;">
-            <label style="font-size: 12px; font-weight: 700; color: #1E293B;">Payment Particulars / Notes:</label>
-            <input type="text" id="receipt-notes" class="pm-legacy-input" placeholder="e.g. October Rent &amp; Service Charge settlement">
+          <!-- SMS Checkbox -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="receipt-send-sms" checked style="accent-color: #008080; width: 17px; height: 17px; cursor: pointer;">
+            <label for="receipt-send-sms" style="font-size: 12.5px; font-weight: 700; color: #1F2937; cursor: pointer; user-select: none;">
+              Send SMS Receipt to Tenant (Africa's Talking API)
+            </label>
           </div>
 
         </div>
-      </fieldset>
 
-      <!-- BLOCK 4: ACTION FOOTER (Three Buttons Centered + SMS Checkbox matching image_6046ca.png) -->
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 10px;">
-        
-        <!-- Three Cashier Workflow Buttons Centered -->
-        <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
-          
-          <!-- 1. [Save] (Blue) -->
-          <button type="button" id="btn-receipt-save" class="pm-btn-orange" onclick="executePaymentReceipt('save')" style="background: #2563EB !important; border-color: #1D4ED8 !important; padding: 7px 34px; font-size: 13.5px; font-weight: 800; min-width: 110px;">
-            Save
-          </button>
+      </form>
 
-          <!-- 2. [Save & Print] (Dark Navy) -->
-          <button type="button" id="btn-receipt-save-print" class="pm-btn-orange" onclick="executePaymentReceipt('print')" style="background: #1E293B !important; border-color: #0F172A !important; padding: 7px 34px; font-size: 13.5px; font-weight: 800; min-width: 140px;">
-            Save &amp; Print
-          </button>
+    </div>
+    <!-- END OF COMPACT RIGHT-ALIGNED UPPER WRAPPER -->
 
-          <!-- 3. [Save & Send] (Green) -->
-          <button type="button" id="btn-receipt-save-send" class="pm-btn-orange" onclick="executePaymentReceipt('send_sms')" style="background: #059669 !important; border-color: #047857 !important; padding: 7px 34px; font-size: 13.5px; font-weight: 800; min-width: 140px;">
-            Save &amp; Send
-          </button>
-
-          <!-- Reset Form / Cancel button -->
-          <button type="button" class="btn-action-pill" onclick="resetReceiptForm()" style="padding: 7px 18px; font-size: 12.5px; margin-left: 8px;">
-            Reset Form
-          </button>
-        </div>
-
-        <!-- SMS Checkbox -->
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="receipt-send-sms" checked style="accent-color: #008080; width: 17px; height: 17px; cursor: pointer;">
-          <label for="receipt-send-sms" style="font-size: 12.5px; font-weight: 700; color: #1F2937; cursor: pointer; user-select: none;">
-            Send SMS Receipt to Tenant (Africa's Talking API)
-          </label>
-        </div>
-
-      </div>
-
-    </form>
-
-    <!-- BLOCK 5: DIRECTORY TABLE (matching image_6046ca.png footer) -->
-    <fieldset style="border: 1px solid #D1D5DB; border-radius: 2px; padding: 14px 18px 18px 18px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+    <!-- BLOCK 5: DIRECTORY TABLE (100% Full-Width Ledger) -->
+    <fieldset style="width: 100%; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 2px; padding: 14px 18px 18px 18px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
       <legend style="color: #F97316; font-size: 12px; font-weight: 700; padding: 0 6px;">
         — List of Recorded Tenant Receipts —
       </legend>

@@ -1504,3 +1504,35 @@
     border: none !important;
   }
 }
+
+/* --------------------------------------------------------------------------
+   RECEIPTING INTERFACE CONSTRAINTS & SPINNER REMOVAL
+   -------------------------------------------------------------------------- */
+input[type="number"].receipt-alloc-input::-webkit-outer-spin-button,
+input[type="number"].receipt-alloc-input::-webkit-inner-spin-button,
+#receipt-amount-paid::-webkit-outer-spin-button,
+#receipt-amount-paid::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+input[type="number"].receipt-alloc-input,
+#receipt-amount-paid {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+.receipting-upper-card {
+  max-width: 1000px !important;
+  width: 75% !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  margin-bottom: 24px !important;
+}
+
+@media (max-width: 1200px) {
+  .receipting-upper-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
