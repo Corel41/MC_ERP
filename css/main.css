@@ -1523,7 +1523,7 @@ input[type="number"].receipt-alloc-input,
 }
 
 .receipting-upper-card {
-  max-width: 950px !important;
+  max-width: 1400px !important;
   width: 100% !important;
   margin-left: 0 !important;
   margin-right: auto !important;
@@ -1534,9 +1534,15 @@ input[type="number"].receipt-alloc-input,
   padding-left: 0 !important;
 }
 
-@media (max-width: 1200px) {
-  .receipting-upper-card {
-    width: 100% !important;
-    max-width: 100% !important;
+.receipting-grid-container {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) {
+  .receipting-grid-container {
+    grid-template-columns: 1fr;
   }
 }
