@@ -1523,11 +1523,15 @@ input[type="number"].receipt-alloc-input,
 }
 
 .receipting-upper-card {
-  max-width: 1000px !important;
-  width: 75% !important;
-  margin-left: auto !important;
-  margin-right: 0 !important;
+  max-width: 950px !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
   margin-bottom: 24px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 0 !important;
 }
 
 @media (max-width: 1200px) {
