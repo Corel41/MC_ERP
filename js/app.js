@@ -191,6 +191,18 @@ const AppState = {
       ]
     };
 
+    // Immediate synchronous hydration from 6-month showcase dataset
+    if (typeof window !== 'undefined' && window.MC_ERP_SEED_DATA) {
+      Object.keys(window.MC_ERP_SEED_DATA).forEach(function(k) {
+        if (Array.isArray(window.MC_ERP_SEED_DATA[k])) {
+          AppState[k] = window.MC_ERP_SEED_DATA[k];
+        } else if (typeof window.MC_ERP_SEED_DATA[k] === 'object' && window.MC_ERP_SEED_DATA[k] !== null) {
+          AppState[k] = Object.assign(AppState[k] || {}, window.MC_ERP_SEED_DATA[k]);
+        }
+      });
+    }
+
+
     const root = document.documentElement;
     const body = document.body;
     const sidebar = document.getElementById('sidebar');
@@ -2927,14 +2939,11 @@ const AppState = {
       // 1. Populate Property Dropdowns
       const propSel = document.getElementById('receipt-property-select');
       const filterPropSel = document.getElementById('receipt-filter-property');
-      if (propSel) {
-        propSel.innerHTML = AppState.properties.map(p => 
-          `<option value="${p.id}" ${p.name.includes('CHIMNEY RISE') ? 'selected' : ''}>${p.name}</option>`
+            if (propSel && AppState.properties && AppState.properties.length > 0) {
+        propSel.innerHTML = AppState.properties.map((p, idx) => 
+          `<option value="${p.id}" ${idx === 0 ? 'selected' : ''}>${p.name}</option>`
         ).join('');
-        const chimneyProp = AppState.properties.find(p => p.name.includes('CHIMNEY RISE'));
-        if (chimneyProp) {
-          propSel.value = chimneyProp.id;
-        }
+        propSel.value = AppState.properties[0].id;
       }
       if (filterPropSel) {
         filterPropSel.innerHTML = '<option value="ALL">All Properties</option>' + AppState.properties.map(p => 
@@ -3029,24 +3038,20 @@ const AppState = {
       const detailPrevDate = document.getElementById('receipt-detail-prev-date');
       const rNumDisplay = document.getElementById('receipt-number-display');
 
-      const tenant = AppState.tenants.find(t => t.id === tenantId) || 
-                     AppState.tenants.find(t => t.name.includes('Nancy')) || 
-                     AppState.tenants[0] ||
-                     { id: 'TEN-CRE-01', name: 'Nancy Jacqueline Kamau', phone: '+254 722 111 001', unitCode: '1', rentAmount: 35000, propertyName: 'CHIMNEY RISE ESTATE -' };
-
+            const tenant = AppState.tenants.find(t => t.id === tenantId) || AppState.tenants[0];
       const actualTenantId = tenant ? tenant.id : tenantId;
       const lease = (AppState.leases || []).find(l => l.tenantId === actualTenantId || (tenant && l.tenantName === tenant.name));
       const property = (tenant && AppState.properties.find(p => p.id === tenant.propertyId)) || 
                        (tenant && tenant.propertyName ? { name: tenant.propertyName } : null) || 
-                       (lease && lease.propertyName ? { name: lease.propertyName } : { name: 'CHIMNEY RISE ESTATE -' });
+                       (lease && lease.propertyName ? { name: lease.propertyName } : (AppState.properties[0] || { name: 'Property' }));
 
-      const tenantName = tenant ? tenant.name : 'Nancy Jacqueline Kamau';
-      const propName = property ? property.name : 'CHIMNEY RISE ESTATE -';
-      const phoneNo = (tenant && (tenant.phone || tenant.phoneNumber || tenant.telNo)) || '+254 722 111 001';
-      const rawUnit = (tenant && tenant.unitCode) || (lease && lease.unitCode) || '1';
+      const tenantName = tenant ? tenant.name : (AppState.tenants[0] ? AppState.tenants[0].name : 'Tenant');
+      const propName = property ? property.name : (AppState.properties[0] ? AppState.properties[0].name : 'Property');
+      const phoneNo = (tenant && (tenant.phone || tenant.phoneNumber || tenant.telNo)) || '+254 720 000 000';
+      const rawUnit = (tenant && tenant.unitCode) || (lease && lease.unitCode) || '01';
       const unitNo = rawUnit.toString().toLowerCase().startsWith('unit') ? rawUnit : `Unit ${rawUnit}`;
       const regDate = (tenant && (tenant.registrationDate || tenant.regDate || (tenant.createdAt ? tenant.createdAt.split('T')[0] : null))) || 
-                      (lease && lease.startDate) || '2026-01-15';
+                      (lease && lease.startDate) || '2026-05-01';
 
       // Look up previous recorded payment from AppState.tenantReceipts or ledger
       const prevReceipt = (AppState.tenantReceipts || []).find(r => r.tenant_id === actualTenantId || (tenant && r.tenant_name === tenant.name));
@@ -3112,51 +3117,59 @@ const AppState = {
       const tbody = document.getElementById('receipt-invoices-allocation-body');
       if (!tbody) return;
 
-      const tenant = AppState.tenants.find(t => t.id === tenantId) || 
-                     AppState.tenants.find(t => t.name.includes('Nancy')) || 
-                     AppState.tenants[0] ||
-                     { id: 'TEN-CRE-01', rentAmount: 35000 };
-
+      const tenant = AppState.tenants.find(t => t.id === tenantId) || AppState.tenants[0];
+      const actualTenantId = tenant ? tenant.id : tenantId;
       const monthlyRent = tenant && tenant.rentAmount ? Number(tenant.rentAmount) : 35000;
-      
+
       // Calculate tenant total due with prior arrears if any
-      const tenantEntries = AppState.ledger.filter(l => l.tenantId === (tenant ? tenant.id : tenantId));
+      const tenantEntries = AppState.ledger.filter(l => l.tenantId === actualTenantId);
       const debits = tenantEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
       const credits = tenantEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
       const netLedgerBalance = debits - credits;
-      const rentTotalDue = netLedgerBalance > monthlyRent ? netLedgerBalance : (monthlyRent + 11000); // 46,000.00 matching reference
 
-      // Structure payables list: strictly 4 columns:
-      // 1. Payable Item (Description)
-      // 2. Monthly Bill (Base amount)
-      // 3. Total Bill Due (Base + Arrears)
-      // 4. Amount Paid (Editable input)
-      const payables = [
-        {
-          item: 'Rent',
-          code: '001',
-          monthly: monthlyRent,
-          totalDue: rentTotalDue,
-          defaultPaid: 25000.00,
-          priority: 1
-        },
-        {
-          item: 'Service Charge',
-          code: '002',
-          monthly: 2500.00,
-          totalDue: 2500.00,
-          defaultPaid: 0.00,
-          priority: 2
-        },
-        {
-          item: 'Penalty',
-          code: '035',
-          monthly: 2000.00,
-          totalDue: 2000.00,
-          defaultPaid: 0.00,
-          priority: 3
-        }
-      ];
+      // Locate October or latest invoice lines for this tenant
+      const tenantInvs = (AppState.invoices || []).filter(i => (i.tenantId === actualTenantId || (tenant && i.tenantName === tenant.name)));
+      const octInv = tenantInvs.find(i => i.periodMonth === 10) || tenantInvs[tenantInvs.length - 1];
+      const octLines = (AppState.tenantInvoiceLines || []).filter(l => octInv && l.invoice_id === octInv.id);
+
+      let payables = [];
+      if (octLines.length > 0) {
+        payables = octLines.map((line, idx) => {
+          let code = '001';
+          let priority = 1;
+          const desc = line.description || '';
+          if (/service charge/i.test(desc)) { code = '009'; priority = 2; }
+          else if (/water/i.test(desc)) { code = '002'; priority = 3; }
+          else if (/garbage/i.test(desc)) { code = '017'; priority = 4; }
+          else if (/penalty/i.test(desc)) { code = '035'; priority = 0; }
+          else if (/rent/i.test(desc)) { code = '001'; priority = 1; }
+
+          const lineAmt = Number(line.amount) || 0;
+          const itemClean = desc.replace(/\s*-\s*(May|Jun|Jul|Aug|Sep|Oct)\s*\d{4}/i, '').trim();
+          let totalDue = lineAmt;
+          if (code === '001' && netLedgerBalance > lineAmt) {
+            totalDue = netLedgerBalance;
+          }
+          return {
+            item: itemClean,
+            code: code,
+            monthly: lineAmt,
+            totalDue: totalDue,
+            defaultPaid: 0.00,
+            priority: priority
+          };
+        });
+      } else {
+        const rentTotalDue = netLedgerBalance > monthlyRent ? netLedgerBalance : monthlyRent;
+        payables = [
+          { item: 'Rent', code: '001', monthly: monthlyRent, totalDue: rentTotalDue, defaultPaid: 0.00, priority: 1 },
+          { item: 'Service Charge', code: '009', monthly: 3500.00, totalDue: 3500.00, defaultPaid: 0.00, priority: 2 },
+          { item: 'Water Bill', code: '002', monthly: 1500.00, totalDue: 1500.00, defaultPaid: 0.00, priority: 3 },
+          { item: 'Garbage Collection', code: '017', monthly: 500.00, totalDue: 500.00, defaultPaid: 0.00, priority: 4 }
+        ];
+      }
+
+      payables.sort((a, b) => a.priority - b.priority);
 
       let rowsHtml = '';
       payables.forEach((p, idx) => {
@@ -3178,7 +3191,7 @@ const AppState = {
                 data-monthly="${p.monthly}" 
                 data-due="${p.totalDue}" 
                 data-idx="${idx}"
-                value="${p.defaultPaid !== undefined ? Number(p.defaultPaid).toFixed(2) : '0.00'}" 
+                value="0.00" 
                 placeholder="0.00" 
                 oninput="onMatrixAmountPaidInput(this)" 
                 style="width: 100%; text-align: right; font-weight: 700; background: #FFFFFF !important; box-sizing: border-box; -webkit-appearance: none; margin: 0;">
@@ -3194,10 +3207,13 @@ const AppState = {
       const payDate = document.getElementById('receipt-payment-date');
       if (payDate && !payDate.value) payDate.value = todayIso;
 
-      // Initial Payment Received setting (default 25,000.00 if unset, matching image_6046ca.png)
+      // Initial Payment Received setting: default to tenant balance or monthly total
       const amtInput = document.getElementById('receipt-amount-paid');
-      if (amtInput && (!amtInput.value || parseFloat(amtInput.value) <= 0)) {
-        amtInput.value = '25000.00';
+      const invoiceSum = payables.reduce((s, p) => s + p.totalDue, 0);
+      const defaultPay = netLedgerBalance > 0 ? netLedgerBalance : invoiceSum;
+      if (amtInput) {
+        amtInput.value = defaultPay > 0 ? defaultPay.toFixed(2) : (monthlyRent > 0 ? monthlyRent.toFixed(2) : '35000.00');
+        autoAllocateReceiptWaterfallSilently(parseFloat(amtInput.value) || 0);
       }
 
       // Dynamically validate and update Status Summary
