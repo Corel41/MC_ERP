@@ -988,78 +988,139 @@
         </div>
       </div>
 
-      <!-- TENANT LEDGER PANEL -->
-      <div class="tenant-panel" id="panel-tenant-ledger">
-        <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Tenant Double-Entry Ledger & Statement of Account</h2>
-              <p>Searchable double-entry ledger detailing all debits (charges & invoices) and credits (M-Pesa C2B Paybill & bank receipts) with running balance reconciliation.</p>
-            </div>
-            <span class="live-pulse-badge">Double-Entry Financial Ledger</span>
-          </div>
-
-          <!-- Filter & Action Bar -->
-          <div style="background: var(--nav-active-bg); border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
-            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; flex: 1;">
-              <div class="form-group" style="min-width: 240px;">
-                <label class="form-label">Filter By Tenant Statement</label>
-                <select class="form-input" id="ledger-tenant-filter" onchange="renderLedgerTable()">
-                  <option value="ALL">All Tenants (Consolidated Ledger)</option>
-                  <!-- Dynamically populated -->
+      <!-- TENANT LEDGER & STATEMENT OF ACCOUNT PANEL (image_f7715c.png) -->
+      <div class="tenant-panel" id="panel-tab-ledger">
+        <div class="glass-card clean-module-container" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+          
+          <!-- TOP FILTER & ACTION BAR -->
+          <div class="statement-filter-bar" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px;">
+            <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; flex: 1;">
+              <div style="min-width: 220px; flex: 1;">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Select Property</label>
+                <select id="ledger-property-filter" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 13px;" onchange="onLedgerPropertyChange()">
+                  <!-- Populated dynamically -->
                 </select>
               </div>
-              <div class="form-group" style="min-width: 200px;">
-                <label class="form-label">Search Reference / M-Pesa</label>
-                <input type="text" class="form-input" id="ledger-search-query" placeholder="Filter by Code or Ref..." oninput="renderLedgerTable()">
+              <div style="min-width: 240px; flex: 1.2;">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Select Tenant</label>
+                <select id="ledger-tenant-filter" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 13px;" onchange="onLedgerTenantChange()">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+              <div style="width: 150px;">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">From Date</label>
+                <input type="date" id="ledger-date-from" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+              </div>
+              <div style="width: 150px;">
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">To Date</label>
+                <input type="date" id="ledger-date-to" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
               </div>
             </div>
-            <button type="button" class="btn-elevated-primary" onclick="openReceiptModal()">
-              💳 Log Payment Receipt (M-Pesa / Bank)
-            </button>
-          </div>
-
-          <!-- Ledger Totals -->
-          <div class="stat-pill-group">
-            <div class="stat-pill">
-              <span class="stat-pill-title">Total Debits (Invoices / Charges)</span>
-              <span class="stat-pill-value" id="ledger-stat-debits" style="color: var(--accent-primary);">KES 120,025</span>
-            </div>
-            <div class="stat-pill">
-              <span class="stat-pill-title">Total Credits (Receipts Settled)</span>
-              <span class="stat-pill-value" id="ledger-stat-credits" style="color: var(--accent-secondary);">KES 37,525</span>
-            </div>
-            <div class="stat-pill">
-              <span class="stat-pill-title">Current Net Balance (Arrears)</span>
-              <span class="stat-pill-value" id="ledger-stat-balance" style="color: var(--accent-amber);">KES 82,500</span>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button type="button" class="pm-btn-orange" onclick="generateTenantStatement()" style="padding: 7px 22px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                <span>⚙️</span> Generate Statement
+              </button>
+              <button type="button" onclick="printTenantStatement()" style="padding: 7px 22px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; background: #008080; color: #FFFFFF; border: none; border-radius: 3px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                <span>🖨️</span> Print Statement
+              </button>
             </div>
           </div>
 
-          <!-- Ledger Statement Table -->
-          <div style="margin-top: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h3 style="font-size: 1.05rem; font-weight: 700;">Double-Entry Ledger Statement</h3>
-              <span class="badge-status" style="color: var(--accent-secondary);">Immutable Audit Trail</span>
+          <!-- PRINTABLE STATEMENT SHEET (image_f7715c.png) -->
+          <div id="printable-tenant-statement" class="tenant-statement-sheet" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 32px 36px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); max-width: 1200px; margin: 0 auto; color: #111827; font-family: 'Segoe UI', Arial, sans-serif;">
+            
+            <!-- CORPORATE HEADER -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+              <div>
+                <h1 style="margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 0.5px; color: #111827; text-transform: uppercase;">METROCOSMO LTD - NAIROBI</h1>
+                <div style="font-size: 12px; font-weight: 700; color: #374151; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</div>
+                <div style="font-size: 12px; color: #4B5563; margin-top: 2px;">P.O. BOX 40656 - 00100 Nairobi</div>
+                <div style="font-size: 12px; color: #4B5563;">Cell: 020 2244218, 0721 737093</div>
+                <div style="font-size: 12px; color: #4B5563;">E-Mail: info@metrocosmo.com</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 11.5px; color: #4B5563; font-weight: 600;">
+                  Date: <span id="statement-gen-timestamp">22-Oct-2026 10:45:12</span>
+                </div>
+              </div>
             </div>
-            <div class="builder-table-wrap">
-              <table class="builder-table">
+
+            <div style="height: 1px; background: #D1D5DB; margin: 10px 0 14px 0;"></div>
+
+            <!-- DOCUMENT TITLE -->
+            <div style="text-align: center; margin: 14px 0 18px 0;">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #111827; text-decoration: underline;">STATEMENT OF ACCOUNT</h2>
+            </div>
+
+            <!-- METADATA BLOCK (3 lines, exact key-value layout) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 30px; font-size: 12.5px; margin-bottom: 12px; line-height: 1.6;">
+              <div style="display: flex; gap: 8px;">
+                <span style="font-weight: 700; width: 105px; color: #111827;">Tenant Code:</span>
+                <span id="statement-tenant-code" style="font-weight: 700; color: #1E3A8A;">—</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span style="font-weight: 700; width: 110px; color: #111827;">Tenant Name:</span>
+                <span id="statement-tenant-name" style="font-weight: 700; color: #111827;">—</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span style="font-weight: 700; width: 105px; color: #111827;">Property:</span>
+                <span id="statement-property-name" style="color: #111827;">—</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span style="font-weight: 700; width: 110px; color: #111827;">Unit:</span>
+                <span id="statement-unit-code" style="font-weight: 700; color: #111827;">—</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span style="font-weight: 700; width: 105px; color: #111827;">Period:</span>
+                <span>From: <strong id="statement-date-from">—</strong> &nbsp; To: <strong id="statement-date-to">—</strong></span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <span style="font-weight: 700; width: 110px; color: #111827;">Phone No:</span>
+                <span id="statement-phone-no" style="color: #111827;">—</span>
+              </div>
+            </div>
+
+            <!-- DOUBLE HORIZONTAL LINE -->
+            <div style="border-top: 3px double #000000; margin: 12px 0 16px 0;"></div>
+
+            <!-- STATEMENT LEDGER TABLE -->
+            <div style="overflow-x: auto;">
+              <table class="statement-ledger-table" style="width: 100%; border-collapse: collapse; font-size: 12px; font-family: 'Segoe UI', Arial, sans-serif;">
                 <thead>
-                  <tr>
-                    <th>Date & Time</th>
-                    <th>Ref / M-Pesa Code</th>
-                    <th>Tenant Name</th>
-                    <th>Unit</th>
-                    <th>Type</th>
-                    <th>Description</th>
-                    <th>Debit (Charges)</th>
-                    <th>Credit (Paid)</th>
-                    <th>Running Balance</th>
-                    <th>Action</th>
+                  <tr style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; background: #F9FAFB;">
+                    <th style="padding: 7px 6px; width: 35px; text-align: center; font-weight: 800; border-right: 1px solid #E5E7EB;">#</th>
+                    <th style="padding: 7px 8px; width: 85px; text-align: left; font-weight: 800; border-right: 1px solid #E5E7EB;">Date</th>
+                    <th style="padding: 7px 10px; text-align: left; font-weight: 800; border-right: 1px solid #E5E7EB;">Payables</th>
+                    <th style="padding: 7px 10px; width: 150px; text-align: left; font-weight: 800; border-right: 1px solid #E5E7EB;">Receipt No. / Invoice No.</th>
+                    <th style="padding: 7px 8px; width: 80px; text-align: left; font-weight: 800; border-right: 1px solid #E5E7EB;">Mode</th>
+                    <th style="padding: 7px 8px; width: 95px; text-align: left; font-weight: 800; border-right: 1px solid #E5E7EB;">Month</th>
+                    <th style="padding: 7px 10px; width: 105px; text-align: right; font-weight: 800; border-right: 1px solid #E5E7EB;">Debit</th>
+                    <th style="padding: 7px 10px; width: 105px; text-align: right; font-weight: 800; border-right: 1px solid #E5E7EB;">Credit</th>
+                    <th style="padding: 7px 10px; width: 110px; text-align: right; font-weight: 800;">Balance</th>
                   </tr>
                 </thead>
-                <tbody id="table-ledger-body"></tbody>
+                <tbody id="statement-table-body">
+                  <!-- Dynamically rendered rows -->
+                </tbody>
+                <tfoot>
+                  <tr style="border-top: 1px solid #000000; border-bottom: 3px double #000000; font-weight: 800; background: #F9FAFB;">
+                    <td colspan="6" style="padding: 9px 10px; text-align: right; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;">TOTALS:</td>
+                    <td id="statement-total-debit" style="padding: 9px 10px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums;">0.00</td>
+                    <td id="statement-total-credit" style="padding: 9px 10px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums;">0.00</td>
+                    <td id="statement-closing-balance" style="padding: 9px 10px; text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; color: #111827;">0.00</td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
+
+            <!-- CLOSING SUMMARY PILL (matching image_f7715c.png) -->
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; align-items: center; gap: 20px; font-size: 13px;">
+              <div style="background: #F3F4F6; border: 1px solid #D1D5DB; border-radius: 4px; padding: 8px 18px; display: flex; align-items: center; gap: 12px;">
+                <span style="font-weight: 700; color: #4B5563;">Current Outstanding Balance:</span>
+                <span id="statement-summary-balance" style="font-size: 15px; font-weight: 900; color: #B91C1C;">KES 0.00</span>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

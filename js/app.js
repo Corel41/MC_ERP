@@ -281,7 +281,10 @@ const AppState = {
       'settings': '07_settings.html',
       'admin-setup': '08_admin.html',
       '08_admin': '08_admin.html',
-      '8_admin': '08_admin.html'
+      '8_admin': '08_admin.html',
+      'tenant-ledger': '1_5_tenant_ledger.html',
+      'estate-ledger': '1_5_tenant_ledger.html',
+      '1_5_tenant_ledger': '1_5_tenant_ledger.html'
     };
 
     const moduleCache = {};
@@ -412,6 +415,12 @@ const AppState = {
           loadTenantReceipts();
           initTenantReceipting();
           switchTenantTab(AppState.activeTenantTab || 'tab-invoices');
+          break;
+
+        case 'tenant-ledger':
+        case 'estate-ledger':
+        case '1_5_tenant_ledger':
+          initTenantStatementEngine();
           break;
 
         case 'estate-landlords':
@@ -2452,7 +2461,7 @@ const AppState = {
       // Update panel visibility
       const panels = document.querySelectorAll('.tenant-panel');
       panels.forEach(p => {
-        if (p.id === `panel-${targetTabId}` || p.id === `panel-tenant-${targetTabId}`) {
+        if (p.id === `panel-${targetTabId}` || p.id === `panel-tenant-${targetTabId}` || (targetTabId === 'tab-ledger' && (p.id === 'panel-tab-ledger' || p.id === 'panel-tenant-ledger'))) {
           p.style.display = 'block';
           p.classList.add('active');
         } else {
@@ -2473,8 +2482,7 @@ const AppState = {
         populateTenantDropdowns();
         renderReadingsTable();
       } else if (targetTabId === 'tab-ledger' || targetTabId === 'ledger') {
-        populateTenantDropdowns();
-        renderLedgerTable();
+        initTenantStatementEngine();
       }
     }
 
@@ -4694,8 +4702,400 @@ const AppState = {
       `).join('');
     }
 
+    /* --------------------------------------------------------------------------
+       TENANT STATEMENT OF ACCOUNT & DOUBLE-ENTRY FINANCIAL LEDGER (image_f7715c.png)
+       -------------------------------------------------------------------------- */
+
+    function getStatementCurrentTimestamp() {
+      const now = new Date();
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const day = String(now.getDate()).padStart(2, '0');
+      const mon = months[now.getMonth()];
+      const yr = now.getFullYear();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      return `${day}-${mon}-${yr} ${hh}:${mm}:${ss}`;
+    }
+
+    function formatDisplayDate(dateStr) {
+      if (!dateStr) return '—';
+      const clean = String(dateStr).split('T')[0].split(' ')[0];
+      const parts = clean.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return clean;
+    }
+
+    function formatStatementNumber(val, isBalance) {
+      const num = Number(val) || 0;
+      if (num === 0 && !isBalance) return '0.00';
+      if (num < 0) {
+        return '(' + Math.abs(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ')';
+      }
+      return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function initTenantStatementEngine() {
+      const propSel = document.getElementById('ledger-property-filter');
+      const tenantSel = document.getElementById('ledger-tenant-filter');
+      if (!propSel && !tenantSel) return;
+
+      if (propSel) {
+        const properties = AppState.properties || [];
+        propSel.innerHTML = `
+          <option value="ALL">All Properties (Consolidated)</option>
+          ${properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+        `;
+        if (properties.length > 0) {
+          propSel.value = properties[0].id;
+        }
+      }
+
+      onLedgerPropertyChange();
+    }
+
+    function onLedgerPropertyChange() {
+      const propSel = document.getElementById('ledger-property-filter');
+      const tenantSel = document.getElementById('ledger-tenant-filter');
+      if (!tenantSel) return;
+
+      const propId = propSel ? propSel.value : 'ALL';
+      let tenants = AppState.tenants || [];
+      if (propId && propId !== 'ALL') {
+        tenants = tenants.filter(t => t.propertyId === propId);
+      }
+
+      tenantSel.innerHTML = tenants.map(t => {
+        const u = t.unitNumber || t.unitCode || '';
+        const unitPart = u ? ` (${u})` : '';
+        return `<option value="${t.id}">${t.tenantCode} - ${t.name}${unitPart}</option>`;
+      }).join('');
+
+      if (tenants.length > 0) {
+        tenantSel.value = tenants[0].id;
+      }
+
+      onLedgerTenantChange();
+    }
+
+    function onLedgerTenantChange() {
+      const tenantSel = document.getElementById('ledger-tenant-filter');
+      if (!tenantSel) return;
+
+      const tenantId = tenantSel.value;
+      const tenant = (AppState.tenants || []).find(t => t.id === tenantId || t.tenantCode === tenantId);
+      const lease = (AppState.leases || []).find(l => l.tenantId === (tenant ? tenant.id : '')) || {};
+
+      const dateFromInput = document.getElementById('ledger-date-from');
+      const dateToInput = document.getElementById('ledger-date-to');
+
+      if (dateFromInput && !dateFromInput.value) {
+        const start = lease.startDate || (tenant ? tenant.registrationDate : '') || '2026-05-01';
+        dateFromInput.value = start.split('T')[0].split(' ')[0];
+      }
+
+      if (dateToInput && !dateToInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateToInput.value = today;
+      }
+
+      generateTenantStatement();
+    }
+
+    function generateTenantStatement() {
+      const tenantSel = document.getElementById('ledger-tenant-filter');
+      const tbody = document.getElementById('statement-table-body');
+      if (!tenantSel || !tbody) return;
+
+      const tenantId = tenantSel.value;
+      const tenant = (AppState.tenants || []).find(t => t.id === tenantId || t.tenantCode === tenantId);
+
+      if (!tenant) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 24px; color: #6B7280;">Please select an active tenant to view statement.</td></tr>';
+        return;
+      }
+
+      const property = (AppState.properties || []).find(p => p.id === tenant.propertyId) || (tenant.propertyName ? { name: tenant.propertyName } : { name: '—' });
+      const lease = (AppState.leases || []).find(l => l.tenantId === tenant.id) || {};
+
+      const fromDate = document.getElementById('ledger-date-from')?.value || '';
+      const toDate = document.getElementById('ledger-date-to')?.value || '';
+
+      // Update Header Metadata
+      const timeEl = document.getElementById('statement-gen-timestamp');
+      if (timeEl) timeEl.textContent = getStatementCurrentTimestamp();
+
+      const codeEl = document.getElementById('statement-tenant-code');
+      if (codeEl) codeEl.textContent = tenant.tenantCode || '—';
+
+      const nameEl = document.getElementById('statement-tenant-name');
+      if (nameEl) nameEl.textContent = tenant.name || '—';
+
+      const propEl = document.getElementById('statement-property-name');
+      if (propEl) propEl.textContent = property.name || tenant.propertyName || '—';
+
+      const unitEl = document.getElementById('statement-unit-code');
+      if (unitEl) unitEl.textContent = tenant.unitNumber || tenant.unitCode || lease.unitCode || '—';
+
+      const fromEl = document.getElementById('statement-date-from');
+      if (fromEl) fromEl.textContent = fromDate ? formatDisplayDate(fromDate) : (lease.startDate ? formatDisplayDate(lease.startDate) : '01/05/2026');
+
+      const toEl = document.getElementById('statement-date-to');
+      if (toEl) toEl.textContent = toDate ? formatDisplayDate(toDate) : formatDisplayDate(new Date().toISOString());
+
+      const phoneEl = document.getElementById('statement-phone-no');
+      if (phoneEl) phoneEl.textContent = tenant.phone || tenant.phoneNumber || '+254 700 000000';
+
+      // Gather Invoices & Receipts
+      const tenantInvs = (AppState.invoices || []).filter(i => i.tenantId === tenant.id || i.tenantName === tenant.name);
+      const tenantReceipts = (AppState.tenantReceipts || []).filter(r => r.tenant_id === tenant.id || r.tenant_name === tenant.name);
+      const allLines = AppState.tenantInvoiceLines || [];
+      const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      let transactions = [];
+
+      // 1. Process Invoices (Debits)
+      tenantInvs.forEach(inv => {
+        const invLines = allLines.filter(l => l.invoice_id === inv.id);
+        const mName = (monthNames[inv.periodMonth] || 'Month') + ' - ' + (inv.periodYear || '2026');
+        const invDate = inv.issueDate ? inv.issueDate.substring(0, 10) : (inv.dueDate ? inv.dueDate.substring(0, 7) + '-01' : `${inv.periodYear}-${String(inv.periodMonth).padStart(2, '0')}-01`);
+
+        if (fromDate && invDate < fromDate) return;
+        if (toDate && invDate > toDate) return;
+
+        if (invLines.length > 0) {
+          invLines.forEach((line, lIdx) => {
+            let pName = (line.description || 'Rent').replace(/\s*-\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s*\d{4}/i, '').trim();
+            if (!pName.endsWith('~')) pName += '~';
+            transactions.push({
+              date: invDate,
+              payable: pName,
+              refNo: inv.invoiceNumber,
+              mode: '',
+              month: mName,
+              debit: Number(line.amount) || 0,
+              credit: 0,
+              timestamp: invDate + ' 08:00:' + String(lIdx).padStart(2, '0'),
+              order: 1
+            });
+          });
+        } else {
+          if (inv.rent > 0) {
+            transactions.push({ date: invDate, payable: 'Rent~', refNo: inv.invoiceNumber, mode: '', month: mName, debit: Number(inv.rent), credit: 0, timestamp: invDate + ' 08:00:01', order: 1 });
+          }
+          if (inv.serviceCharge > 0) {
+            transactions.push({ date: invDate, payable: 'Service Charge~', refNo: inv.invoiceNumber, mode: '', month: mName, debit: Number(inv.serviceCharge), credit: 0, timestamp: invDate + ' 08:00:02', order: 1 });
+          }
+          if (inv.utilities > 0) {
+            transactions.push({ date: invDate, payable: 'Water Bill~', refNo: inv.invoiceNumber, mode: '', month: mName, debit: Number(inv.utilities), credit: 0, timestamp: invDate + ' 08:00:03', order: 1 });
+          }
+          if (!inv.rent && !inv.serviceCharge && !inv.utilities) {
+            transactions.push({ date: invDate, payable: 'Rent~', refNo: inv.invoiceNumber, mode: '', month: mName, debit: Number(inv.totalAmount) || 0, credit: 0, timestamp: invDate + ' 08:00:00', order: 1 });
+          }
+        }
+      });
+
+      // 2. Process Receipts (Credits)
+      tenantReceipts.forEach(rc => {
+        const rawDate = rc.payment_date || rc.paymentDate || '2026-05-03';
+        const rDate = rawDate.split('T')[0].split(' ')[0];
+
+        if (fromDate && rDate < fromDate) return;
+        if (toDate && rDate > toDate) return;
+
+        let mode = 'Paybill';
+        const pMethod = (rc.payment_method || rc.paymentMethod || '').toLowerCase();
+        if (pMethod.includes('bank') || pMethod.includes('slip')) mode = 'Bank Slip';
+        else if (pMethod.includes('cash')) mode = 'Cash';
+        else if (pMethod.includes('cheque') || pMethod.includes('check')) mode = 'Cheque';
+        else if (pMethod.includes('mpesa') || pMethod.includes('paybill') || pMethod.includes('c2b')) mode = 'Paybill';
+
+        const dObj = new Date(rDate);
+        const mName = (monthNames[dObj.getMonth() + 1] || 'Month') + ' - ' + dObj.getFullYear();
+
+        if (Array.isArray(rc.allocations) && rc.allocations.length > 0) {
+          rc.allocations.forEach((al, alIdx) => {
+            let pName = (al.payable_name || al.payableName || al.description || 'Rent').trim();
+            if (!pName.endsWith('~')) pName += '~';
+            transactions.push({
+              date: rDate,
+              payable: pName,
+              refNo: rc.receipt_number || rc.receiptNumber,
+              mode: mode,
+              month: mName,
+              debit: 0,
+              credit: Number(al.amount || al.amount_paid) || 0,
+              timestamp: rDate + ' 12:00:' + String(alIdx).padStart(2, '0'),
+              order: 2
+            });
+          });
+        } else {
+          const matchedInv = tenantInvs.find(i => {
+            const invD = i.dueDate ? i.dueDate.substring(0, 7) : `${i.periodYear}-${String(i.periodMonth).padStart(2, '0')}`;
+            return invD === rDate.substring(0, 7);
+          });
+
+          if (matchedInv) {
+            const invLines = allLines.filter(l => l.invoice_id === matchedInv.id);
+            const totalAmt = Number(rc.amount_paid || rc.amountPaid || 0);
+            if (invLines.length > 0 && Math.abs(matchedInv.totalAmount - totalAmt) < 1) {
+              invLines.forEach((line, lIdx) => {
+                let pName = (line.description || 'Rent').replace(/\s*-\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s*\d{4}/i, '').trim();
+                if (!pName.endsWith('~')) pName += '~';
+                transactions.push({
+                  date: rDate,
+                  payable: pName,
+                  refNo: rc.receipt_number || rc.receiptNumber,
+                  mode: mode,
+                  month: mName,
+                  debit: 0,
+                  credit: Number(line.amount) || 0,
+                  timestamp: rDate + ' 12:00:' + String(lIdx).padStart(2, '0'),
+                  order: 2
+                });
+              });
+            } else if (invLines.length > 0) {
+              let remaining = totalAmt;
+              invLines.forEach((line, lIdx) => {
+                if (remaining <= 0) return;
+                const lineAmt = Number(line.amount) || 0;
+                const allocAmt = Math.min(remaining, lineAmt);
+                let pName = (line.description || 'Rent').replace(/\s*-\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s*\d{4}/i, '').trim();
+                if (!pName.endsWith('~')) pName += '~';
+                transactions.push({
+                  date: rDate,
+                  payable: pName,
+                  refNo: rc.receipt_number || rc.receiptNumber,
+                  mode: mode,
+                  month: mName,
+                  debit: 0,
+                  credit: allocAmt,
+                  timestamp: rDate + ' 12:00:' + String(lIdx).padStart(2, '0'),
+                  order: 2
+                });
+                remaining -= allocAmt;
+              });
+              if (remaining > 0) {
+                transactions.push({
+                  date: rDate,
+                  payable: 'Unallocated Prepayment~',
+                  refNo: rc.receipt_number || rc.receiptNumber,
+                  mode: mode,
+                  month: mName,
+                  debit: 0,
+                  credit: remaining,
+                  timestamp: rDate + ' 12:00:99',
+                  order: 2
+                });
+              }
+            } else {
+              transactions.push({
+                date: rDate,
+                payable: 'Rent~',
+                refNo: rc.receipt_number || rc.receiptNumber,
+                mode: mode,
+                month: mName,
+                debit: 0,
+                credit: totalAmt,
+                timestamp: rDate + ' 12:00:00',
+                order: 2
+              });
+            }
+          } else {
+            transactions.push({
+              date: rDate,
+              payable: 'Rent~',
+              refNo: rc.receipt_number || rc.receiptNumber,
+              mode: mode,
+              month: mName,
+              debit: 0,
+              credit: Number(rc.amount_paid || rc.amountPaid || 0),
+              timestamp: rDate + ' 12:00:00',
+              order: 2
+            });
+          }
+        }
+      });
+
+      // 3. Chronological Sort
+      transactions.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        if (a.order !== b.order) return a.order - b.order;
+        return a.timestamp.localeCompare(b.timestamp);
+      });
+
+      // 4. Compute Running Balances & Totals
+      let running = 0;
+      let totalDebits = 0;
+      let totalCredits = 0;
+
+      transactions.forEach((tx, idx) => {
+        totalDebits += tx.debit;
+        totalCredits += tx.credit;
+        running += (tx.debit - tx.credit);
+        tx.idx = idx + 1;
+        tx.runningBalance = running;
+      });
+
+      // 5. Render Table Rows
+      if (transactions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 24px; color: #6B7280;">No transaction records found for the selected tenant within this date range.</td></tr>';
+      } else {
+        tbody.innerHTML = transactions.map(tx => `
+          <tr>
+            <td style="padding: 6px 6px; text-align: center; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #F3F4F6;">${tx.idx}</td>
+            <td style="padding: 6px 8px; text-align: left; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #F3F4F6; white-space: nowrap;">${formatDisplayDate(tx.date)}</td>
+            <td style="padding: 6px 10px; text-align: left; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #F3F4F6; font-weight: 600;">${tx.payable}</td>
+            <td style="padding: 6px 10px; text-align: left; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #F3F4F6; font-family: monospace; font-size: 11px;">${tx.refNo}</td>
+            <td style="padding: 6px 8px; text-align: left; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #F3F4F6;">${tx.mode || ''}</td>
+            <td style="padding: 6px 8px; text-align: left; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #F3F4F6; white-space: nowrap;">${tx.month}</td>
+            <td style="padding: 6px 10px; text-align: right; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #F3F4F6; font-variant-numeric: tabular-nums;">${tx.debit > 0 ? formatStatementNumber(tx.debit) : '0.00'}</td>
+            <td style="padding: 6px 10px; text-align: right; border-right: 1px solid #E5E7EB; border-bottom: 1px solid #F3F4F6; font-variant-numeric: tabular-nums;">${tx.credit > 0 ? formatStatementNumber(tx.credit) : '0.00'}</td>
+            <td style="padding: 6px 10px; text-align: right; border-bottom: 1px solid #F3F4F6; font-weight: 700; font-variant-numeric: tabular-nums; color: ${tx.runningBalance > 0 ? '#B91C1C' : tx.runningBalance < 0 ? '#047857' : '#111827'};">${formatStatementNumber(tx.runningBalance, true)}</td>
+          </tr>
+        `).join('');
+      }
+
+      // 6. Update Totals in Footer
+      const debEl = document.getElementById('statement-total-debit');
+      if (debEl) debEl.textContent = formatStatementNumber(totalDebits);
+
+      const credEl = document.getElementById('statement-total-credit');
+      if (credEl) credEl.textContent = formatStatementNumber(totalCredits);
+
+      const balEl = document.getElementById('statement-closing-balance');
+      if (balEl) {
+        balEl.textContent = formatStatementNumber(running, true);
+        balEl.style.color = running > 0 ? '#B91C1C' : running < 0 ? '#047857' : '#111827';
+      }
+
+      const sumBalEl = document.getElementById('statement-summary-balance');
+      if (sumBalEl) {
+        sumBalEl.textContent = `KES ${formatStatementNumber(running, true)}`;
+        sumBalEl.style.color = running > 0 ? '#B91C1C' : running < 0 ? '#047857' : '#111827';
+      }
+
+      // Sync legacy counters if present
+      const debOld = document.getElementById('ledger-stat-debits');
+      if (debOld) debOld.textContent = `KES ${totalDebits.toLocaleString()}`;
+      const credOld = document.getElementById('ledger-stat-credits');
+      if (credOld) credOld.textContent = `KES ${totalCredits.toLocaleString()}`;
+      const balOld = document.getElementById('ledger-stat-balance');
+      if (balOld) balOld.textContent = `KES ${Math.max(0, running).toLocaleString()}`;
+    }
+
+    function printTenantStatement() {
+      generateTenantStatement();
+      window.print();
+    }
+
     // 4. TENANT LEDGER & RECEIPTING ENGINE
     function renderLedgerTable() {
+      if (document.getElementById('statement-table-body')) {
+        generateTenantStatement();
+      }
       const tbody = document.getElementById('table-ledger-body');
       if (!tbody) return;
 
@@ -7054,6 +7454,16 @@ const AppState = {
     window.closeOfficialReceiptModal = closeOfficialReceiptModal;
     window.printOfficialReceipt = printOfficialReceipt;
     window.numberToWords = numberToWords;
+
+    // Tenant Statement of Account Engine Handlers (image_f7715c.png)
+    window.initTenantStatementEngine = initTenantStatementEngine;
+    window.onLedgerPropertyChange = onLedgerPropertyChange;
+    window.onLedgerTenantChange = onLedgerTenantChange;
+    window.generateTenantStatement = generateTenantStatement;
+    window.printTenantStatement = printTenantStatement;
+    window.getStatementCurrentTimestamp = getStatementCurrentTimestamp;
+    window.formatStatementNumber = formatStatementNumber;
+    window.formatDisplayDate = formatDisplayDate;
 
     // Initialize Theme and Load Active Module
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'developer';

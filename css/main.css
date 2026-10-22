@@ -1473,13 +1473,15 @@
     [data-theme="developer"] .badge-alloc-tenant { background: #FEF2F2 !important; color: #B91C1C !important; border-color: #FECACA !important; }
     [data-theme="developer"] .badge-alloc-pool { background: #ECFDF5 !important; color: #047857 !important; border-color: #A7F3D0 !important; }
 
-/* Print styles for Official Receipt and Financial Vouchers */
+/* Print styles for Official Receipt, Financial Vouchers and Tenant Statements */
 @media print {
   body * {
     visibility: hidden;
   }
   #modal-official-receipt,
-  #modal-official-receipt * {
+  #modal-official-receipt *,
+  #printable-tenant-statement,
+  #printable-tenant-statement * {
     visibility: visible;
   }
   #modal-official-receipt {
@@ -1502,6 +1504,29 @@
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
+  }
+  #printable-tenant-statement {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .statement-filter-bar,
+  .tenant-subtab-strip,
+  .module-header-strip,
+  button {
+    display: none !important;
+  }
+  @page {
+    size: portrait;
+    margin: 10mm 12mm;
   }
 }
 
@@ -1545,4 +1570,74 @@ input[type="number"].receipt-alloc-input,
   .receipting-grid-container {
     grid-template-columns: 1fr;
   }
+}
+
+
+/* --------------------------------------------------------------------------
+   TENANT STATEMENT OF ACCOUNT & LEDGER ENGINE (image_f7715c.png)
+   -------------------------------------------------------------------------- */
+.statement-filter-bar {
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.tenant-statement-sheet {
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  border-radius: 4px;
+  padding: 32px 36px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  max-width: 1200px;
+  margin: 0 auto 30px auto;
+  color: #111827;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.statement-ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.statement-ledger-table thead tr {
+  border-top: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+  background: #F9FAFB;
+}
+
+.statement-ledger-table th {
+  padding: 7px 8px;
+  text-align: left;
+  font-weight: 800;
+  color: #111827;
+  border-right: 1px solid #E5E7EB;
+}
+
+.statement-ledger-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #F3F4F6;
+  border-right: 1px solid #E5E7EB;
+  color: #111827;
+}
+
+.statement-ledger-table th:last-child,
+.statement-ledger-table td:last-child {
+  border-right: none;
+}
+
+.statement-ledger-table tfoot tr {
+  border-top: 1px solid #000000;
+  border-bottom: 3px double #000000;
+  font-weight: 800;
+  background: #F9FAFB;
 }
