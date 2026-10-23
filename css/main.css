@@ -1252,43 +1252,110 @@ input[type="number"].receipt-alloc-input,
   align-items: start;
 }
 
-/* Ergonomic Spatial Remapping for Receipting Module */
-.receipting-top-row {
-  display: flex;
-  gap: 18px;
+/* Ergonomic Spatial Remapping & Density for Receipting Module */
+.receipting-intake-container,
+#form-tenant-receipt {
+  max-width: 1240px;
   width: 100%;
   margin-left: 0;
   margin-right: auto;
-  margin-bottom: 18px;
+  box-sizing: border-box;
+}
+
+.receipting-top-row {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  max-width: 1240px;
+  margin-left: 0;
+  margin-right: auto;
+  margin-bottom: 14px;
   align-items: stretch;
 }
 
 .receipting-top-row .receipting-profile-box {
-  flex: 1.35;
+  flex: 1.25;
   width: 58%;
+  max-width: 660px;
   min-width: 320px;
+  padding: 14px 16px;
+  box-sizing: border-box;
 }
 
 .receipting-top-row .receipting-summary-box {
   flex: 1;
-  width: 40%;
+  width: 42%;
+  max-width: 480px;
   min-width: 280px;
+  padding: 14px 16px;
+  box-sizing: border-box;
 }
 
+.receipting-bounded-card {
+  max-width: 1240px;
+  width: 100%;
+  margin-left: 0;
+  margin-right: auto;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+}
+
+/* Compact padding for receipting form fields & inputs */
+.receipting-compact-form .form-input,
+.receipting-compact-form select.form-input {
+  padding: 6px 10px;
+  font-size: 0.84rem;
+  border-radius: 8px;
+}
+
+.receipting-compact-form .form-label {
+  font-size: 0.75rem;
+  margin-bottom: 3px;
+  font-weight: 600;
+}
+
+.receipting-compact-form .form-group {
+  margin-bottom: 0;
+}
+
+/* Compact Waterfall Billing Breakdown Table */
+.receipting-breakdown-table th {
+  padding: 8px 10px !important;
+  font-size: 0.70rem !important;
+  letter-spacing: 0.08em;
+}
+
+.receipting-breakdown-table td {
+  padding: 6px 10px !important;
+  font-size: 0.82rem !important;
+}
+
+.receipting-breakdown-table .receipt-alloc-input {
+  max-width: 180px;
+  padding: 4px 8px !important;
+  font-size: 0.86rem !important;
+  margin-left: auto;
+  text-align: right;
+  border-radius: 6px;
+}
+
+/* Compact Transaction Details Grid */
 .receipting-tx-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  gap: 10px 12px;
   align-items: end;
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1100px) {
   .receipting-top-row {
     flex-direction: column;
   }
   .receipting-top-row .receipting-profile-box,
   .receipting-top-row .receipting-summary-box {
     width: 100%;
+    max-width: 100%;
     flex: auto;
   }
   .receipting-tx-grid {

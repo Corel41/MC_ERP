@@ -236,7 +236,7 @@
   <div class="tenant-panel" id="panel-tab-receipting" style="display: none;">
 
     <!-- TOP HEADER STRIP & EDIT MODE NOTIFICATION -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; margin-left: 0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px; margin-left: 0; max-width: 1240px;">
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 1.25rem; font-weight: 800; letter-spacing: 0.5px;">Receipts</span>
         <span class="stat-pill" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 600;">Tenant Payment Intake &amp; Strict Waterfall Allocation</span>
@@ -249,7 +249,7 @@
     </div>
 
     <!-- MAIN FORM CONTAINER -->
-    <form id="form-tenant-receipt" onsubmit="event.preventDefault(); executePaymentReceipt('save');" style="margin-left: 0; width: 100%;">
+    <form id="form-tenant-receipt" class="receipting-intake-container receipting-compact-form" onsubmit="event.preventDefault(); executePaymentReceipt('save');">
 
       <!-- =========================================================================
            TOP ROW: TENANT & UNIT PROFILE (LEFT ~58%) + PAYMENT RECEIVED & SUMMARY (RIGHT ~40%)
@@ -257,7 +257,7 @@
       <div class="receipting-top-row">
         
         <!-- Top Row Left: Tenant & Unit Profile -->
-        <div class="glass-card receipting-profile-box" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div class="glass-card receipting-profile-box" style="display: flex; flex-direction: column; gap: 10px;">
           <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
             <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
               — Tenant &amp; Unit Profile —
@@ -315,7 +315,7 @@
         </div>
 
         <!-- Top Row Right: Payment Received & Status Summary -->
-        <div class="glass-card receipting-summary-box" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div class="glass-card receipting-summary-box" style="display: flex; flex-direction: column; gap: 10px;">
           <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px;">
             <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
               — Payment Received &amp; Status Summary —
@@ -372,15 +372,15 @@
       <!-- =========================================================================
            MIDDLE ZONE: BILLING BREAKDOWN (MOVED UP FROM LOWER ZONE / DIRECTLY BELOW SUMMARY)
            ========================================================================= -->
-      <div class="glass-card" style="padding: 20px; margin-bottom: 18px; width: 100%; margin-left: 0;">
-        <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px; margin-bottom: 14px;">
-          <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+      <div class="glass-card receipting-bounded-card">
+        <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 6px; margin-bottom: 10px;">
+          <h4 style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
             — Billing Breakdown —
           </h4>
         </div>
 
         <div class="builder-table-wrap">
-          <table class="builder-table" style="width: 100%; table-layout: fixed;">
+          <table class="builder-table receipting-breakdown-table" style="width: 100%; table-layout: fixed;">
             <colgroup>
               <col style="width: 34%;">
               <col style="width: 22%;">
@@ -416,9 +416,9 @@
       <!-- =========================================================================
            LOWER ZONE: PAYMENT & TRANSACTION DETAILS (MOVED DOWN / DIRECTLY ABOVE ACTIONS)
            ========================================================================= -->
-      <div class="glass-card" style="padding: 20px; margin-bottom: 24px; width: 100%; margin-left: 0;">
-        <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px; margin-bottom: 16px;">
-          <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+      <div class="glass-card receipting-bounded-card" style="margin-bottom: 20px;">
+        <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 6px; margin-bottom: 12px;">
+          <h4 style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
             — Payment &amp; Transaction Details —
           </h4>
         </div>
@@ -524,7 +524,7 @@
     <!-- =========================================================================
          MASTER DIRECTORY: LIST OF RECORDED TENANT RECEIPTS (.glass-card)
          ========================================================================= -->
-    <div class="glass-card clean-module-container" style="padding: 24px; width: 100%; margin-left: 0;">
+    <div class="glass-card clean-module-container" style="padding: 20px; max-width: 1240px; width: 100%; margin-left: 0; margin-right: auto; box-sizing: border-box;">
       
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--divider-color); padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
         <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">

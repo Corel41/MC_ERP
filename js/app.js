@@ -3243,13 +3243,13 @@ const AppState = {
       payables.forEach((p, idx) => {
         rowsHtml += `
           <tr class="pm-table-row" data-item="${p.item}" data-code="${p.code}" data-monthly="${p.monthly}" data-due="${p.totalDue}" data-priority="${p.priority}">
-            <td style="padding: 7px 12px; font-weight: 700; color: var(--text-primary); border-right: 1px solid var(--table-border); text-align: left; vertical-align: middle;">
+            <td style="padding: 6px 10px; font-weight: 700; color: var(--text-primary); border-right: 1px solid var(--table-border); text-align: left; vertical-align: middle;">
               ${p.item}
             </td>
-            <td style="padding: 7px 12px; text-align: right; font-weight: 600; color: var(--text-muted); border-right: 1px solid var(--table-border); vertical-align: middle;">
+            <td style="padding: 6px 10px; text-align: right; font-weight: 600; color: var(--text-muted); border-right: 1px solid var(--table-border); vertical-align: middle;">
               KES ${p.monthly.toLocaleString('en-US', {minimumFractionDigits: 2})}
             </td>
-            <td style="padding: 7px 12px; text-align: right; font-weight: 700; color: var(--accent-primary); border-right: 1px solid var(--table-border); vertical-align: middle;">
+            <td style="padding: 6px 10px; text-align: right; font-weight: 700; color: var(--accent-primary); border-right: 1px solid var(--table-border); vertical-align: middle;">
               KES ${p.totalDue.toLocaleString('en-US', {minimumFractionDigits: 2})}
             </td>
             <td style="padding: 4px 8px; text-align: right; vertical-align: middle;">
