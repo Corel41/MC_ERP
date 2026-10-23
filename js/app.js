@@ -292,9 +292,48 @@ const AppState = {
 
     const moduleCache = {};
 
+    function syncTopNavTabs(container) {
+      const topNav = document.getElementById('top-nav');
+      if (!topNav) return;
+
+      const headerLeft = topNav.querySelector('.header-left');
+      if (headerLeft) {
+        headerLeft.innerHTML = '';
+      }
+
+      const themeSelector = topNav.querySelector('#quick-theme-dropdown');
+      if (themeSelector) {
+        themeSelector.remove();
+      }
+
+      if (!container) return;
+
+      let tabStrip = container.querySelector(
+        '.reg-nav-tabs, .tenant-nav-tabs, .landlord-nav-tabs, .repair-nav-tabs, .tab-header, .tenant-subtab-strip'
+      );
+
+      if (!tabStrip) {
+        const tenantBtn = container.querySelector('.tenant-subtab-btn');
+        if (tenantBtn && tenantBtn.parentElement) {
+          tabStrip = tenantBtn.parentElement;
+          tabStrip.classList.add('tenant-nav-tabs', 'tab-header');
+        }
+      }
+
+      if (tabStrip && headerLeft) {
+        tabStrip.style.marginBottom = '0';
+        tabStrip.style.padding = '0';
+        tabStrip.style.background = 'transparent';
+        tabStrip.style.border = 'none';
+        tabStrip.style.boxShadow = 'none';
+        headerLeft.appendChild(tabStrip);
+      }
+    }
+
     async function loadModule(viewName, title) {
       AppState.activeView = viewName;
-      if (title && currentPageTitle) currentPageTitle.textContent = title;
+
+      syncTopNavTabs(null);
 
       navItems.forEach(item => {
         if (item.getAttribute('data-view') === viewName) {
@@ -324,6 +363,9 @@ const AppState = {
         // Ensure inner view-content container has active class
         const loadedView = moduleContainer.querySelector('.view-content');
         if (loadedView) loadedView.classList.add('active');
+
+        // Move active module's child tab strip directly into header#top-nav .header-left
+        syncTopNavTabs(moduleContainer);
 
         // Run module-specific initializers and renderers
         initializeLoadedModule(viewName);
@@ -2191,12 +2233,11 @@ const AppState = {
       const activeCount = rows.filter(r => r.status).length;
 
       tbody.innerHTML = rows.map((r, idx) => {
-        const bg = idx % 2 === 0 ? '#FFFFFF' : '#F9FAFB';
         return `
-          <tr style="background: ${bg}; border-bottom: 1px solid #E5E7EB;">
-            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB; font-weight: 700; color: #6B7280;">${idx + 1}</td>
-            <td style="padding: 6px 8px; border-right: 1px solid #E5E7EB; font-weight: 800; font-family: monospace; color: #1F2937;">${r.code}</td>
-            <td style="padding: 6px 8px; border-right: 1px solid #E5E7EB; font-weight: 600; color: #111827;">${r.description}</td>
+          <tr style="border-bottom: 1px solid var(--table-border);">
+            <td style="text-align: center; padding: 6px 8px; border-right: 1px solid var(--table-border); font-weight: 700; color: var(--text-muted);">${idx + 1}</td>
+            <td style="padding: 6px 8px; border-right: 1px solid var(--table-border); font-weight: 800; font-family: monospace; color: var(--text-primary);">${r.code}</td>
+            <td style="padding: 6px 8px; border-right: 1px solid var(--table-border); font-weight: 600; color: var(--text-primary);">${r.description}</td>
             <td style="text-align: center; padding: 6px 8px; border-right: 1px solid #E5E7EB;">
               <input type="checkbox" ${r.isCompulsory ? 'checked' : ''} onchange="updatePayableRow('${r.code}', 'isCompulsory', this.checked)">
             </td>
@@ -3202,13 +3243,13 @@ const AppState = {
       payables.forEach((p, idx) => {
         rowsHtml += `
           <tr class="pm-table-row" data-item="${p.item}" data-code="${p.code}" data-monthly="${p.monthly}" data-due="${p.totalDue}" data-priority="${p.priority}">
-            <td style="padding: 7px 12px; font-weight: 700; color: #1E293B; border-right: 1px solid #E2E8F0; text-align: left; vertical-align: middle;">
+            <td style="padding: 7px 12px; font-weight: 700; color: var(--text-primary); border-right: 1px solid var(--table-border); text-align: left; vertical-align: middle;">
               ${p.item}
             </td>
-            <td style="padding: 7px 12px; text-align: right; font-weight: 600; color: #475569; border-right: 1px solid #E2E8F0; vertical-align: middle;">
+            <td style="padding: 7px 12px; text-align: right; font-weight: 600; color: var(--text-muted); border-right: 1px solid var(--table-border); vertical-align: middle;">
               KES ${p.monthly.toLocaleString('en-US', {minimumFractionDigits: 2})}
             </td>
-            <td style="padding: 7px 12px; text-align: right; font-weight: 700; color: #1E3A8A; border-right: 1px solid #E2E8F0; vertical-align: middle;">
+            <td style="padding: 7px 12px; text-align: right; font-weight: 700; color: var(--accent-primary); border-right: 1px solid var(--table-border); vertical-align: middle;">
               KES ${p.totalDue.toLocaleString('en-US', {minimumFractionDigits: 2})}
             </td>
             <td style="padding: 4px 8px; text-align: right; vertical-align: middle;">
@@ -3221,7 +3262,7 @@ const AppState = {
                 value="0.00" 
                 placeholder="0.00" 
                 oninput="onMatrixAmountPaidInput(this)" 
-                style="width: 100%; text-align: right; font-weight: 700; background: #FFFFFF !important; box-sizing: border-box; -webkit-appearance: none; margin: 0;">
+                style="width: 100%; text-align: right; font-weight: 700; box-sizing: border-box; -webkit-appearance: none; margin: 0;">
             </td>
           </tr>
         `;
@@ -3440,13 +3481,13 @@ const AppState = {
 
         if (badge) {
           if (paymentReceived <= 0) {
-            badge.innerHTML = `<span style="color: #64748B; font-weight: 700;">Enter payment amount to allocate</span>`;
-            badge.style.background = '#F1F5F9';
-            badge.style.borderColor = '#CBD5E1';
+            badge.innerHTML = `<span style="color: var(--text-muted); font-weight: 700;">Enter payment amount to allocate</span>`;
+            badge.style.background = 'var(--glass-pill)';
+            badge.style.borderColor = 'var(--glass-border)';
           } else {
-            badge.innerHTML = `<span style="color: #B91C1C; font-weight: 800;">⚠️ Unbalanced: Matrix KES ${matrixSum.toLocaleString('en-US', {minimumFractionDigits: 2})} ≠ Payment KES ${paymentReceived.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>`;
-            badge.style.background = '#FEF2F2';
-            badge.style.borderColor = '#EF4444';
+            badge.innerHTML = `<span style="color: #EF4444; font-weight: 800;">⚠️ Unbalanced: Matrix KES ${matrixSum.toLocaleString('en-US', {minimumFractionDigits: 2})} ≠ Payment KES ${paymentReceived.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>`;
+            badge.style.background = 'rgba(239, 68, 68, 0.15)';
+            badge.style.borderColor = 'rgba(239, 68, 68, 0.35)';
           }
         }
 
@@ -4051,18 +4092,18 @@ const AppState = {
                 ${item.payment_method}
               </span>
             </td>
-            <td style="padding: 6px 12px; border-right: 1px solid #E5E7EB; font-size: 11.5px; color: #4B5563;">${dest}</td>
-            <td style="padding: 6px 12px; font-family: monospace; font-weight: 600; border-right: 1px solid #E5E7EB;">${item.reference_code || '-'}</td>
-            <td style="padding: 6px 12px; text-align: right; font-weight: 800; color: #111827; border-right: 1px solid #E5E7EB;">
+            <td style="padding: 6px 12px; border-right: 1px solid var(--table-border); font-size: 11.5px; color: var(--text-muted);">${dest}</td>
+            <td style="padding: 6px 12px; font-family: monospace; font-weight: 600; border-right: 1px solid var(--table-border);">${item.reference_code || '-'}</td>
+            <td style="padding: 6px 12px; text-align: right; font-weight: 800; color: var(--text-primary); border-right: 1px solid var(--table-border);">
               ${Number(item.amount_paid || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
             </td>
-            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB; font-size: 11.5px;">${item.issued_by || 'DEAN'}</td>
+            <td style="padding: 6px 10px; text-align: center; border-right: 1px solid var(--table-border); font-size: 11.5px;">${item.issued_by || 'DEAN'}</td>
             <td style="padding: 4px 8px; text-align: center; white-space: nowrap;">
               <div style="display: inline-flex; gap: 4px; justify-content: center;">
-                <button type="button" class="btn-action-pill" onclick="editTenantReceipt('${item.id}')" style="padding: 3px 8px; font-size: 11px; font-weight: 700; color: #1E3A8A; background: #EEF2F6; border: 1px solid #CBD5E1; border-radius: 2px; cursor: pointer;" title="Edit Receipt Allocations">
+                <button type="button" class="btn-action-pill" onclick="editTenantReceipt('${item.id}')" title="Edit Receipt Allocations">
                   ✏️ Edit
                 </button>
-                <button type="button" class="btn-action-pill" onclick="openOfficialReceiptModal('${item.id}')" style="padding: 3px 8px; font-size: 11px; font-weight: 700; color: #008080; background: #E6FFFA; border: 1px solid #81E6D9; border-radius: 2px; cursor: pointer;" title="Print Official Receipt">
+                <button type="button" class="btn-action-pill" onclick="openOfficialReceiptModal('${item.id}')" title="Print Official Receipt">
                   🖨️ View / Print
                 </button>
               </div>
@@ -5586,7 +5627,7 @@ const AppState = {
 
       // Group Header Row
       rowsHtml.push(`
-        <tr style="background: #FFFFFF; font-weight: 800;">
+        <tr style="font-weight: 800;">
           <td colspan="7" style="padding: 5px 6px; font-weight: 800; border-top: 1px solid #000; border-bottom: 1px solid #000; border-right: none;">
             ${payableHeader}
           </td>
@@ -7263,19 +7304,19 @@ const AppState = {
 
       tbody.innerHTML = AppState.bankAccounts.map(item => `
         <tr class="pm-table-row">
-          <td style="text-align: center; border-right: 1px solid #CBD5E1;">
-            <button type="button" style="color: #DC2626; font-weight: 700; background: none; border: none; cursor: pointer; font-size: 11.5px; padding: 2px 4px;" onclick="deleteBankAccount('${item.id}')" title="Delete Account">-X-</button>
+          <td style="text-align: center; border-right: 1px solid var(--table-border);">
+            <button type="button" class="btn-action-pill" style="color: #EF4444; padding: 2px 6px;" onclick="deleteBankAccount('${item.id}')" title="Delete Account">✕</button>
           </td>
-          <td style="text-align: center; border-right: 1px solid #CBD5E1;">
-            <button type="button" style="color: #D97706; font-weight: 700; background: none; border: none; cursor: pointer; font-size: 11.5px; padding: 2px 4px;" onclick="editBankAccount('${item.id}')" title="Edit Account">-Edit-</button>
+          <td style="text-align: center; border-right: 1px solid var(--table-border);">
+            <button type="button" class="btn-action-pill" style="padding: 2px 6px;" onclick="editBankAccount('${item.id}')" title="Edit Account">Edit</button>
           </td>
-          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-weight: 600; color: #111827;">${item.bank_name || ''}</td>
-          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; color: #374151;">${item.branch_name || ''}</td>
-          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-weight: 600; color: #111827;">${item.account_name || ''}</td>
-          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-family: monospace; font-weight: 600; color: #1F2937;">${item.account_no || ''}</td>
-          <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; color: #4B5563;">${item.swift_code || ''}</td>
+          <td style="padding: 4px 12px; border-right: 1px solid var(--table-border); font-weight: 600; color: var(--text-primary);">${item.bank_name || ''}</td>
+          <td style="padding: 4px 12px; border-right: 1px solid var(--table-border); color: var(--text-muted);">${item.branch_name || ''}</td>
+          <td style="padding: 4px 12px; border-right: 1px solid var(--table-border); font-weight: 600; color: var(--text-primary);">${item.account_name || ''}</td>
+          <td style="padding: 4px 12px; border-right: 1px solid var(--table-border); font-family: monospace; font-weight: 600; color: var(--text-primary);">${item.account_no || ''}</td>
+          <td style="padding: 4px 12px; border-right: 1px solid var(--table-border); color: var(--text-muted);">${item.swift_code || ''}</td>
           <td style="text-align: center;">
-            <input type="checkbox" disabled ${item.is_active ? 'checked' : ''} style="accent-color: #008080; cursor: default;">
+            <input type="checkbox" disabled ${item.is_active ? 'checked' : ''} style="cursor: default;">
           </td>
         </tr>
       `).join('');
@@ -7524,18 +7565,18 @@ const AppState = {
 
         return `
           <tr class="pm-table-row">
-            <td style="text-align: center; border-right: 1px solid #CBD5E1;">
-              <button type="button" style="color: #DC2626; font-weight: 700; background: none; border: none; cursor: pointer; font-size: 11.5px; padding: 2px 4px;" onclick="deleteMpesaPaybill('${item.id}')" title="Delete Paybill">-X-</button>
+            <td style="text-align: center; border-right: 1px solid var(--table-border);">
+              <button type="button" class="btn-action-pill" style="color: #EF4444; padding: 2px 6px;" onclick="deleteMpesaPaybill('${item.id}')" title="Delete Paybill">✕</button>
             </td>
-            <td style="text-align: center; border-right: 1px solid #CBD5E1;">
-              <button type="button" style="color: #D97706; font-weight: 700; background: none; border: none; cursor: pointer; font-size: 11.5px; padding: 2px 4px;" onclick="editMpesaPaybill('${item.id}')" title="Edit Paybill">-Edit-</button>
+            <td style="text-align: center; border-right: 1px solid var(--table-border);">
+              <button type="button" class="btn-action-pill" style="padding: 2px 6px;" onclick="editMpesaPaybill('${item.id}')" title="Edit Paybill">Edit</button>
             </td>
-            <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-family: monospace; font-weight: 700; color: #008080;">${item.paybill_number || ''}</td>
-            <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; font-weight: 600; color: #111827;">${item.business_name || ''}</td>
-            <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; color: #374151;">${item.account_prefix || '—'}</td>
-            <td style="padding: 4px 12px; border-right: 1px solid #CBD5E1; color: #4B5563;">${linkedBankText}</td>
+            <td style="padding: 4px 12px; border-right: 1px solid var(--table-border); font-family: monospace; font-weight: 700; color: var(--accent-secondary);">${item.paybill_number || ''}</td>
+            <td style="padding: 4px 12px; border-right: 1px solid var(--table-border); font-weight: 600; color: var(--text-primary);">${item.business_name || ''}</td>
+            <td style="padding: 4px 12px; border-right: 1px solid var(--table-border); color: var(--text-muted);">${item.account_prefix || '—'}</td>
+            <td style="padding: 4px 12px; border-right: 1px solid var(--table-border); color: var(--text-muted);">${linkedBankText}</td>
             <td style="text-align: center;">
-              <input type="checkbox" disabled ${item.is_active ? 'checked' : ''} style="accent-color: #008080; cursor: default;">
+              <input type="checkbox" disabled ${item.is_active ? 'checked' : ''} style="cursor: default;">
             </td>
           </tr>
         `;

@@ -517,13 +517,13 @@
     payables.forEach((p, idx) => {
       rowsHtml += `
         <tr class="pm-table-row" data-item="${p.item}" data-code="${p.code}" data-monthly="${p.monthly}" data-due="${p.totalDue}" data-priority="${p.priority}">
-          <td style="padding: 7px 12px; font-weight: 700; color: #1E293B; border-right: 1px solid #E2E8F0; text-align: left; vertical-align: middle;">
+          <td style="padding: 7px 12px; font-weight: 700; color: var(--text-primary); border-right: 1px solid var(--table-border); text-align: left; vertical-align: middle;">
             ${p.item}
           </td>
-          <td style="padding: 7px 12px; text-align: right; font-weight: 600; color: #475569; border-right: 1px solid #E2E8F0; vertical-align: middle;">
+          <td style="padding: 7px 12px; text-align: right; font-weight: 600; color: var(--text-muted); border-right: 1px solid var(--table-border); vertical-align: middle;">
             KES ${p.monthly.toLocaleString('en-US', {minimumFractionDigits: 2})}
           </td>
-          <td style="padding: 7px 12px; text-align: right; font-weight: 700; color: #1E3A8A; border-right: 1px solid #E2E8F0; vertical-align: middle;">
+          <td style="padding: 7px 12px; text-align: right; font-weight: 700; color: var(--accent-primary); border-right: 1px solid var(--table-border); vertical-align: middle;">
             KES ${p.totalDue.toLocaleString('en-US', {minimumFractionDigits: 2})}
           </td>
           <td style="padding: 4px 8px; text-align: right; vertical-align: middle;">
@@ -536,7 +536,7 @@
               value="0.00" 
               placeholder="0.00" 
               oninput="onMatrixAmountPaidInput(this)" 
-              style="width: 100%; text-align: right; font-weight: 700; background: #FFFFFF !important; box-sizing: border-box; -webkit-appearance: none; margin: 0;">
+              style="width: 100%; text-align: right; font-weight: 700; box-sizing: border-box; -webkit-appearance: none; margin: 0;">
           </td>
         </tr>
       `;
@@ -735,13 +735,13 @@
 
       if (badge) {
         if (paymentReceived <= 0) {
-          badge.innerHTML = `<span style="color: #64748B; font-weight: 700;">Enter payment amount to allocate</span>`;
-          badge.style.background = '#F1F5F9';
-          badge.style.borderColor = '#CBD5E1';
+          badge.innerHTML = `<span style="color: var(--text-muted); font-weight: 700;">Enter payment amount to allocate</span>`;
+          badge.style.background = 'var(--glass-pill)';
+          badge.style.borderColor = 'var(--glass-border)';
         } else {
-          badge.innerHTML = `<span style="color: #B91C1C; font-weight: 800;">⚠️ Unbalanced: Matrix KES ${matrixSum.toLocaleString('en-US', {minimumFractionDigits: 2})} ≠ Payment KES ${paymentReceived.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>`;
-          badge.style.background = '#FEF2F2';
-          badge.style.borderColor = '#EF4444';
+          badge.innerHTML = `<span style="color: #EF4444; font-weight: 800;">⚠️ Unbalanced: Matrix KES ${matrixSum.toLocaleString('en-US', {minimumFractionDigits: 2})} ≠ Payment KES ${paymentReceived.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>`;
+          badge.style.background = 'rgba(239, 68, 68, 0.15)';
+          badge.style.borderColor = 'rgba(239, 68, 68, 0.35)';
         }
       }
 
@@ -1307,18 +1307,18 @@
               ${item.payment_method}
             </span>
           </td>
-          <td style="padding: 6px 12px; border-right: 1px solid #E5E7EB; font-size: 11.5px; color: #4B5563;">${dest}</td>
-          <td style="padding: 6px 12px; font-family: monospace; font-weight: 600; border-right: 1px solid #E5E7EB;">${item.reference_code || '-'}</td>
-          <td style="padding: 6px 12px; text-align: right; font-weight: 800; color: #111827; border-right: 1px solid #E5E7EB;">
+          <td style="padding: 6px 12px; border-right: 1px solid var(--table-border); font-size: 11.5px; color: var(--text-muted);">${dest}</td>
+          <td style="padding: 6px 12px; font-family: monospace; font-weight: 600; border-right: 1px solid var(--table-border);">${item.reference_code || '-'}</td>
+          <td style="padding: 6px 12px; text-align: right; font-weight: 800; color: var(--text-primary); border-right: 1px solid var(--table-border);">
             ${Number(item.amount_paid || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
           </td>
-          <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB; font-size: 11.5px;">${item.issued_by || 'DEAN'}</td>
+          <td style="padding: 6px 10px; text-align: center; border-right: 1px solid var(--table-border); font-size: 11.5px;">${item.issued_by || 'DEAN'}</td>
           <td style="padding: 4px 8px; text-align: center; white-space: nowrap;">
             <div style="display: inline-flex; gap: 4px; justify-content: center;">
-              <button type="button" class="btn-action-pill" onclick="editTenantReceipt('${item.id}')" style="padding: 3px 8px; font-size: 11px; font-weight: 700; color: #1E3A8A; background: #EEF2F6; border: 1px solid #CBD5E1; border-radius: 2px; cursor: pointer;" title="Edit Receipt Allocations">
+              <button type="button" class="btn-action-pill" onclick="editTenantReceipt('${item.id}')" title="Edit Receipt Allocations">
                 ✏️ Edit
               </button>
-              <button type="button" class="btn-action-pill" onclick="openOfficialReceiptModal('${item.id}')" style="padding: 3px 8px; font-size: 11px; font-weight: 700; color: #008080; background: #E6FFFA; border: 1px solid #81E6D9; border-radius: 2px; cursor: pointer;" title="Print Official Receipt">
+              <button type="button" class="btn-action-pill" onclick="openOfficialReceiptModal('${item.id}')" title="Print Official Receipt">
                 🖨️ View / Print
               </button>
             </div>

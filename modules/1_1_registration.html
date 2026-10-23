@@ -31,12 +31,7 @@
       <!-- 1. LANDLORD REGISTRATION PANEL -->
       <div class="reg-panel active" id="panel-landlords">
         <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Landlord & Owner Entity Onboarding</h2>
-              <p>Register individual and corporate property owners with statutory KRA PIN and remittance routing.</p>
-            </div>
-            <span class="live-pulse-badge">multi-tenant: organization_id</span>
+          <span class="live-pulse-badge">multi-tenant: organization_id</span>
           </div>
 
           <form id="form-landlord" onsubmit="handleLandlordSubmit(event)">
@@ -168,12 +163,7 @@
       <!-- 2. TENANT REGISTRATION PANEL -->
       <div class="reg-panel" id="panel-tenants">
         <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Tenant Entity Onboarding</h2>
-              <p>Register residential and commercial tenants with primary billing numbers for automated M-Pesa C2B reconciliation.</p>
-            </div>
-            <span class="live-pulse-badge">Daraja C2B Matchable</span>
+          <span class="live-pulse-badge">Daraja C2B Matchable</span>
           </div>
 
           <form id="form-tenant" onsubmit="handleTenantSubmit(event)">
@@ -490,23 +480,18 @@
       <div class="reg-panel" id="panel-property-payables">
         <div class="glass-card clean-module-container" style="padding: 16px 20px;">
           
-          <div class="module-header-strip" style="margin-bottom: 16px;">
-            <div class="module-title-box">
-              <h2>Property Payables Configuration Matrix</h2>
-              <p>Configure property-specific charges, rates, priority waterfall hierarchy, and overpayment surplus routing.</p>
-            </div>
-            <span class="live-pulse-badge">ProMatrix Matrix</span>
+          <span class="live-pulse-badge">ProMatrix Matrix</span>
           </div>
 
           <!-- Outer Fieldset: Property Payables -->
-          <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 18px 16px; margin-bottom: 18px; background: #FFFFFF;">
+          <fieldset >
             <legend style="color: #EA580C; font-weight: 700; font-size: 0.88rem; padding: 0 8px;">Property Payables</legend>
 
             <!-- Top Control Bar: Select Property & Orange Save Payables Matrix Button -->
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
               <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <label for="payable-prop-select" style="font-weight: 700; font-size: 0.86rem; color: #1F2937; white-space: nowrap;">Select Property:</label>
-                <select id="payable-prop-select" class="form-input" style="min-width: 280px; max-width: 400px; height: 32px; padding: 4px 10px; font-size: 0.85rem; border: 1px solid #D1D5DB; border-radius: 4px; background: #FFFFFF; font-weight: 600;" onchange="handlePayablePropChange(this.value)">
+                <select id="payable-prop-select" class="form-input"  onchange="handlePayablePropChange(this.value)">
                   <!-- Dynamically populated with options like '-Select-' and onboarded properties -->
                 </select>
                 <button type="button" id="btn-save-payables-matrix" style="background: #F97316; color: #FFFFFF; font-weight: 700; font-size: 0.85rem; border: 1px solid #EA580C; border-radius: 4px; padding: 6px 22px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12);" onmouseover="this.style.background='#EA580C'" onmouseout="this.style.background='#F97316'" onclick="handleSavePayablesMatrix()">
@@ -525,7 +510,7 @@
           </fieldset>
 
           <!-- Inner Fieldset: Applicable Property Payables Table Section -->
-          <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 16px 16px; background: #FFFFFF;">
+          <fieldset >
             <legend style="color: #EA580C; font-weight: 700; font-size: 0.88rem; padding: 0 8px;">Applicable Property Payables</legend>
 
             <div class="builder-table-wrap" style="overflow-x: auto; max-height: 640px; border: 1px solid #D1D5DB; border-radius: 4px;">
@@ -574,7 +559,7 @@
           <form id="form-tenant-assignment" onsubmit="handleTenantAssignSubmit(event)">
             
             <!-- Fieldset 1: Tenant Details (Top Row) -->
-            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+            <fieldset >
               <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Tenant Details</legend>
               <div style="display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;">
                 <label for="tenant-assign-select" style="font-weight: 700; font-size: 0.86rem; color: #1F2937;">Select Tenant:</label>
@@ -586,7 +571,7 @@
             </fieldset>
 
             <!-- Fieldset 2: Property Details -->
-            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+            <fieldset >
               <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Property Details</legend>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -605,7 +590,7 @@
             </fieldset>
 
             <!-- Fieldset 3: Personal Details -->
-            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+            <fieldset >
               <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Personal Details</legend>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -628,7 +613,7 @@
             </fieldset>
 
             <!-- Fieldset 4: Contact Details -->
-            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+            <fieldset >
               <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Contact Details</legend>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -663,7 +648,7 @@
             </fieldset>
 
             <!-- Fieldset 5: Work Place -->
-            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 12px; background: #FFFFFF;">
+            <fieldset >
               <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Work Place</legend>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -678,7 +663,7 @@
             </fieldset>
 
             <!-- Fieldset 6: Next of Kin Details -->
-            <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 10px 16px; margin-bottom: 18px; background: #FFFFFF;">
+            <fieldset >
               <legend style="color: #EA580C; font-weight: 700; font-size: 0.84rem; padding: 0 6px;">Next of Kin Details</legend>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -754,13 +739,13 @@
         <div class="glass-card clean-module-container" style="padding: 18px 22px;">
           
           <!-- Outer Group: Unit Details Bulk -->
-          <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 18px 16px; margin-bottom: 20px; background: #FFFFFF;">
+          <fieldset >
             <legend style="color: #EA580C; font-weight: 700; font-size: 0.88rem; padding: 0 8px;">Unit Details Bulk</legend>
             
             <!-- Top Control Bar: Select Property & Orange Save Details Button -->
             <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
               <label for="bulk-prop-select" style="font-weight: 700; font-size: 0.86rem; color: #1F2937; white-space: nowrap;">Select Property:</label>
-              <select id="bulk-prop-select" class="form-input" style="min-width: 300px; max-width: 440px; height: 32px; padding: 4px 10px; font-size: 0.85rem; border: 1px solid #D1D5DB; border-radius: 4px; background: #FFFFFF; font-weight: 600;" onchange="handleBulkPropSelectChange(this.value)">
+              <select id="bulk-prop-select" class="form-input"  onchange="handleBulkPropSelectChange(this.value)">
                 <!-- Dynamically populated with options like 'Elgon View - Elijah Chindia' -->
               </select>
               <button type="button" id="btn-save-bulk-details" style="background: #F97316; color: #FFFFFF; font-weight: 700; font-size: 0.85rem; border: 1px solid #EA580C; border-radius: 4px; padding: 6px 22px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.12);" onmouseover="this.style.background='#EA580C'" onmouseout="this.style.background='#F97316'" onclick="handleBulkUnitsCommit()">
@@ -771,7 +756,7 @@
           </fieldset>
 
           <!-- Inner Section: List of Unit Details Bulk -->
-          <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 16px 16px; background: #FFFFFF;">
+          <fieldset >
             <legend style="color: #EA580C; font-weight: 700; font-size: 0.88rem; padding: 0 8px;">List of Unit Details Bulk</legend>
 
             <div class="builder-table-wrap" style="overflow-x: auto; max-height: 640px; border: 1px solid #D1D5DB; border-radius: 4px;">
@@ -829,7 +814,7 @@
                   <strong style="color: #0F766E; font-size: 0.92rem; display: block;">Overpayment & Surplus Routing Account</strong>
                   <span style="font-size: 0.78rem; color: #475569;">When tenant payment exceeds all outstanding liabilities, route surplus automatically:</span>
                 </div>
-                <select id="waterfall-overpayment-routing" class="form-input" style="min-width: 240px; height: 34px; font-weight: 700; border-color: #0D9488; background: #FFFFFF; font-size: 0.84rem;">
+                <select id="waterfall-overpayment-routing" class="form-input" >
                   <option value="ADVANCE_RENT" selected>Advance Rent Credit (Default - Carries forward)</option>
                   <option value="DEPOSIT_REPLENISHMENT">Replenish Rent Deposit (If underfunded)</option>
                   <option value="UNALLOCATED_CREDIT">Unallocated Suspense Ledger Credit</option>
@@ -875,7 +860,7 @@
               </div>
 
               <!-- Simulation Output Matrix -->
-              <div id="sim-waterfall-output" style="max-height: 180px; overflow-y: auto; border: 1px solid #E5E7EB; border-radius: 4px; background: #FFFFFF; font-size: 0.78rem;">
+              <div id="sim-waterfall-output" >
                 <div style="padding: 12px; color: #6B7280; text-align: center;">Click "Simulate" to execute the test allocation against outstanding property payables.</div>
               </div>
             </div>

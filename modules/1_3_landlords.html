@@ -19,12 +19,7 @@
       <!-- 1. PORTFOLIO & MANDATES PANEL -->
       <div class="landlord-panel active" id="panel-landlord-portfolio">
         <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Landlord Asset Portfolio & Management Mandates</h2>
-              <p>Overview of active properties managed per landlord, contractual agency commission percentages, 16% agency VAT covenants, and statutory KRA 7.5% MRI tax withholding.</p>
-            </div>
-            <span class="live-pulse-badge">Mandate Statutory Guard: 16% VAT & 7.5% MRI</span>
+          <span class="live-pulse-badge">Mandate Statutory Guard: 16% VAT & 7.5% MRI</span>
           </div>
 
           <!-- Portfolio Directory Table -->
@@ -59,20 +54,15 @@
       <!-- 2. MONTHLY STATEMENTS ENGINE PANEL -->
       <div class="landlord-panel" id="panel-landlord-statements">
         <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Landlord Monthly Statement & Net Remittance Engine</h2>
-              <p>Calculate monthly net remittance per property by deducting agreed agency commissions, 16% agency VAT, approved maintenance/repair costs, and statutory 7.5% MRI withholding tax.</p>
-            </div>
-            <span class="live-pulse-badge">dbo_Landlord_Payments / Pro_PayToLLComm Sync</span>
+          <span class="live-pulse-badge">dbo_Landlord_Payments / Pro_PayToLLComm Sync</span>
           </div>
 
           <!-- 1. GENERATOR CONTROL PANEL (TWO DISTINCT HORIZONTAL SECTIONS A & B) -->
-          <div class="landlord-stmt-control-panel" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <div class="landlord-stmt-control-panel" >
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
               <div>
-                <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #111827;">Property Account Statement Generator</h3>
+                <h3 >Property Account Statement Generator</h3>
                 <p style="margin: 2px 0 0 0; font-size: 12px; color: #6B7280;">Generate official A4 Property Account Statements for Landlord Remittance (Rent &amp; Utilities) matching Propwings standard.</p>
               </div>
               <button type="button" id="btn-print-landlord-statement" onclick="printLandlordStatement()" style="padding: 8px 24px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; background: #008080; color: #FFFFFF; border: none; border-radius: 4px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
@@ -190,7 +180,7 @@
           </div>
 
           <!-- 2. PRINTABLE STATEMENT CONTAINER (Strictly matching landlord Statement - Jan.pdf) -->
-          <div id="printable-landlord-statement" class="landlord-statement-sheet" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 40px 48px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); max-width: 1050px; margin: 0 auto 30px auto; color: #000000; font-family: Arial, Helvetica, sans-serif; position: relative;">
+          <div id="printable-landlord-statement" class="landlord-statement-sheet" >
             
             <!-- DYNAMIC BRANCH CORPORATE HEADER -->
             <div id="ll-stmt-header-container" style="position: relative; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; min-height: 80px;">
@@ -231,7 +221,7 @@
             <div style="overflow-x: auto;">
               <table class="landlord-statement-table" style="width: 100%; border-collapse: collapse; font-size: 11.5px; font-family: Arial, Helvetica, sans-serif;">
                 <thead>
-                  <tr style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; background: #FFFFFF;">
+                  <tr >
                     <th style="padding: 5px 6px; width: 65px; text-align: left; font-weight: 800; border-right: 1px solid #000000;">Unit</th>
                     <th style="padding: 5px 8px; text-align: left; font-weight: 800; border-right: 1px solid #000000;">Tenant</th>
                     <th style="padding: 5px 8px; width: 100px; text-align: right; font-weight: 800; border-right: 1px solid #000000;">Monthly Bill</th>
@@ -365,12 +355,7 @@
       <!-- 3. REMITTANCE & PAYOUT QUEUE PANEL -->
       <div class="landlord-panel" id="panel-landlord-payouts">
         <div class="glass-card clean-module-container">
-          <div class="module-header-strip">
-            <div class="module-title-box">
-              <h2>Landlord Remittance & Electronic Payout Queue</h2>
-              <p>Authorize and disburse net rental proceeds to property owners via Bank EFT / RTGS or Safaricom Daraja M-Pesa B2C Bulk Mobile Disbursements.</p>
-            </div>
-            <span class="live-pulse-badge">dbo_Pro_LandlordRemittanceExport</span>
+          <span class="live-pulse-badge">dbo_Pro_LandlordRemittanceExport</span>
           </div>
 
           <!-- Summary Metric Counters -->

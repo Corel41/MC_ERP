@@ -384,7 +384,7 @@
 
     // Group Header Row
     rowsHtml.push(`
-      <tr style="background: #FFFFFF; font-weight: 800;">
+      <tr style="font-weight: 800;">
         <td colspan="7" style="padding: 5px 6px; font-weight: 800; border-top: 1px solid #000; border-bottom: 1px solid #000; border-right: none;">
           ${payableHeader}
         </td>
@@ -403,7 +403,7 @@
         rowsHtml.push(`
           <tr style="border-bottom: 1px solid #E5E7EB;">
             <td style="padding: 4px 6px; border-right: 1px solid #000000; font-weight: 600;">${u.code}</td>
-            <td style="padding: 4px 8px; border-right: 1px solid #000000; font-style: italic; color: #374151;">**Vacant**</td>
+            <td style="padding: 4px 8px; border-right: 1px solid #000000; font-style: italic;">**Vacant**</td>
             <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(baselineBill)}</td>
             <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">0.00</td>
             <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">0.00</td>
@@ -630,7 +630,32 @@
     window.print();
   }
 
-  // 5. TAB SWITCHING FOR LANDLORD MODULE
+  // 5. TOP-NAV INJECTION & TAB SWITCHING FOR LANDLORD MODULE
+  function syncLandlordsTopNav() {
+    const topNav = document.getElementById('top-nav');
+    if (!topNav) return;
+
+    const headerLeft = topNav.querySelector('.header-left');
+    if (headerLeft) {
+      headerLeft.innerHTML = '';
+    }
+
+    const themeSelector = topNav.querySelector('#quick-theme-dropdown');
+    if (themeSelector) {
+      themeSelector.remove();
+    }
+
+    const tabStrip = document.querySelector('.landlord-nav-tabs, .tab-header');
+    if (tabStrip && headerLeft) {
+      tabStrip.style.marginBottom = '0';
+      tabStrip.style.padding = '0';
+      tabStrip.style.background = 'transparent';
+      tabStrip.style.border = 'none';
+      tabStrip.style.boxShadow = 'none';
+      headerLeft.appendChild(tabStrip);
+    }
+  }
+
   function setupLandlordTabs() {
     const landlordTabBtns = document.querySelectorAll('.landlord-tab-btn, .tab-btn');
     landlordTabBtns.forEach(btn => {
@@ -911,6 +936,7 @@
   window.executeGenerateLandlordStatement = executeGenerateLandlordStatement;
   window.printLandlordStatement = printLandlordStatement;
   window.setupLandlordTabs = setupLandlordTabs;
+  window.syncLandlordsTopNav = syncLandlordsTopNav;
   window.renderLandlordPortfolioTable = renderLandlordPortfolioTable;
   window.prepareQuickStatement = prepareQuickStatement;
   window.renderLandlordStatementsTable = renderLandlordStatementsTable;
@@ -942,6 +968,7 @@
     }
 
     // 3. Tab switching & renderers
+    syncLandlordsTopNav();
     setupLandlordTabs();
     initLandlordStatementGenerator();
     renderLandlordPortfolioTable();

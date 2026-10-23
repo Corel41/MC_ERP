@@ -5,7 +5,7 @@
 <div class="module-container" style="padding: 16px; width: 100%; box-sizing: border-box;">
 
   <!-- TOP FILTER & ACTION BAR -->
-  <div class="statement-filter-bar" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 18px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px;">
+  <div class="statement-filter-bar" >
     <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; flex: 1;">
       <div style="min-width: 220px; flex: 1;">
         <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Select Property</label>
@@ -39,7 +39,7 @@
   </div>
 
   <!-- PRINTABLE STATEMENT SHEET (image_f7715c.png) -->
-  <div id="printable-tenant-statement" class="tenant-statement-sheet" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 32px 36px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); max-width: 1200px; margin: 0 auto; color: #111827; font-family: 'Segoe UI', Arial, sans-serif;">
+  <div id="printable-tenant-statement" class="tenant-statement-sheet" Segoe UI', Arial, sans-serif;">
     
     <!-- UNIFORM CORPORATE HEADER -->
     <div style="display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
@@ -49,8 +49,8 @@
       </div>
 
       <!-- Right/Center -->
-      <div style="text-align: right; font-size: 11.5px; color: #111827; line-height: 1.4;">
-        <h1 style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; color: #111827; text-transform: uppercase;">METROCOSMO LTD - NAIROBI</h1>
+      <div >
+        <h1 >METROCOSMO LTD - NAIROBI</h1>
         <div style="font-size: 11.5px; font-style: italic; font-weight: 600; color: #374151; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</div>
         <div style="margin-top: 3px;">P.O. BOX 40656 - 00100 Nairobi | Hughes Building, 7th Floor</div>
         <div>Cell: 020 2244218, 0721 737093 | E-Mail: info@metrocosmo.com</div>
@@ -62,34 +62,34 @@
 
     <!-- DOCUMENT TITLE -->
     <div style="text-align: center; margin: 14px 0 18px 0;">
-      <h2 style="margin: 0; font-size: 16px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; color: #111827; text-decoration: underline;">STATEMENT OF ACCOUNT</h2>
+      <h2 >STATEMENT OF ACCOUNT</h2>
     </div>
 
     <!-- METADATA BLOCK (3 lines, exact key-value layout) -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 30px; font-size: 12.5px; margin-bottom: 12px; line-height: 1.6;">
       <div style="display: flex; gap: 8px;">
-        <span style="font-weight: 700; width: 105px; color: #111827;">Tenant Code:</span>
+        <span >Tenant Code:</span>
         <span id="statement-tenant-code" style="font-weight: 700; color: #1E3A8A;">—</span>
       </div>
       <div style="display: flex; gap: 8px;">
-        <span style="font-weight: 700; width: 110px; color: #111827;">Tenant Name:</span>
-        <span id="statement-tenant-name" style="font-weight: 700; color: #111827;">—</span>
+        <span >Tenant Name:</span>
+        <span id="statement-tenant-name" >—</span>
       </div>
       <div style="display: flex; gap: 8px;">
-        <span style="font-weight: 700; width: 105px; color: #111827;">Property:</span>
-        <span id="statement-property-name" style="color: #111827;">—</span>
+        <span >Property:</span>
+        <span id="statement-property-name" >—</span>
       </div>
       <div style="display: flex; gap: 8px;">
-        <span style="font-weight: 700; width: 110px; color: #111827;">Unit:</span>
-        <span id="statement-unit-code" style="font-weight: 700; color: #111827;">—</span>
+        <span >Unit:</span>
+        <span id="statement-unit-code" >—</span>
       </div>
       <div style="display: flex; gap: 8px;">
-        <span style="font-weight: 700; width: 105px; color: #111827;">Period:</span>
+        <span >Period:</span>
         <span>From: <strong id="statement-date-from">—</strong> &nbsp; To: <strong id="statement-date-to">—</strong></span>
       </div>
       <div style="display: flex; gap: 8px;">
-        <span style="font-weight: 700; width: 110px; color: #111827;">Phone No:</span>
-        <span id="statement-phone-no" style="color: #111827;">—</span>
+        <span >Phone No:</span>
+        <span id="statement-phone-no" >—</span>
       </div>
     </div>
 
@@ -120,7 +120,7 @@
             <td colspan="6" style="padding: 9px 10px; text-align: right; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;">TOTALS:</td>
             <td id="statement-total-debit" style="padding: 9px 10px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums;">0.00</td>
             <td id="statement-total-credit" style="padding: 9px 10px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums;">0.00</td>
-            <td id="statement-closing-balance" style="padding: 9px 10px; text-align: right; font-size: 12.5px; font-variant-numeric: tabular-nums; color: #111827;">0.00</td>
+            <td id="statement-closing-balance" >0.00</td>
           </tr>
         </tfoot>
       </table>
