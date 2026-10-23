@@ -424,7 +424,12 @@ const AppState = {
           renderLedgerTable();
           loadTenantReceipts();
           initTenantReceipting();
-          switchTenantTab(AppState.activeTenantTab || 'tab-invoices');
+          const subHash = window.location.hash.split('/')[1];
+          if (subHash === 'receipting' || subHash === 'tab-receipting') {
+            switchTenantTab('tab-receipting');
+          } else {
+            switchTenantTab(AppState.activeTenantTab || 'tab-invoices');
+          }
           break;
 
         case 'tenant-ledger':
@@ -2488,8 +2493,7 @@ const AppState = {
       if (targetTabId === 'tab-invoices' || targetTabId === 'invoices') {
         switchInvoiceSubTab(AppState.activeInvoiceSubTab || 'single');
       } else if (targetTabId === 'tab-receipting' || targetTabId === 'receipting') {
-        window.location.href = 'receipts.html';
-        return;
+        initTenantReceipting();
       } else if (targetTabId === 'tab-leases' || targetTabId === 'leases') {
         populateTenantDropdowns();
         renderLeasesTable();

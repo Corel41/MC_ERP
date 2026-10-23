@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MC ERP — Landlords Hub & Deductions</title>
+  <title>MC ERP — Landlords Hub & Portfolios</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -94,7 +94,7 @@
         <div class="nav-group-label" data-full="ESTATE MANAGEMENT" data-short="EST">ESTATE MANAGEMENT</div>
         <ul class="nav-list">
           <li class="nav-item" data-tooltip="Registration">
-            <a class="nav-link" href="index.html">
+            <a class="nav-link" href="index.html#estate-reg">
               <span class="nav-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
               </span>
@@ -107,14 +107,6 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </span>
               <span class="nav-text">Tenants</span>
-            </a>
-          </li>
-          <li class="nav-item" data-tooltip="Receipting">
-            <a class="nav-link" href="receipts.html">
-              <span class="nav-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg>
-              </span>
-              <span class="nav-text">Receipting</span>
             </a>
           </li>
           <li class="nav-item active" data-tooltip="Landlords">
@@ -185,347 +177,635 @@
         </ul>
       </div>
     </div>
+
+    <div class="sidebar-footer">
+      <div class="user-avatar-pill">DIR</div>
+      <div class="user-details">
+        <div class="user-fullname">Metrocosmo HQ</div>
+        <div class="user-role-badge">Executive Directorship</div>
+      </div>
+    </div>
   </aside>
 
-  <!-- Main View Area -->
-  <main id="main-view">
-    <!-- Top Header -->
-    <header id="top-header" class="glass-surface">
+  <!-- Main Canvas / Workspace (Standard Main Content Indentation) -->
+  <main id="workspace" class="main-content">
+
+    <!-- Top Sticky Header -->
+    <header id="top-nav" class="glass-surface">
       <div class="header-left">
-        <h1 class="page-title" style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #1E293B;">Landlords Hub & Deductions</h1>
-        <span class="badge-status" style="margin-left: 8px; background: #ECFDF5; color: #047857; font-weight: 700; font-size: 11px;">MPA Active</span>
-      </div>
-      <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
-        <a href="landlord-statements.html" class="btn-elevated-primary" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 6px 14px; background: #008080; color: #FFFFFF; font-weight: 700; font-size: 12px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.12);">
-          📑 Statements Engine &rarr;
-        </a>
-        <div class="theme-selector-quick" style="display: flex; align-items: center; gap: 6px;">
-          <select id="quick-theme-select" class="form-input" style="padding: 4px 8px; font-size: 12px; height: 32px; border-radius: 4px;" onchange="document.documentElement.setAttribute('data-theme', this.value)">
-            <option value="developer" selected>Developer Theme</option>
-            <option value="light">Light Theme</option>
-            <option value="dark">Dark Theme</option>
-          </select>
+        <div class="view-title-pill">
+          <span id="current-page-title">Landlords Hub</span>
+          <span class="live-pulse-badge">
+            <span class="pulse-dot"></span>
+            <span id="header-theme-indicator">Developer Plain</span>
+          </span>
         </div>
+      </div>
+
+      <div class="header-controls">
+        <select class="pill-select" id="quick-theme-dropdown" title="Theme Selector" onchange="document.documentElement.setAttribute('data-theme', this.value)">
+          <option value="developer" selected>⚡ Developer Plain (High-Contrast Solid)</option>
+          <option value="flowly">🌸 Frosted Iridescent (Flowly)</option>
+          <option value="cobalt">💎 Cobalt Bloom (Windows 11)</option>
+          <option value="hireism">🦄 Modern SaaS Iris (Hireism)</option>
+          <option value="obsidian">🌲 Obsidian &amp; Emerald (Executive)</option>
+        </select>
+
+        <a href="index.html#settings" class="pill-btn-icon" id="quick-settings-btn" title="Open Settings &amp; Themes" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </a>
       </div>
     </header>
 
-    <!-- Main Workspace Content -->
-    <div id="content-area" style="padding: 16px 24px; max-width: 1560px; margin: 0 auto;">
+    <!-- Standalone Module Content Container -->
+    <div id="module-content">
+      <div class="view-content active" id="view-estate-landlords">
 
-      <!-- Top Tab Navigation Strip & Action Link -->
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #E2E8F0; padding-bottom: 12px; margin-bottom: 20px;">
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="landlord-hub-tab-btn active" data-tab-target="deductions" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 6px; border: 1px solid #CBD5E1; background: #008080; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-            <span>📉</span> Deductions & Property Expenses
-          </button>
-          <button type="button" class="landlord-hub-tab-btn" data-tab-target="portfolio" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 6px; border: 1px solid #CBD5E1; background: #F1F5F9; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-            <span>🏢</span> Managed Portfolios & Mandates
-          </button>
-          <button type="button" class="landlord-hub-tab-btn" data-tab-target="payouts" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 6px; border: 1px solid #CBD5E1; background: #F1F5F9; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-            <span>💳</span> Remittance & Payout Queue
-          </button>
-        </div>
-
-        <div>
-          <a href="landlord-statements.html" style="padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 6px; border: 1px solid #008080; background: #E6FFFA; color: #008080; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-            <span>📑</span> Open Monthly Statements Engine &rarr;
-          </a>
-        </div>
-      </div>
-
-      <!-- PANEL 1: DEDUCTIONS & PROPERTY EXPENSES (ACTIVE) -->
-      <div id="panel-deductions" class="landlord-hub-panel active">
-        
-        <!-- Summary Stat Cards -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
-          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #008080; border-radius: 6px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <div style="font-size: 11.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Total Expenses (Active)</div>
-            <div id="stat-deductions-total" style="font-size: 1.35rem; font-weight: 800; color: #0F172A; margin-top: 4px; font-variant-numeric: tabular-nums;">KES 79,300.00</div>
-          </div>
-          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #B45309; border-radius: 6px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <div style="font-size: 11.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Statutory 7.5% MRI Tax</div>
-            <div id="stat-deductions-mri" style="font-size: 1.35rem; font-weight: 800; color: #B45309; margin-top: 4px; font-variant-numeric: tabular-nums;">KES 15,300.00</div>
-          </div>
-          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #047857; border-radius: 6px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <div style="font-size: 11.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Caretaker & Security Wages</div>
-            <div id="stat-deductions-wages" style="font-size: 1.35rem; font-weight: 800; color: #047857; margin-top: 4px; font-variant-numeric: tabular-nums;">KES 43,000.00</div>
-          </div>
-          <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #DC2626; border-radius: 6px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <div style="font-size: 11.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Repairs & Maintenance</div>
-            <div id="stat-deductions-repairs" style="font-size: 1.35rem; font-weight: 800; color: #DC2626; margin-top: 4px; font-variant-numeric: tabular-nums;">KES 12,500.00</div>
-          </div>
-        </div>
-
-        <!-- 2-Column Responsive Layout: Entry Form (Left 38%) + Table (Right 62%) -->
-        <div style="display: grid; grid-template-columns: minmax(340px, 400px) 1fr; gap: 20px; align-items: start;">
+        <div class="glass-card clean-module-container">
           
-          <!-- Deduction Voucher Form -->
-          <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); padding: 18px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px; margin-bottom: 14px;">
-              <h3 style="margin: 0; font-size: 14px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 6px;">
-                <span>✍️</span> Record Landlord Deduction / Expense
-              </h3>
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Landlord Portfolio, Statements &amp; Remittance Hub</h2>
+              <p>Contractual management mandates, monthly expense deductions, official A4 account statements, and remittance payout queue.</p>
             </div>
-
-            <form id="form-landlord-deduction" onsubmit="recordLandlordDeduction(event)" style="display: flex; flex-direction: column; gap: 12px;">
-              <input type="hidden" id="deduction-landlord-id">
-
-              <div>
-                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
-                  Managed Property: <span style="color: #DC2626;">*</span>
-                </label>
-                <select id="deduction-property-select" class="pm-legacy-input" required style="width: 100%; box-sizing: border-box; font-size: 12.5px;">
-                  <!-- Dynamically populated from AppState.properties -->
-                </select>
-              </div>
-
-              <div>
-                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
-                  Principal Landlord / Beneficiary:
-                </label>
-                <input type="text" id="deduction-landlord-name" class="pm-legacy-input" readonly style="width: 100%; box-sizing: border-box; background: #F8FAFC !important; color: #475569; font-weight: 600;">
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                  <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
-                    Expense Category: <span style="color: #DC2626;">*</span>
-                  </label>
-                  <select id="deduction-category-select" class="pm-legacy-input" required style="width: 100%; box-sizing: border-box;">
-                    <option value="Caretaker Wages">Caretaker Wages</option>
-                    <option value="Security Wages">Security Wages</option>
-                    <option value="Statutory 7.5% MRI Tax">Statutory 7.5% MRI Tax</option>
-                    <option value="Repairs & Maintenance">Repairs & Maintenance</option>
-                    <option value="Conservancy & Land Rates">Conservancy & Land Rates</option>
-                    <option value="Electricity / Water Common">Electricity / Water Common</option>
-                    <option value="Insurance Premium">Insurance Premium</option>
-                    <option value="Legal & Audit Fees">Legal & Audit Fees</option>
-                    <option value="Direct Landlord Settlement">Direct Landlord Settlement</option>
-                    <option value="Other Sundry Expense">Other Sundry Expense</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
-                    Amount (KES): <span style="color: #DC2626;">*</span>
-                  </label>
-                  <input type="number" id="deduction-amount" class="pm-legacy-input" placeholder="0.00" step="0.01" min="1" required style="width: 100%; box-sizing: border-box; font-weight: 800; font-size: 13.5px; color: #0F172A;">
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                  <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">Period Month:</label>
-                  <select id="deduction-month" class="pm-legacy-input" style="width: 100%; box-sizing: border-box;">
-                    <option value="1">January</option>
-                    <option value="2">February</option>
-                    <option value="3">March</option>
-                    <option value="4">April</option>
-                    <option value="5">May</option>
-                    <option value="6">June</option>
-                    <option value="7">July</option>
-                    <option value="8">August</option>
-                    <option value="9">September</option>
-                    <option value="10">October</option>
-                    <option value="11">November</option>
-                    <option value="12">December</option>
-                  </select>
-                </div>
-                <div>
-                  <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">Period Year:</label>
-                  <select id="deduction-year" class="pm-legacy-input" style="width: 100%; box-sizing: border-box;">
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                  <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">Voucher Ref #:</label>
-                  <input type="text" id="deduction-voucher-ref" class="pm-legacy-input" placeholder="VCH-2026-0000" required style="width: 100%; box-sizing: border-box; font-family: monospace; font-weight: 600;">
-                </div>
-                <div>
-                  <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">Expense Date:</label>
-                  <input type="date" id="deduction-date" class="pm-legacy-input" required style="width: 100%; box-sizing: border-box;">
-                </div>
-              </div>
-
-              <div>
-                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
-                  Payee / Contractor Name:
-                </label>
-                <input type="text" id="deduction-payee" class="pm-legacy-input" placeholder="e.g. Caretaker / KRA / Plumbing Tech" style="width: 100%; box-sizing: border-box;">
-              </div>
-
-              <div>
-                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
-                  Description / Expense Notes:
-                </label>
-                <textarea id="deduction-notes" class="pm-legacy-input" rows="2" placeholder="Brief note on this expense..." style="width: 100%; box-sizing: border-box; resize: vertical;"></textarea>
-              </div>
-
-              <div style="display: flex; gap: 8px; margin-top: 6px;">
-                <button type="submit" style="flex: 1; padding: 10px 16px; font-size: 12.5px; font-weight: 800; color: #FFFFFF; background: #008080; border: none; border-radius: 4px; cursor: pointer;">
-                  + Add Deduction Voucher
-                </button>
-                <button type="reset" style="padding: 10px 14px; font-size: 12.5px; font-weight: 700; color: #475569; background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 4px; cursor: pointer;">
-                  Reset
-                </button>
-              </div>
-            </form>
+            <span class="live-pulse-badge">dbo_Landlord_Payments / Pro_PayToLLComm Sync</span>
           </div>
 
-          <!-- Itemized Deductions Table -->
-          <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); padding: 18px; overflow-x: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px;">
-              <h3 style="margin: 0; font-size: 14px; font-weight: 800; color: #0F172A;">
-                Itemized Landlord Deductions & Property Expenses
-              </h3>
+          <!-- Standard Application Tabbed Interface -->
+          <div class="tab-header landlord-nav-tabs">
+            <button type="button" class="tab-btn landlord-tab-btn active" data-landlord-target="portfolio" data-tab-target="portfolio" onclick="switchLandlordTab('portfolio')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span>Managed Portfolios</span>
+            </button>
+            <button type="button" class="tab-btn landlord-tab-btn" data-landlord-target="deductions" data-tab-target="deductions" onclick="switchLandlordTab('deductions')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <span>Deductions &amp; Expenses</span>
+            </button>
+            <button type="button" class="tab-btn landlord-tab-btn" data-landlord-target="statements" data-tab-target="statements" onclick="switchLandlordTab('statements')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Monthly Statements</span>
+            </button>
+            <button type="button" class="tab-btn landlord-tab-btn" data-landlord-target="payouts" data-tab-target="payouts" onclick="switchLandlordTab('payouts')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              <span>Remittance &amp; Payouts</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: MANAGED PORTFOLIOS & MANDATES PANEL (ACTIVE DEFAULT) -->
+          <div class="tab-content landlord-panel active" id="panel-landlord-portfolio">
+            <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px;">
+                <div>
+                  <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #0F172A;">
+                    Active Landlord Portfolio Directory &amp; Agency Mandates
+                  </h3>
+                  <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748B;">
+                    Contractual commissions, management mandates, tax profiles, and disbursement bank accounts.
+                  </p>
+                </div>
+                <span class="badge-status" id="portfolio-count-badge" style="background: #ECFDF5; color: #047857; font-weight: 700;">
+                  2 Active Mandates
+                </span>
+              </div>
+
+              <div class="builder-table-wrap">
+                <table class="builder-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                  <thead>
+                    <tr style="background: #F8FAFC; border-bottom: 2px solid #CBD5E1; color: #334155;">
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Landlord / Principal</th>
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Estate / LR No.</th>
+                      <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Units</th>
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Mgmt Rate</th>
+                      <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">VAT Status</th>
+                      <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">MRI (7.5%)</th>
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Account Manager</th>
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Remittance Destination</th>
+                      <th style="padding: 8px 10px; text-align: center;">Statements</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-landlord-portfolio-body">
+                    <!-- Dynamically populated from AppState.mandates -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: DEDUCTIONS & PROPERTY EXPENSES PANEL -->
+          <div class="tab-content landlord-panel" id="panel-landlord-deductions">
+            
+            <!-- Summary Stat Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #008080; border-radius: 6px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size: 11.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Total Expenses (Active)</div>
+                <div id="stat-deductions-total" style="font-size: 1.35rem; font-weight: 800; color: #0F172A; margin-top: 4px; font-variant-numeric: tabular-nums;">KES 79,300.00</div>
+              </div>
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #B45309; border-radius: 6px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size: 11.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Statutory 7.5% MRI Tax</div>
+                <div id="stat-deductions-mri" style="font-size: 1.35rem; font-weight: 800; color: #B45309; margin-top: 4px; font-variant-numeric: tabular-nums;">KES 15,300.00</div>
+              </div>
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #047857; border-radius: 6px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size: 11.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Caretaker &amp; Security Wages</div>
+                <div id="stat-deductions-wages" style="font-size: 1.35rem; font-weight: 800; color: #047857; margin-top: 4px; font-variant-numeric: tabular-nums;">KES 43,000.00</div>
+              </div>
+              <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #DC2626; border-radius: 6px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-size: 11.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Repairs &amp; Maintenance</div>
+                <div id="stat-deductions-repairs" style="font-size: 1.35rem; font-weight: 800; color: #DC2626; margin-top: 4px; font-variant-numeric: tabular-nums;">KES 12,500.00</div>
+              </div>
+            </div>
+
+            <!-- 2-Column Responsive Layout: Entry Form (Left) + Table (Right) -->
+            <div style="display: grid; grid-template-columns: minmax(340px, 400px) 1fr; gap: 20px; align-items: start;">
               
-              <!-- Filter Controls -->
-              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <input type="text" id="filter-deduction-search" class="pm-legacy-input" placeholder="Search ref, payee, property..." oninput="renderLandlordDeductionsTable()" style="width: 180px; height: 30px; font-size: 11.5px;">
-                <select id="filter-deduction-property" class="pm-legacy-input" onchange="renderLandlordDeductionsTable()" style="height: 30px; font-size: 11.5px;">
-                  <option value="ALL">All Properties</option>
-                </select>
-                <select id="filter-deduction-category" class="pm-legacy-input" onchange="renderLandlordDeductionsTable()" style="height: 30px; font-size: 11.5px;">
-                  <option value="ALL">All Categories</option>
-                  <option value="Caretaker Wages">Caretaker Wages</option>
-                  <option value="Security Wages">Security Wages</option>
-                  <option value="Statutory 7.5% MRI Tax">Statutory 7.5% MRI Tax</option>
-                  <option value="Repairs & Maintenance">Repairs & Maintenance</option>
-                  <option value="Conservancy & Land Rates">Conservancy</option>
-                </select>
+              <!-- Deduction Voucher Form -->
+              <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); padding: 18px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px; margin-bottom: 14px;">
+                  <h3 style="margin: 0; font-size: 14px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 6px;">
+                    <span>✍️</span> Record Landlord Deduction / Expense
+                  </h3>
+                </div>
+
+                <form id="form-landlord-deduction" onsubmit="recordLandlordDeduction(event)" style="display: flex; flex-direction: column; gap: 12px;">
+                  <input type="hidden" id="deduction-landlord-id">
+
+                  <div>
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
+                      Managed Property: <span style="color: #DC2626;">*</span>
+                    </label>
+                    <select id="deduction-property-select" class="pm-legacy-input" required style="width: 100%; box-sizing: border-box; font-size: 12.5px;">
+                      <!-- Dynamically populated from AppState.properties -->
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
+                      Principal Landlord / Beneficiary:
+                    </label>
+                    <input type="text" id="deduction-landlord-name" class="pm-legacy-input" readonly style="width: 100%; box-sizing: border-box; background: #F8FAFC !important; color: #475569; font-weight: 600;">
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                      <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
+                        Expense Category: <span style="color: #DC2626;">*</span>
+                      </label>
+                      <select id="deduction-category-select" class="pm-legacy-input" required style="width: 100%; box-sizing: border-box;">
+                        <option value="Caretaker Wages">Caretaker Wages</option>
+                        <option value="Security Wages">Security Wages</option>
+                        <option value="Statutory 7.5% MRI Tax">Statutory 7.5% MRI Tax</option>
+                        <option value="Repairs &amp; Maintenance">Repairs &amp; Maintenance</option>
+                        <option value="Conservancy &amp; Land Rates">Conservancy &amp; Land Rates</option>
+                        <option value="Electricity / Water Common">Electricity / Water Common</option>
+                        <option value="Insurance Premium">Insurance Premium</option>
+                        <option value="Legal &amp; Audit Fees">Legal &amp; Audit Fees</option>
+                        <option value="Direct Landlord Settlement">Direct Landlord Settlement</option>
+                        <option value="Other Sundry Expense">Other Sundry Expense</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
+                        Amount (KES): <span style="color: #DC2626;">*</span>
+                      </label>
+                      <input type="number" id="deduction-amount" class="pm-legacy-input" placeholder="0.00" step="0.01" min="1" required style="width: 100%; box-sizing: border-box; font-weight: 800; font-size: 13.5px; color: #0F172A;">
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                      <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">Period Month:</label>
+                      <select id="deduction-month" class="pm-legacy-input" style="width: 100%; box-sizing: border-box;">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">Period Year:</label>
+                      <select id="deduction-year" class="pm-legacy-input" style="width: 100%; box-sizing: border-box;">
+                        <option value="2026">2026</option>
+                        <option value="2025">2025</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                      <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">Voucher Ref #:</label>
+                      <input type="text" id="deduction-voucher-ref" class="pm-legacy-input" placeholder="VCH-2026-0000" required style="width: 100%; box-sizing: border-box; font-family: monospace; font-weight: 600;">
+                    </div>
+                    <div>
+                      <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">Expense Date:</label>
+                      <input type="date" id="deduction-date" class="pm-legacy-input" required style="width: 100%; box-sizing: border-box;">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
+                      Payee / Contractor Name:
+                    </label>
+                    <input type="text" id="deduction-payee" class="pm-legacy-input" placeholder="e.g. Caretaker / KRA / Plumbing Tech" style="width: 100%; box-sizing: border-box;">
+                  </div>
+
+                  <div>
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: #334155; margin-bottom: 4px;">
+                      Description / Expense Notes:
+                    </label>
+                    <textarea id="deduction-notes" class="pm-legacy-input" rows="2" placeholder="Brief note on this expense..." style="width: 100%; box-sizing: border-box; resize: vertical;"></textarea>
+                  </div>
+
+                  <div style="display: flex; gap: 8px; margin-top: 6px;">
+                    <button type="submit" style="flex: 1; padding: 10px 16px; font-size: 12.5px; font-weight: 800; color: #FFFFFF; background: #008080; border: none; border-radius: 4px; cursor: pointer;">
+                      + Add Deduction Voucher
+                    </button>
+                    <button type="reset" style="padding: 10px 14px; font-size: 12.5px; font-weight: 700; color: #475569; background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 4px; cursor: pointer;">
+                      Reset
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Itemized Deductions Table -->
+              <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); padding: 18px; overflow-x: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px;">
+                  <h3 style="margin: 0; font-size: 14px; font-weight: 800; color: #0F172A;">
+                    Itemized Landlord Deductions &amp; Property Expenses
+                  </h3>
+                  
+                  <!-- Filter Controls -->
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <input type="text" id="filter-deduction-search" class="pm-legacy-input" placeholder="Search ref, payee, property..." oninput="renderLandlordDeductionsTable()" style="width: 180px; height: 30px; font-size: 11.5px;">
+                    <select id="filter-deduction-property" class="pm-legacy-input" onchange="renderLandlordDeductionsTable()" style="height: 30px; font-size: 11.5px;">
+                      <option value="ALL">All Properties</option>
+                    </select>
+                    <select id="filter-deduction-category" class="pm-legacy-input" onchange="renderLandlordDeductionsTable()" style="height: 30px; font-size: 11.5px;">
+                      <option value="ALL">All Categories</option>
+                      <option value="Caretaker Wages">Caretaker Wages</option>
+                      <option value="Security Wages">Security Wages</option>
+                      <option value="Statutory 7.5% MRI Tax">Statutory 7.5% MRI Tax</option>
+                      <option value="Repairs &amp; Maintenance">Repairs &amp; Maintenance</option>
+                      <option value="Conservancy &amp; Land Rates">Conservancy</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Table -->
+                <div class="builder-table-wrap">
+                  <table class="builder-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                    <thead>
+                      <tr style="background: #F8FAFC; border-bottom: 2px solid #CBD5E1; color: #334155;">
+                        <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB; width: 40px;">#</th>
+                        <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Voucher Ref</th>
+                        <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Date</th>
+                        <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Property</th>
+                        <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Landlord</th>
+                        <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Expense Category</th>
+                        <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Payee / Notes</th>
+                        <th style="padding: 8px 12px; text-align: right; border-right: 1px solid #E5E7EB;">Amount (KES)</th>
+                        <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Status</th>
+                        <th style="padding: 8px 10px; text-align: center;">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-landlord-deductions-body">
+                      <!-- Dynamically populated from AppState.landlordDeductions -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- TAB 3: MONTHLY STATEMENTS PANEL -->
+          <div class="tab-content landlord-panel" id="panel-landlord-statements">
+            
+            <!-- 1. GENERATOR CONTROL PANEL (TWO DISTINCT HORIZONTAL SECTIONS A & B) -->
+            <div class="landlord-stmt-control-panel" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
+                <div>
+                  <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #111827;">Property Account Statement Generator</h3>
+                  <p style="margin: 2px 0 0 0; font-size: 12px; color: #6B7280;">Generate official A4 Property Account Statements for Landlord Remittance (Rent &amp; Utilities) matching Propwings standard.</p>
+                </div>
+                <button type="button" id="btn-print-landlord-statement" onclick="printLandlordStatement()" style="padding: 8px 24px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; background: #008080; color: #FFFFFF; border: none; border-radius: 4px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                  <span>🖨️</span> Print Statement
+                </button>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                
+                <!-- SECTION A: RENT STATEMENTS -->
+                <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 16px; background: #F9FAFB;">
+                  <legend style="color: #F97316; font-size: 12px; font-weight: 800; padding: 0 6px;">— Section A: Rent Statements (001-Rent) —</legend>
+                  <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                      <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Property</label>
+                      <select id="landlord-stmt-property-rent" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                        <!-- Populated dynamically -->
+                      </select>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                      <div style="flex: 1.2;">
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Month</label>
+                        <select id="landlord-stmt-month-rent" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                          <option value="1">1 - January</option>
+                          <option value="2">2 - February</option>
+                          <option value="3">3 - March</option>
+                          <option value="4">4 - April</option>
+                          <option value="5">5 - May</option>
+                          <option value="6">6 - June</option>
+                          <option value="7">7 - July</option>
+                          <option value="8">8 - August</option>
+                          <option value="9">9 - September</option>
+                          <option value="10">10 - October</option>
+                          <option value="11">11 - November</option>
+                          <option value="12">12 - December</option>
+                        </select>
+                      </div>
+                      <div style="flex: 0.8;">
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Year</label>
+                        <select id="landlord-stmt-year-rent" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                          <option value="2024">2024</option>
+                          <option value="2025">2025</option>
+                          <option value="2026" selected>2026</option>
+                          <option value="2027">2027</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div style="margin-top: 4px;">
+                      <button type="button" class="pm-btn-orange" onclick="generateLandlordRentStatement()" style="width: 100%; padding: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px;">
+                        <span>⚡</span> Generate Rent Statement
+                      </button>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <!-- SECTION B: UTILITY / OTHER PAYABLES -->
+                <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 16px; background: #F9FAFB;">
+                  <legend style="color: #008080; font-size: 12px; font-weight: 800; padding: 0 6px;">— Section B: Utility &amp; Other Payables —</legend>
+                  <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; gap: 10px;">
+                      <div style="flex: 1.2;">
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Property</label>
+                        <select id="landlord-stmt-property-util" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                          <!-- Populated dynamically -->
+                        </select>
+                      </div>
+                      <div style="flex: 1;">
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Payable</label>
+                        <select id="landlord-stmt-payable-type" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                          <option value="002" selected>002 - Water Bill</option>
+                          <option value="009">009 - Service Charge</option>
+                          <option value="017">017 - Garbage Collection</option>
+                          <option value="015">015 - Security Levy</option>
+                          <option value="035">035 - Late Payment Penalty</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                      <div style="flex: 1.2;">
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Month</label>
+                        <select id="landlord-stmt-month-util" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                          <option value="1">1 - January</option>
+                          <option value="2">2 - February</option>
+                          <option value="3">3 - March</option>
+                          <option value="4">4 - April</option>
+                          <option value="5">5 - May</option>
+                          <option value="6">6 - June</option>
+                          <option value="7">7 - July</option>
+                          <option value="8">8 - August</option>
+                          <option value="9">9 - September</option>
+                          <option value="10">10 - October</option>
+                          <option value="11">11 - November</option>
+                          <option value="12">12 - December</option>
+                        </select>
+                      </div>
+                      <div style="flex: 0.8;">
+                        <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Year</label>
+                        <select id="landlord-stmt-year-util" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                          <option value="2024">2024</option>
+                          <option value="2025">2025</option>
+                          <option value="2026" selected>2026</option>
+                          <option value="2027">2027</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div style="margin-top: 4px;">
+                      <button type="button" class="pm-btn-orange" onclick="generateLandlordUtilityStatement()" style="width: 100%; padding: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; background: #008080 !important; border-color: #006666 !important;">
+                        <span>⚡</span> Generate Utility Statement
+                      </button>
+                    </div>
+                  </div>
+                </fieldset>
+
               </div>
             </div>
 
-            <!-- Table -->
-            <div class="builder-table-wrap">
-              <table class="builder-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                <thead>
-                  <tr style="background: #F8FAFC; border-bottom: 2px solid #CBD5E1; color: #334155;">
-                    <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB; width: 40px;">#</th>
-                    <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Voucher Ref</th>
-                    <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Date</th>
-                    <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Property</th>
-                    <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Landlord</th>
-                    <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Expense Category</th>
-                    <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Payee / Notes</th>
-                    <th style="padding: 8px 12px; text-align: right; border-right: 1px solid #E5E7EB;">Amount (KES)</th>
-                    <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Status</th>
-                    <th style="padding: 8px 10px; text-align: center;">Action</th>
-                  </tr>
-                </thead>
-                <tbody id="table-landlord-deductions-body">
-                  <!-- Dynamically populated from AppState.landlordDeductions -->
-                </tbody>
-              </table>
+            <!-- 2. PRINTABLE STATEMENT CONTAINER (Strictly matching landlord Statement - Jan.pdf) -->
+            <div id="printable-landlord-statement" class="landlord-statement-sheet" style="background: #FFFFFF; border: 1px solid #D1D5DB; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); padding: 30px 40px; margin: 0 auto 30px auto; max-width: 960px; color: #000000; font-family: 'Arial', sans-serif;">
+              
+              <!-- HEADER -->
+              <div id="ll-stmt-header-container" style="position: relative; text-align: center; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 12px; min-height: 80px;">
+                <img src="assets/logo.png" alt="Metrocosmo Logo" style="position: absolute; left: 0; top: 0; max-width: 130px; max-height: 75px; object-fit: contain;">
+                <div style="display: inline-block; text-align: center;">
+                  <h1 style="margin: 0; font-size: 17px; font-weight: bold; letter-spacing: 0.5px;">METROCOSMO LTD - <span id="ll-stmt-branch-header">NAIROBI</span></h1>
+                  <p style="margin: 2px 0; font-size: 11px; font-style: italic; font-weight: bold;">REAL ESTATE MANAGERS, PROPERTY VALUERS &amp; ESTATE AGENTS</p>
+                  <p style="margin: 2px 0; font-size: 11px;">P.O. BOX 40656 - 00100 NAIROBI, TEL: 020 2244218, 0721 737093</p>
+                  <p style="margin: 2px 0; font-size: 11px;">EMAIL: info@metrocosmo.co.ke / metrocosmo@gmail.com</p>
+                  <p style="margin: 2px 0; font-size: 11px; font-weight: bold;">PIN: P051189201A | Date: <span id="ll-stmt-print-date">21/10/2026</span> <span id="ll-stmt-print-time">11:58:36AM</span></p>
+                </div>
+              </div>
+
+              <!-- STATEMENT DETAILS BAR -->
+              <div style="border-bottom: 1px solid #000; padding: 6px 0; margin-bottom: 14px; font-size: 12px; font-weight: 700; line-height: 1.6;">
+                <div style="display: flex; justify-content: space-between;">
+                  <div>
+                    PRINCIPAL: <span id="ll-stmt-principal">L042 - COUNTY HOME DEVELOPERS LIMITED</span>
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 2px;">
+                  <div>
+                    PROPERTY L.R NO. <span id="ll-stmt-property-lr">RUNDA VIEW</span>
+                  </div>
+                  <div>
+                    PAYMENT PERIOD: <span id="ll-stmt-payment-period">January 2026</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- STATEMENT LEDGER TABLE -->
+              <div style="overflow-x: auto;">
+                <table class="landlord-statement-table" style="width: 100%; border-collapse: collapse; font-size: 11px; border: 1px solid #000000;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid #000; border-top: 1px solid #000; background: #FFFFFF; font-weight: 800;">
+                      <th style="padding: 6px 4px; text-align: left; border-right: 1px solid #000000; width: 65px;">Unit Code</th>
+                      <th style="padding: 6px 6px; text-align: left; border-right: 1px solid #000000;">Tenant Name</th>
+                      <th style="padding: 6px 6px; text-align: right; border-right: 1px solid #000000; width: 105px;">Monthly Bill</th>
+                      <th style="padding: 6px 6px; text-align: right; border-right: 1px solid #000000; width: 105px;">Opening Arrears</th>
+                      <th style="padding: 6px 6px; text-align: right; border-right: 1px solid #000000; width: 105px;">Expected</th>
+                      <th style="padding: 6px 6px; text-align: right; border-right: 1px solid #000000; width: 105px;">Amount Paid</th>
+                      <th style="padding: 6px 6px; text-align: right; width: 105px;">Closing Bal</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ll-stmt-table-body">
+                    <!-- Dynamically rendered rows: group header, unit rows, sub-totals, totals -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- SUMMARY & DEDUCTIONS FOOTER (RENT ONLY) -->
+              <div id="ll-stmt-rent-summary-block" style="margin-top: 24px;">
+                
+                <!-- Row: Count of tenants & Monthly Collected -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; font-size: 12.5px; font-weight: 700; margin-bottom: 16px;">
+                  <div>
+                    No. of tenants in this statement: <span id="ll-stmt-tenants-count">9</span>
+                  </div>
+                  <div style="text-align: right; width: 340px;">
+                    <div style="display: flex; justify-content: space-between;">
+                      <span>Monthly Collected:</span>
+                      <span id="ll-stmt-monthly-collected" style="font-variant-numeric: tabular-nums;">292,950.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 18px;">
+                      <span>Expected Remittance:</span>
+                      <span id="ll-stmt-expected-remittance" style="font-variant-numeric: tabular-nums;">292,950.00</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Deductions Block -->
+                <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                  <div style="width: 480px; font-size: 12px; font-weight: 700;">
+                    <div style="text-decoration: underline; margin-bottom: 6px;">Deductions</div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span style="width: 220px;">Management Fee on Rent:</span>
+                      <span id="ll-stmt-fee-pct" style="width: 70px; text-align: right;">5.50 %</span>
+                      <span id="ll-stmt-mgmt-fee" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">16,112.25</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                      <span style="width: 220px;">V.A.T on Fees</span>
+                      <span style="width: 70px; text-align: right;">16.00 %</span>
+                      <span id="ll-stmt-vat-amount" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">2,577.96</span>
+                    </div>
+
+                    <div id="ll-stmt-dynamic-deductions"></div>
+
+                    <div style="border-top: 1px solid #000000; margin: 4px 0 6px 0; display: flex; justify-content: flex-end;">
+                      <span id="ll-stmt-total-deductions" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums; border-bottom: 1px solid #000000; padding: 2px 0;">18,690.21</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 13px;">
+                      <span style="width: 220px; text-align: right; padding-right: 20px;">Net Due:</span>
+                      <span id="ll-stmt-net-due" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums; border-top: 1px solid #000000; border-bottom: 3px double #000000; padding: 2px 0;">274,259.79</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- BOTTOM FOOTER -->
+              <div style="margin-top: 28px; font-size: 11.5px; line-height: 1.8;">
+                <div style="font-weight: 700;">
+                  Current vacant units: <span id="ll-stmt-vacant-units" style="font-weight: 600;">D11 , D2 , D30 , D31 , D7</span>
+                </div>
+                
+                <div style="margin-top: 8px; font-weight: 700;">
+                  Comments:
+                </div>
+
+                <!-- Signatures -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 22px; font-weight: 700;">
+                  <div>Prepared By: <span style="display: inline-block; width: 140px; border-bottom: 1px solid #000000; margin-left: 6px;"></span></div>
+                  <div>Checked By: <span style="display: inline-block; width: 140px; border-bottom: 1px solid #000000; margin-left: 6px;"></span></div>
+                  <div>Approved By: <span style="display: inline-block; width: 140px; border-bottom: 1px solid #000000; margin-left: 6px;"></span></div>
+                </div>
+
+                <!-- Payment details -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px;">
+                  <div style="line-height: 2; font-weight: 700;">
+                    <div>Pay to: <span id="ll-stmt-pay-to">- - CO-OPERATIVE BANK</span> &nbsp;&nbsp; Date: <span style="display: inline-block; width: 100px; border-bottom: 1px solid #000000;"></span> &nbsp;&nbsp; Bank: <span style="display: inline-block; width: 100px; border-bottom: 1px solid #000000;"></span></div>
+                    <div>Cheque No: <span style="display: inline-block; width: 120px; border-bottom: 1px solid #000000;"></span></div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- TAB 4: REMITTANCE & PAYOUT QUEUE PANEL -->
+          <div class="tab-content landlord-panel" id="panel-landlord-payouts">
+            <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px;">
+                <div>
+                  <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #0F172A;">
+                    Monthly Landlord Remittance &amp; Disbursement Payout Queue
+                  </h3>
+                  <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748B;">
+                    Review approved monthly net payable balances and execute bank EFT or M-Pesa B2C remittances.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Stats Strip -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 10px 14px;">
+                  <div style="font-size: 11px; font-weight: 700; color: #64748B;">GROSS RENT COLLECTED</div>
+                  <div id="landlord-stat-gross" style="font-size: 1.25rem; font-weight: 800; color: #008080; margin-top: 2px;">KES 0.00</div>
+                </div>
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 10px 14px;">
+                  <div style="font-size: 11px; font-weight: 700; color: #64748B;">AGENCY COMM &amp; VAT</div>
+                  <div id="landlord-stat-commission" style="font-size: 1.25rem; font-weight: 800; color: #1D4ED8; margin-top: 2px;">KES 0.00</div>
+                </div>
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 10px 14px;">
+                  <div style="font-size: 11px; font-weight: 700; color: #64748B;">MRI WITHHOLDING (7.5%)</div>
+                  <div id="landlord-stat-mri" style="font-size: 1.25rem; font-weight: 800; color: #B45309; margin-top: 2px;">KES 0.00</div>
+                </div>
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 10px 14px;">
+                  <div style="font-size: 11px; font-weight: 700; color: #64748B;">NET DISBURSED</div>
+                  <div id="landlord-stat-net" style="font-size: 1.25rem; font-weight: 800; color: #047857; margin-top: 2px;">KES 0.00</div>
+                </div>
+              </div>
+
+              <!-- Queue Table -->
+              <div class="builder-table-wrap">
+                <table class="builder-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                  <thead>
+                    <tr style="background: #F8FAFC; border-bottom: 2px solid #CBD5E1; color: #334155;">
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Statement ID</th>
+                      <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Period</th>
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Landlord</th>
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Property</th>
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Remit Destination</th>
+                      <th style="padding: 8px 12px; text-align: right; border-right: 1px solid #E5E7EB;">Net Due (KES)</th>
+                      <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Status</th>
+                      <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Payment Ref</th>
+                      <th style="padding: 8px 10px; text-align: center;">Disburse Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-landlord-payouts-body">
+                    <!-- Dynamically populated from AppState.landlordStatements -->
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
         </div>
-
       </div>
-
-      <!-- PANEL 2: MANAGED PORTFOLIOS & MANDATES (HIDDEN INITIALLY) -->
-      <div id="panel-portfolio" class="landlord-hub-panel" style="display: none;">
-        <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); padding: 18px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px;">
-            <div>
-              <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #0F172A;">
-                Active Landlord Portfolio Directory & Agency Mandates
-              </h3>
-              <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748B;">
-                Overview of contractual commissions, management mandates, tax profiles, and disbursement bank accounts.
-              </p>
-            </div>
-            <span class="badge-status" id="portfolio-count-badge" style="background: #ECFDF5; color: #047857; font-weight: 700;">
-              2 Active Mandates
-            </span>
-          </div>
-
-          <div class="builder-table-wrap">
-            <table class="builder-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
-              <thead>
-                <tr style="background: #F8FAFC; border-bottom: 2px solid #CBD5E1; color: #334155;">
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Landlord / Principal</th>
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Estate / LR No.</th>
-                  <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Units</th>
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Mgmt Rate</th>
-                  <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">VAT Status</th>
-                  <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">MRI (7.5%)</th>
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Account Manager</th>
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Remittance Destination</th>
-                  <th style="padding: 8px 10px; text-align: center;">Statements</th>
-                </tr>
-              </thead>
-              <tbody id="table-landlord-portfolio-body">
-                <!-- Dynamically populated from AppState.mandates -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- PANEL 3: REMITTANCE & PAYOUT QUEUE (HIDDEN INITIALLY) -->
-      <div id="panel-payouts" class="landlord-hub-panel" style="display: none;">
-        <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); padding: 18px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px;">
-            <div>
-              <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #0F172A;">
-                Monthly Landlord Remittance & Disbursement Payout Queue
-              </h3>
-              <p style="margin: 2px 0 0 0; font-size: 12px; color: #64748B;">
-                Review approved monthly net payable balances and execute bank EFT or M-Pesa B2C remittances.
-              </p>
-            </div>
-          </div>
-
-          <!-- Stats Strip -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
-            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 10px 14px;">
-              <div style="font-size: 11px; font-weight: 700; color: #64748B;">GROSS RENT COLLECTED</div>
-              <div id="landlord-stat-gross" style="font-size: 1.25rem; font-weight: 800; color: #008080; margin-top: 2px;">KES 0.00</div>
-            </div>
-            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 10px 14px;">
-              <div style="font-size: 11px; font-weight: 700; color: #64748B;">AGENCY COMM & VAT</div>
-              <div id="landlord-stat-commission" style="font-size: 1.25rem; font-weight: 800; color: #1D4ED8; margin-top: 2px;">KES 0.00</div>
-            </div>
-            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 10px 14px;">
-              <div style="font-size: 11px; font-weight: 700; color: #64748B;">MRI WITHHOLDING (7.5%)</div>
-              <div id="landlord-stat-mri" style="font-size: 1.25rem; font-weight: 800; color: #B45309; margin-top: 2px;">KES 0.00</div>
-            </div>
-            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 10px 14px;">
-              <div style="font-size: 11px; font-weight: 700; color: #64748B;">NET DISBURSED</div>
-              <div id="landlord-stat-net" style="font-size: 1.25rem; font-weight: 800; color: #047857; margin-top: 2px;">KES 0.00</div>
-            </div>
-          </div>
-
-          <!-- Queue Table -->
-          <div class="builder-table-wrap">
-            <table class="builder-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
-              <thead>
-                <tr style="background: #F8FAFC; border-bottom: 2px solid #CBD5E1; color: #334155;">
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Statement ID</th>
-                  <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Period</th>
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Landlord</th>
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Property</th>
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Remit Destination</th>
-                  <th style="padding: 8px 12px; text-align: right; border-right: 1px solid #E5E7EB;">Net Due (KES)</th>
-                  <th style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Status</th>
-                  <th style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">Payment Ref</th>
-                  <th style="padding: 8px 10px; text-align: center;">Disburse Action</th>
-                </tr>
-              </thead>
-              <tbody id="table-landlord-payouts-body">
-                <!-- Dynamically populated from AppState.landlordStatements -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
     </div>
   </main>
 
@@ -587,10 +867,43 @@
     </div>
   </div>
 
-  <div id="toast-tray" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column-reverse; gap: 8px;"></div>
+  <!-- Global Confirm Modal -->
+  <div class="modal-overlay" id="modal-global-confirm" style="z-index: 2000; display: none;">
+    <div class="modal-card" style="max-width: 540px; border-left: 6px solid #F59E0B;">
+      <div class="modal-header-strip">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.5rem;" id="global-confirm-icon">⚠️</span>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;" id="global-confirm-title">Database Execution Warning</h3>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 2px 0 0 0;">Transaction Confirmation Interceptor</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeGlobalConfirmModal()">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88rem; line-height: 1.5; padding: 16px 20px;">
+        <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px; color: var(--text-primary);" id="global-confirm-box">
+          <p id="global-confirm-msg" style="margin: 0; font-weight: 500;">Are you sure you want to proceed with this operation?</p>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted);">
+          This action will immediately execute database writes and commit changes to the multi-tenant ledger.
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; border-top: 1px solid var(--divider-color); padding: 16px 20px;">
+        <button type="button" class="btn-action-pill" style="padding: 9px 18px; font-size: 0.85rem;" onclick="closeGlobalConfirmModal()">Cancel / Abort</button>
+        <button type="button" class="btn-elevated-primary" id="global-confirm-execute-btn" style="background: var(--accent-primary); border-color: var(--accent-primary);" onclick="executeGlobalConfirmedAction()">
+          Confirm &amp; Execute
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-tray" id="toast-tray"></div>
 
   <!-- Scripts -->
   <script src="js/seed_data.js"></script>
+  <script src="js/landlords.js"></script>
   <script src="js/landlords_hub.js"></script>
 </body>
 </html>

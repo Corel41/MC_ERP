@@ -632,22 +632,34 @@
 
   // 5. TAB SWITCHING FOR LANDLORD MODULE
   function setupLandlordTabs() {
-    const landlordTabBtns = document.querySelectorAll('.landlord-tab-btn');
+    const landlordTabBtns = document.querySelectorAll('.landlord-tab-btn, .tab-btn');
     landlordTabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-landlord-target') || btn.getAttribute('data-tab-target');
+        if (typeof window.switchLandlordTab === 'function') {
+          window.switchLandlordTab(target);
+          return;
+        }
         landlordTabBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        const target = btn.getAttribute('data-landlord-target');
         AppState.activeLandlordTab = target;
-        document.querySelectorAll('.landlord-panel').forEach(p => p.classList.remove('active'));
-        const targetPanel = document.getElementById(`panel-landlord-${target}`);
-        if (targetPanel) targetPanel.classList.add('active');
+        document.querySelectorAll('.landlord-panel, .tab-content').forEach(p => {
+          p.classList.remove('active');
+          p.style.display = 'none';
+        });
+        const targetPanel = document.getElementById(`panel-landlord-${target}`) || document.getElementById(`panel-${target}`);
+        if (targetPanel) {
+          targetPanel.classList.add('active');
+          targetPanel.style.display = 'block';
+        }
 
         if (target === 'statements') {
           initLandlordStatementGenerator();
         } else if (target === 'portfolio') {
           renderLandlordPortfolioTable();
+        } else if (target === 'deductions') {
+          if (typeof renderLandlordDeductionsTable === 'function') renderLandlordDeductionsTable();
         } else if (target === 'payouts') {
           renderLandlordPayoutQueueTable();
         }

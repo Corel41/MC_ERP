@@ -594,7 +594,7 @@
       width: 0;
     }
 
-    main#workspace {
+    main#workspace, .main-content, #main-content {
       flex: 1;
       margin-left: calc(284px + 32px);
       padding: 16px 32px 48px 12px;
@@ -604,7 +604,9 @@
       transition: margin-left 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    body.sidebar-collapsed main#workspace {
+    body.sidebar-collapsed main#workspace,
+    body.sidebar-collapsed .main-content,
+    body.sidebar-collapsed #main-content {
       margin-left: calc(76px + 32px);
     }
 
@@ -1149,7 +1151,7 @@
     }
 
     /* Sub-Module 1.3 Landlord Navigation Segment Tabs & Panels */
-    .landlord-nav-tabs {
+    .landlord-nav-tabs, .tab-header {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
@@ -1161,7 +1163,7 @@
       box-shadow: var(--glass-shadow-sm);
     }
 
-    .landlord-tab-btn {
+    .landlord-tab-btn, .tab-btn, .tab-header button {
       padding: 9px 18px;
       border-radius: 10px;
       border: none;
@@ -1177,19 +1179,19 @@
       transition: all 0.2s ease;
     }
 
-    .landlord-tab-btn:hover {
+    .landlord-tab-btn:hover, .tab-btn:hover, .tab-header button:hover {
       color: var(--text-primary);
       background: rgba(255, 255, 255, 0.15);
     }
 
-    .landlord-tab-btn.active {
+    .landlord-tab-btn.active, .tab-btn.active, .tab-header button.active {
       background: var(--accent-primary);
       color: #FFFFFF;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
     }
 
-    .landlord-panel { display: none; }
-    .landlord-panel.active {
+    .landlord-panel, .tab-content { display: none; }
+    .landlord-panel.active, .tab-content.active {
       display: flex;
       flex-direction: column;
       gap: 24px;
@@ -1295,7 +1297,7 @@
     @media (max-width: 768px) {
       aside#sidebar { transform: translateX(-120%); }
       aside#sidebar.mobile-open { transform: translateX(0); width: 284px; }
-      main#workspace { margin-left: 0 !important; padding: 12px; }
+      main#workspace, .main-content, #main-content { margin-left: 0 !important; padding: 12px; }
       .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
     }
     /* Sub-Module 1.4 Repairs & Maintenance Navigation & Styles */

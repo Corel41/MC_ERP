@@ -1,6 +1,6 @@
 /**
  * MC ERP - Landlords Hub & Deductions Engine (MPA)
- * Handles Landlord Deductions, Property Expenses, Portfolios, and Remittance Payouts
+ * Handles Landlord Deductions, Property Expenses, Portfolios, Statements, and Remittance Payouts
  */
 
 (function () {
@@ -29,6 +29,7 @@
       propertyId: '00000002-0000-4000-8000-000000000001',
       propertyName: 'Sunrise Park Estate',
       landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
       category: 'Security Wages',
       amount: 25000.00,
       periodMonth: 1,
@@ -110,7 +111,6 @@
   }
 
   function initLandlordsHub() {
-    // Make sure AppState exists
     window.AppState = window.AppState || {};
     if (!AppState.properties && window.SEED_PROPERTIES) AppState.properties = window.SEED_PROPERTIES;
     if (!AppState.landlords && window.SEED_LANDLORDS) AppState.landlords = window.SEED_LANDLORDS;
@@ -125,29 +125,67 @@
     populateDateDefaults();
     generateNewVoucherRef();
 
-    renderLandlordDeductionsTable();
     renderLandlordPortfolioTable();
+    renderLandlordDeductionsTable();
     renderLandlordPayoutQueueTable();
+
+    // Check URL hash for direct tab navigation (e.g. #statements, #deductions, #payouts)
+    const hash = window.location.hash.replace('#', '');
+    if (hash === 'statements' || hash === 'deductions' || hash === 'payouts' || hash === 'portfolio') {
+      switchLandlordTab(hash);
+    }
+  }
+
+  function switchLandlordTab(targetTabId) {
+    if (!targetTabId) return;
+    AppState.activeLandlordTab = targetTabId;
+
+    // Normalize targets
+    const cleanId = targetTabId.replace('panel-landlord-', '').replace('panel-', '');
+
+    const tabBtns = document.querySelectorAll('.landlord-tab-btn, .tab-btn, .landlord-hub-tab-btn');
+    tabBtns.forEach(btn => {
+      const bTarget = btn.getAttribute('data-landlord-target') || btn.getAttribute('data-tab-target');
+      if (bTarget === cleanId) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+
+    const panels = document.querySelectorAll('.landlord-panel, .tab-content, .landlord-hub-panel');
+    panels.forEach(p => {
+      if (p.id === `panel-landlord-${cleanId}` || p.id === `panel-${cleanId}`) {
+        p.classList.add('active');
+        p.style.display = 'block';
+      } else {
+        p.classList.remove('active');
+        p.style.display = 'none';
+      }
+    });
+
+    // Trigger tab-specific initialization
+    if (cleanId === 'statements') {
+      if (typeof window.initLandlordStatementGenerator === 'function') {
+        window.initLandlordStatementGenerator();
+      }
+    } else if (cleanId === 'portfolio') {
+      renderLandlordPortfolioTable();
+    } else if (cleanId === 'deductions') {
+      renderLandlordDeductionsTable();
+    } else if (cleanId === 'payouts') {
+      renderLandlordPayoutQueueTable();
+    }
   }
 
   function setupTabNavigation() {
-    const tabBtns = document.querySelectorAll('.landlord-hub-tab-btn');
+    const tabBtns = document.querySelectorAll('.landlord-tab-btn, .tab-btn, .landlord-hub-tab-btn');
     tabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
-        tabBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        const target = btn.getAttribute('data-tab-target');
-        const panels = document.querySelectorAll('.landlord-hub-panel');
-        panels.forEach(p => {
-          if (p.id === `panel-${target}`) {
-            p.classList.add('active');
-            p.style.display = 'block';
-          } else {
-            p.classList.remove('active');
-            p.style.display = 'none';
-          }
-        });
+        const target = btn.getAttribute('data-landlord-target') || btn.getAttribute('data-tab-target');
+        if (target) {
+          switchLandlordTab(target);
+        }
       });
     });
   }
@@ -190,7 +228,6 @@
     const prop = (AppState.properties || []).find(p => p.id === propId);
     if (!prop) return;
 
-    // Look up mandate or landlord
     const mandate = (AppState.mandates || []).find(m => m.propertyName === prop.name || m.propertyId === prop.id);
     let landlordName = mandate ? mandate.landlordName : '';
     let landlordId = '';
@@ -216,7 +253,7 @@
   function populateDateDefaults() {
     const today = new Date();
     const curYear = today.getFullYear();
-    const curMonth = today.getMonth() + 1; // 1-12
+    const curMonth = today.getMonth() + 1;
 
     const monthSel = document.getElementById('deduction-month');
     const yearSel = document.getElementById('deduction-year');
@@ -284,7 +321,6 @@
     AppState.landlordDeductions.unshift(newDeduction);
     saveStoredDeductions(AppState.landlordDeductions);
 
-    // Reset inputs
     amountInput.value = '';
     payeeInput.value = '';
     notesInput.value = '';
@@ -321,7 +357,6 @@
       );
     }
 
-    // Update Stat Cards
     const totalAll = list.reduce((sum, d) => sum + Number(d.amount || 0), 0);
     const mriTotal = list.filter(d => d.category.includes('MRI')).reduce((sum, d) => sum + Number(d.amount || 0), 0);
     const wagesTotal = list.filter(d => d.category.includes('Wages')).reduce((sum, d) => sum + Number(d.amount || 0), 0);
@@ -408,7 +443,7 @@
     showToast('Deduction voucher deleted successfully.');
   }
 
-  // 2. Portfolios & Mandates Table
+  // Portfolio & Mandates Table
   function renderLandlordPortfolioTable() {
     const tbody = document.getElementById('table-landlord-portfolio-body');
     if (!tbody) return;
@@ -450,14 +485,30 @@
           <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB; font-size:0.8rem;">${m.manager || 'Dean Enterprise'}</td>
           <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB; font-size:0.78rem;">${remitText}</td>
           <td style="padding: 8px 10px; text-align: center;">
-            <a href="landlord-statements.html" class="btn-action-pill" style="padding: 4px 10px; font-size: 11px; text-decoration: none; display: inline-block;">📑 View Statements</a>
+            <button type="button" class="btn-action-pill" onclick="prepareQuickStatement('${landlord.id}', '${property.id || ''}')" style="padding: 4px 10px; font-size: 11px; font-weight: 700; color: #008080; background: #E6FFFA; border: 1px solid #81E6D9; border-radius: 3px; cursor: pointer;">
+              ⚡ Generate Statement
+            </button>
           </td>
         </tr>
       `;
     }).join('');
   }
 
-  // 3. Remittance & Payout Queue
+  function prepareQuickStatement(landlordId, propertyId) {
+    switchLandlordTab('statements');
+    if (propertyId) {
+      const propSel = document.getElementById('landlord-stmt-property-rent');
+      if (propSel) {
+        propSel.value = propertyId;
+        if (typeof window.generateLandlordRentStatement === 'function') {
+          window.generateLandlordRentStatement();
+        }
+      }
+    }
+    showToast('Loaded property into Statements Engine.');
+  }
+
+  // Remittance & Payout Queue Table
   function renderLandlordPayoutQueueTable() {
     const tbody = document.getElementById('table-landlord-payouts-body');
     if (!tbody) return;
@@ -498,7 +549,7 @@
         </td>
         <td style="padding: 6px 10px; text-align: center;">
           ${s.status !== 'Paid'
-            ? `<button class="btn-action-pill" style="padding: 4px 10px; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #008080; border: none; border-radius: 3px; cursor: pointer;" onclick="openLandlordPayoutModal('${s.id}')">💳 Mark Paid</button>`
+            ? `<button type="button" class="btn-action-pill" style="padding: 4px 10px; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #008080; border: none; border-radius: 3px; cursor: pointer;" onclick="openLandlordPayoutModal('${s.id}')">💳 Mark Paid</button>`
             : `<span style="font-size:0.75rem; color:#64748B;">✓ ${s.payoutDate || 'Settled'}</span>`}
         </td>
       </tr>
@@ -511,20 +562,32 @@
 
     const modal = document.getElementById('modal-landlord-payout');
     if (!modal) return;
+    modal.style.display = 'flex';
     modal.classList.add('active');
 
-    document.getElementById('payout-modal-landlord-name').textContent = statement.landlordName;
-    document.getElementById('payout-modal-remit-info').textContent = statement.remitDetails || 'Direct Bank Settlement';
-    document.getElementById('payout-modal-amount-display').textContent = `KES ${Number(statement.netPayable || 0).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
-    document.getElementById('payout-modal-statement-id').value = statement.id;
-    document.getElementById('payout-modal-amount').value = statement.netPayable;
-    document.getElementById('payout-date-input').value = new Date().toISOString().split('T')[0];
-    document.getElementById('payout-ref-input').value = `EFT-KCB-${Math.floor(100000 + Math.random() * 900000)}`;
+    const nameEl = document.getElementById('payout-modal-landlord-name');
+    const remitEl = document.getElementById('payout-modal-remit-info');
+    const amtEl = document.getElementById('payout-modal-amount-display');
+    const idInput = document.getElementById('payout-modal-statement-id');
+    const amtInput = document.getElementById('payout-modal-amount');
+    const dateInput = document.getElementById('payout-date-input');
+    const refInput = document.getElementById('payout-ref-input');
+
+    if (nameEl) nameEl.textContent = statement.landlordName;
+    if (remitEl) remitEl.textContent = statement.remitDetails || 'Direct Bank Settlement';
+    if (amtEl) amtEl.textContent = `KES ${Number(statement.netPayable || 0).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
+    if (idInput) idInput.value = statement.id;
+    if (amtInput) amtInput.value = statement.netPayable;
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+    if (refInput) refInput.value = `EFT-KCB-${Math.floor(100000 + Math.random() * 900000)}`;
   }
 
   function closeLandlordPayoutModal() {
     const modal = document.getElementById('modal-landlord-payout');
-    if (modal) modal.classList.remove('active');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('active');
+    }
   }
 
   function handleLandlordPayoutSubmit(e) {
@@ -563,6 +626,8 @@
   }
 
   // Global Exports
+  window.switchLandlordTab = switchLandlordTab;
+  window.prepareQuickStatement = prepareQuickStatement;
   window.recordLandlordDeduction = recordLandlordDeduction;
   window.renderLandlordDeductionsTable = renderLandlordDeductionsTable;
   window.deleteLandlordDeduction = deleteLandlordDeduction;
@@ -571,6 +636,7 @@
   window.openLandlordPayoutModal = openLandlordPayoutModal;
   window.closeLandlordPayoutModal = closeLandlordPayoutModal;
   window.handleLandlordPayoutSubmit = handleLandlordPayoutSubmit;
+  window.showToast = showToast;
 
   document.addEventListener('DOMContentLoaded', initLandlordsHub);
 })();
