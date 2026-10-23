@@ -192,22 +192,15 @@
           <!-- 2. PRINTABLE STATEMENT CONTAINER (Strictly matching landlord Statement - Jan.pdf) -->
           <div id="printable-landlord-statement" class="landlord-statement-sheet" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 40px 48px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); max-width: 1050px; margin: 0 auto 30px auto; color: #000000; font-family: Arial, Helvetica, sans-serif; position: relative;">
             
-            <!-- UNIFORM CORPORATE HEADER -->
-            <div style="display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
-              <!-- Left Side -->
-              <div style="display: flex; align-items: center;">
-                <img src="assets/logo.png" alt="Metrocosmo Logo" style="max-width: 140px; max-height: 80px; object-fit: contain;">
-              </div>
-
-              <!-- Right/Center -->
-              <div style="text-align: right; font-size: 11.5px; color: #000000; line-height: 1.4;">
-                <h1 style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; color: #000000; text-transform: uppercase;">METROCOSMO LTD - NAIROBI</h1>
-                <div style="font-size: 11.5px; font-style: italic; font-weight: 600; color: #1F2937; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</div>
-                <div style="margin-top: 3px;">P.O. BOX 40656 - 00100 Nairobi | Hughes Building, 7th Floor</div>
-                <div>Cell: 020 2244218, 0721 737093 | E-Mail: info@metrocosmo.com</div>
-                <div style="margin-top: 4px; font-weight: 700; font-size: 11.5px;">
-                  P.I.N: <span id="ll-stmt-header-pin" style="font-family: monospace;">P051112708J</span> | Date: <span id="ll-stmt-header-date">06-Mar-2026</span> <span id="ll-stmt-header-time">15:06:13</span>
-                </div>
+            <!-- DYNAMIC BRANCH CORPORATE HEADER -->
+            <div id="ll-stmt-header-container" style="position: relative; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; min-height: 80px;">
+              <img src="assets/logo.png" alt="Company Logo" style="position: absolute; left: 0; top: 0; max-width: 120px; max-height: 80px; object-fit: contain;">
+              <div style="display: inline-block; text-align: center;">
+                <h2 style="margin: 0; font-size: 18px; font-weight: bold;">METROCOSMO LTD - NAIROBI</h2>
+                <p style="margin: 2px 0; font-size: 11px; font-style: italic; font-weight: bold;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</p>
+                <p style="margin: 2px 0; font-size: 11px;">P.O. BOX 40656 - 00100 Nairobi | Hughes Building, 7th Floor</p>
+                <p style="margin: 2px 0; font-size: 11px;">Cell: 020 2244218, 0721 737093 | E-Mail: info@metrocosmo.com</p>
+                <p style="margin: 2px 0; font-size: 11px; font-weight: bold;">PIN: P051189201A | Date: <span id="ll-stmt-header-date">06-Mar-2026 15:06:13</span></p>
               </div>
             </div>
 

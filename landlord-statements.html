@@ -246,74 +246,16 @@
     <div id="module-content">
       <div class="view-content active" id="view-estate-landlords">
 
-        <!-- Navigation Segment Tabs for Landlords -->
-        <div class="landlord-nav-tabs">
-          <button class="landlord-tab-btn" data-landlord-target="portfolio">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <span>Portfolio &amp; Mandates</span>
-          </button>
-          <button class="landlord-tab-btn active" data-landlord-target="statements">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            <span>Monthly Statements Engine</span>
-          </button>
-          <button class="landlord-tab-btn" data-landlord-target="payouts">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            <span>Remittance &amp; Payout Queue</span>
-          </button>
-        </div>
-
-        <!-- 1. PORTFOLIO & MANDATES PANEL -->
-        <div class="landlord-panel" id="panel-landlord-portfolio">
-          <div class="glass-card clean-module-container">
-            <div class="module-header-strip">
-              <div class="module-title-box">
-                <h2>Landlord Asset Portfolio &amp; Management Mandates</h2>
-                <p>Overview of active properties managed per landlord, contractual agency commission percentages, 16% agency VAT covenants, and statutory KRA 7.5% MRI tax withholding.</p>
-              </div>
-              <span class="live-pulse-badge">Mandate Statutory Guard: 16% VAT &amp; 7.5% MRI</span>
+        <div class="glass-card clean-module-container">
+          <div class="module-header-strip">
+            <div class="module-title-box">
+              <h2>Landlord Monthly Statement &amp; Net Remittance Engine</h2>
+              <p>Calculate monthly net remittance per property by deducting agreed agency commissions, 16% agency VAT, approved maintenance/repair costs, and statutory 7.5% MRI withholding tax.</p>
             </div>
-
-            <!-- Portfolio Directory Table -->
-            <div style="margin-top: 10px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Managed Property Portfolios</h3>
-                <span class="badge-status" id="portfolio-count-badge" style="color: var(--accent-secondary);">5 Active Mandates</span>
-              </div>
-              <div class="builder-table-wrap">
-                <table class="builder-table">
-                  <thead>
-                    <tr>
-                      <th>Landlord &amp; Code</th>
-                      <th>Managed Property &amp; LR No.</th>
-                      <th>Units Managed</th>
-                      <th>Commission Terms</th>
-                      <th>16% VAT</th>
-                      <th>7.5% MRI Tax</th>
-                      <th>Property Manager</th>
-                      <th>Remittance Target</th>
-                      <th>Property Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="table-landlord-portfolio-body"></tbody>
-                </table>
-              </div>
-            </div>
+            <span class="live-pulse-badge">dbo_Landlord_Payments / Pro_PayToLLComm Sync</span>
           </div>
-        </div>
 
-        <!-- 2. MONTHLY STATEMENTS ENGINE PANEL -->
-        <div class="landlord-panel active" id="panel-landlord-statements">
-          <div class="glass-card clean-module-container">
-            <div class="module-header-strip">
-              <div class="module-title-box">
-                <h2>Landlord Monthly Statement &amp; Net Remittance Engine</h2>
-                <p>Calculate monthly net remittance per property by deducting agreed agency commissions, 16% agency VAT, approved maintenance/repair costs, and statutory 7.5% MRI withholding tax.</p>
-              </div>
-              <span class="live-pulse-badge">dbo_Landlord_Payments / Pro_PayToLLComm Sync</span>
-            </div>
-
-            <!-- 1. GENERATOR CONTROL PANEL (TWO DISTINCT HORIZONTAL SECTIONS A & B) -->
+          <!-- 1. GENERATOR CONTROL PANEL (TWO DISTINCT HORIZONTAL SECTIONS A & B) -->
             <div class="landlord-stmt-control-panel" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
               
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
@@ -438,22 +380,15 @@
             <!-- 2. PRINTABLE STATEMENT CONTAINER (Strictly matching landlord Statement - Jan.pdf) -->
             <div id="printable-landlord-statement" class="landlord-statement-sheet" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 40px 48px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); max-width: 1050px; margin: 0 auto 30px auto; color: #000000; font-family: Arial, Helvetica, sans-serif; position: relative;">
               
-              <!-- UNIFORM CORPORATE HEADER -->
-              <div style="display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
-                <!-- Left Side -->
-                <div style="display: flex; align-items: center;">
-                  <img src="assets/logo.png" alt="Metrocosmo Logo" style="max-width: 140px; max-height: 80px; object-fit: contain;">
-                </div>
-
-                <!-- Right/Center -->
-                <div style="text-align: right; font-size: 11.5px; color: #000000; line-height: 1.4;">
-                  <h1 style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; color: #000000; text-transform: uppercase;">METROCOSMO LTD - NAIROBI</h1>
-                  <div style="font-size: 11.5px; font-style: italic; font-weight: 600; color: #1F2937; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</div>
-                  <div style="margin-top: 3px;">P.O. BOX 40656 - 00100 Nairobi | Hughes Building, 7th Floor</div>
-                  <div>Cell: 020 2244218, 0721 737093 | E-Mail: info@metrocosmo.com</div>
-                  <div style="margin-top: 4px; font-weight: 700; font-size: 11.5px;">
-                    P.I.N: <span id="ll-stmt-header-pin" style="font-family: monospace;">P051112708J</span> | Date: <span id="ll-stmt-header-date">06-Mar-2026</span> <span id="ll-stmt-header-time">15:06:13</span>
-                  </div>
+              <!-- DYNAMIC BRANCH CORPORATE HEADER -->
+              <div id="ll-stmt-header-container" style="position: relative; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; min-height: 80px;">
+                <img src="assets/logo.png" alt="Company Logo" style="position: absolute; left: 0; top: 0; max-width: 120px; max-height: 80px; object-fit: contain;">
+                <div style="display: inline-block; text-align: center;">
+                  <h2 style="margin: 0; font-size: 18px; font-weight: bold;">METROCOSMO LTD - NAIROBI</h2>
+                  <p style="margin: 2px 0; font-size: 11px; font-style: italic; font-weight: bold;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</p>
+                  <p style="margin: 2px 0; font-size: 11px;">P.O. BOX 40656 - 00100 Nairobi | Hughes Building, 7th Floor</p>
+                  <p style="margin: 2px 0; font-size: 11px;">Cell: 020 2244218, 0721 737093 | E-Mail: info@metrocosmo.com</p>
+                  <p style="margin: 2px 0; font-size: 11px; font-weight: bold;">PIN: P051189201A | Date: <span id="ll-stmt-header-date">06-Mar-2026 15:06:13</span></p>
                 </div>
               </div>
 
@@ -584,164 +519,15 @@
 
             </div>
 
-            <!-- Statements History Table -->
-            <div style="margin-top: 14px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Issued Landlord Statements</h3>
-                <span class="badge-status" style="color: var(--accent-secondary);">Net Payout Verified</span>
-              </div>
-              <div class="builder-table-wrap">
-                <table class="builder-table">
-                  <thead>
-                    <tr>
-                      <th>Statement Ref</th>
-                      <th>Period</th>
-                      <th>Landlord Name</th>
-                      <th>Property</th>
-                      <th>Gross Collected</th>
-                      <th>Commission (-)</th>
-                      <th>VAT (-)</th>
-                      <th>Maintenance (-)</th>
-                      <th>KRA MRI (-)</th>
-                      <th>Net Payout</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="table-statements-body"></tbody>
-                </table>
-              </div>
-            </div>
           </div>
         </div>
-
-        <!-- 3. REMITTANCE & PAYOUT QUEUE PANEL -->
-        <div class="landlord-panel" id="panel-landlord-payouts">
-          <div class="glass-card clean-module-container">
-            <div class="module-header-strip">
-              <div class="module-title-box">
-                <h2>Landlord Remittance &amp; Electronic Payout Queue</h2>
-                <p>Authorize and disburse net rental proceeds to property owners via Bank EFT / RTGS or Safaricom Daraja M-Pesa B2C Bulk Mobile Disbursements.</p>
-              </div>
-              <span class="live-pulse-badge">dbo_Pro_LandlordRemittanceExport</span>
-            </div>
-
-            <!-- Summary Metric Counters -->
-            <div class="stat-pill-group">
-              <div class="stat-pill">
-                <span class="stat-pill-title">Total Gross Rent Managed</span>
-                <span class="stat-pill-value" id="landlord-stat-gross" style="color: var(--accent-primary);">KES 0.00</span>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">Agency Commission &amp; VAT Retained</span>
-                <span class="stat-pill-value" id="landlord-stat-commission" style="color: var(--accent-secondary);">KES 0.00</span>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">KRA 7.5% MRI Tax Withheld</span>
-                <span class="stat-pill-value" id="landlord-stat-mri" style="color: var(--accent-amber);">KES 0.00</span>
-              </div>
-              <div class="stat-pill">
-                <span class="stat-pill-title">Net Landlord Proceeds Disbursed</span>
-                <span class="stat-pill-value" id="landlord-stat-net" style="color: var(--accent-tertiary);">KES 0.00</span>
-              </div>
-            </div>
-
-            <!-- Payout Queue Table -->
-            <div style="margin-top: 10px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="font-size: 1.05rem; font-weight: 700;">Electronic Remittance Dispatch Queue</h3>
-                <span class="badge-status" style="color: var(--accent-secondary);">Direct B2C / Bank Routing</span>
-              </div>
-              <div class="builder-table-wrap">
-                <table class="builder-table">
-                  <thead>
-                    <tr>
-                      <th>Statement No.</th>
-                      <th>Period</th>
-                      <th>Landlord Name</th>
-                      <th>Target Property</th>
-                      <th>Remittance Destination</th>
-                      <th>Net Amount Due</th>
-                      <th>Payout Status</th>
-                      <th>Disbursement Ref</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="table-landlord-payouts-body"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-  </main>
-
-  <div class="toast-tray" id="toast-tray"></div>
-
-  <!-- LANDLORD PAYOUT MODAL (BANK EFT / M-PESA B2C) -->
-  <div class="modal-overlay" id="modal-landlord-payout">
-    <div class="modal-card">
-      <div class="modal-header-strip">
-        <div>
-          <h3 style="font-size: 1.2rem; font-weight: 800;">Execute Landlord Remittance Payout</h3>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">Record Bank Transfer EFT Reference or Safaricom M-Pesa B2C Transaction Code.</p>
-        </div>
-        <button type="button" class="modal-close-btn" onclick="closeLandlordPayoutModal()" title="Close">&times;</button>
       </div>
 
-      <form id="form-landlord-payout" onsubmit="handleLandlordPayoutSubmit(event)">
-        <div class="form-grid-2">
-          <div class="form-group span-full" style="background: var(--nav-active-bg); padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border);">
-            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Beneficiary &amp; Target Statement</div>
-            <div style="font-size: 1.05rem; font-weight: 800; margin-top: 2px;" id="payout-modal-landlord-name">—</div>
-            <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 2px;" id="payout-modal-remit-info">—</div>
-            <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent-secondary); margin-top: 6px;" id="payout-modal-amount-due">KES 0.00</div>
-            <input type="hidden" id="payout-modal-statement-id">
-            <input type="hidden" id="payout-modal-amount">
-          </div>
+    </main>
 
-          <div class="form-group">
-            <label class="form-label">Disbursement Channel</label>
-            <select class="form-input" id="payout-method-select">
-              <option value="Bank Transfer">Bank Transfer (EFT / RTGS)</option>
-              <option value="M-Pesa B2C">Safaricom M-Pesa B2C Mobile Payout</option>
-              <option value="Cheque">Corporate Banker's Cheque</option>
-            </select>
-          </div>
+    <div class="toast-tray" id="toast-tray"></div>
 
-          <div class="form-group">
-            <label class="form-label">Transaction Reference / EFT Code</label>
-            <input type="text" class="form-input" id="payout-ref-input" required placeholder="e.g. EFT-KCB-982102 or B2C-SK9102">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Disbursement Date</label>
-            <input type="date" class="form-input" id="payout-date-input" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Authorizing Officer</label>
-            <input type="text" class="form-input" id="payout-authorizer-input" readonly value="Metrocosmo Finance Executive">
-          </div>
-
-          <div class="form-group span-full">
-            <label class="form-label">Payout Remittance Notes</label>
-            <input type="text" class="form-input" id="payout-notes-input" placeholder="e.g. October 2026 Net Rental Proceeds Disbursed via KCB EFT">
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
-          <button type="button" class="btn-action-pill" onclick="closeLandlordPayoutModal()" style="padding: 10px 18px;">Cancel</button>
-          <button type="submit" class="btn-elevated-primary">✓ Confirm &amp; Authorize Payout</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- GLOBAL CONFIRMATION INTERCEPTOR MODAL -->
+    <!-- GLOBAL CONFIRMATION INTERCEPTOR MODAL -->
   <div class="modal-overlay" id="modal-global-confirm" style="z-index: 2000;">
     <div class="modal-card" style="max-width: 540px; border-left: 6px solid #F59E0B;">
       <div class="modal-header-strip">

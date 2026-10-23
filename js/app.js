@@ -5498,16 +5498,29 @@ const AppState = {
       const lastDay = new Date(yearNum, monthNum, 0).getDate();
       const endOfMonth = `${yearNum}-${String(monthNum).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
-      // Set Metadata Headers
-      const pinEl = document.getElementById('ll-stmt-header-pin');
-      if (pinEl) pinEl.textContent = landlord.kraPin || 'P051112708J';
+      // Identify branch based on property, default to NAIROBI
+      const selectedProperty = prop || {};
+      const branchName = selectedProperty.branch_name || selectedProperty.branch || (selectedProperty.officeBranch ? selectedProperty.officeBranch.replace(/\s*(Head\s*)?Office/i, '').trim() : '') || 'NAIROBI';
+      const currentDateTime = `${getLandlordStatementCurrentDate()} ${getLandlordStatementCurrentTime()}`;
 
-      const dateEl = document.getElementById('ll-stmt-header-date');
-      if (dateEl) dateEl.textContent = getLandlordStatementCurrentDate();
+      // Update Header Container with dynamic branch name and centered layout
+      const headerContainer = document.getElementById('ll-stmt-header-container');
+      if (headerContainer) {
+        headerContainer.outerHTML = `
+<div id="ll-stmt-header-container" style="position: relative; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; min-height: 80px;">
+    <img src="assets/logo.png" alt="Company Logo" style="position: absolute; left: 0; top: 0; max-width: 120px; max-height: 80px; object-fit: contain;">
+    <div style="display: inline-block; text-align: center;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: bold;">METROCOSMO LTD - ${branchName.toUpperCase()}</h2>
+        <p style="margin: 2px 0; font-size: 11px; font-style: italic; font-weight: bold;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS & VALUERS</p>
+        <p style="margin: 2px 0; font-size: 11px;">P.O. BOX 40656 - 00100 Nairobi | Hughes Building, 7th Floor</p>
+        <p style="margin: 2px 0; font-size: 11px;">Cell: 020 2244218, 0721 737093 | E-Mail: info@metrocosmo.com</p>
+        <p style="margin: 2px 0; font-size: 11px; font-weight: bold;">PIN: P051189201A | Date: ${currentDateTime}</p>
+    </div>
+</div>
+`;
+      }
 
-      const timeEl = document.getElementById('ll-stmt-header-time');
-      if (timeEl) timeEl.textContent = getLandlordStatementCurrentTime();
-
+      // Set Metadata Details
       const princEl = document.getElementById('ll-stmt-principal');
       if (princEl) princEl.textContent = `${landlord.landlordCode || 'L042'} - ${(landlord.name || 'COUNTY HOME DEVELOPERS LIMITED').toUpperCase()}`;
 
