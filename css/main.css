@@ -1473,23 +1473,105 @@
     [data-theme="developer"] .badge-alloc-tenant { background: #FEF2F2 !important; color: #B91C1C !important; border-color: #FECACA !important; }
     [data-theme="developer"] .badge-alloc-pool { background: #ECFDF5 !important; color: #047857 !important; border-color: #A7F3D0 !important; }
 
-/* Print styles for Official Receipt, Financial Vouchers and Tenant Statements */
+/* Print styles for Official Receipt, Financial Vouchers, Tenant & Landlord Statements */
 @media print {
-  body * {
-    visibility: hidden;
+  /* Standardize page to A4 and control margins */
+  @page {
+    size: A4 portrait;
+    margin: 10mm; /* Adjusts standard margins to fit content cleanly */
   }
-  #modal-official-receipt,
-  #modal-official-receipt *,
-  #printable-tenant-statement,
-  #printable-tenant-statement *,
+
+  /* Zero out all body and parent constraints */
+  body, html {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  /* Hide all UI elements */
+  .sidebar, #sidebar, aside, .top-header, header#top-nav, #top-nav, .nav, .nav-container, .nav-divider, 
+  .sidebar-header, .sidebar-footer, .window-controls, .action-bars, .control-panel, .landlord-stmt-control-panel, 
+  .landlord-nav-tabs, .tenant-subtab-strip, .statement-filter-bar, .module-header-strip, .builder-table-wrap, 
+  .toast-tray, .modal-overlay:not(#modal-official-receipt), button, input, select, .no-print {
+    display: none !important;
+  }
+
+  /* Force the main content area to release any desktop minimum widths */
+  .main-content, #main-wrapper, .container, main#workspace, #workspace, #module-content, .view-content, 
+  .landlord-panel, .clean-module-container, .glass-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Allow the statement container to span exactly the paper width */
   #printable-landlord-statement,
-  #printable-landlord-statement * {
-    visibility: visible;
+  #printable-tenant-statement {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    font-size: 11px !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
   }
-  #modal-official-receipt {
-    position: absolute !important;
-    left: 0 !important;
+
+  /* Ensure the table shrinks to fit */
+  #printable-landlord-statement table,
+  #printable-tenant-statement table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: auto !important; /* Let browser adjust column widths */
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+  }
+
+  #printable-landlord-statement th,
+  #printable-tenant-statement th {
+    width: auto !important;
+  }
+
+  #printable-landlord-statement th,
+  #printable-landlord-statement td,
+  #printable-tenant-statement th,
+  #printable-tenant-statement td {
+    box-sizing: border-box !important;
+    padding: 4px 5px !important;
+  }
+
+  #printable-landlord-statement tr,
+  #printable-tenant-statement tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+  }
+
+  /* Pin and timestamp corner alignment for landlord statement */
+  #printable-landlord-statement div[style*="position: absolute"] {
     top: 0 !important;
+    right: 0 !important;
+  }
+
+  /* Support for Official Receipt printing in modal overlay */
+  #modal-official-receipt {
+    display: block !important;
+    position: static !important;
     width: 100% !important;
     height: auto !important;
     background: transparent !important;
@@ -1497,41 +1579,17 @@
     margin: 0 !important;
     box-shadow: none !important;
   }
+
   #modal-official-receipt button,
   #modal-official-receipt div[style*="background: #008080"] {
     display: none !important;
   }
+
   #printable-receipt-content {
     padding: 10px !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
-  }
-  #printable-tenant-statement,
-  #printable-landlord-statement {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    background: #FFFFFF !important;
-    color: #000000 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
-    border: none !important;
-  }
-  .statement-filter-bar,
-  .landlord-stmt-control-panel,
-  .landlord-nav-tabs,
-  .tenant-subtab-strip,
-  .module-header-strip,
-  button {
-    display: none !important;
-  }
-  @page {
-    size: portrait;
-    margin: 10mm 12mm;
   }
 }
 
