@@ -375,7 +375,7 @@
     if (list.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="10" style="text-align: center; padding: 28px; color: #6B7280; font-style: italic;">
+          <td colspan="10" style="text-align: center; padding: 32px; color: var(--text-muted); font-style: italic;">
             No landlord deductions or property expenses found matching current filters.
           </td>
         </tr>
@@ -384,49 +384,44 @@
     }
 
     tbody.innerHTML = list.map((item, idx) => {
-      let catBadgeBg = '#EFF6FF';
-      let catBadgeColor = '#1D4ED8';
-
+      let badgeClass = 'badge-priority-low';
       if (item.category.includes('MRI')) {
-        catBadgeBg = '#FEF3C7';
-        catBadgeColor = '#B45309';
+        badgeClass = 'badge-priority-medium';
       } else if (item.category.includes('Wages')) {
-        catBadgeBg = '#ECFDF5';
-        catBadgeColor = '#047857';
+        badgeClass = 'badge-status-completed';
       } else if (item.category.includes('Repairs')) {
-        catBadgeBg = '#FEE2E2';
-        catBadgeColor = '#B91C1C';
+        badgeClass = 'badge-priority-emergency';
       }
 
       const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const periodLabel = `${monthNames[item.periodMonth] || ''} ${item.periodYear || ''}`;
 
       return `
-        <tr class="pm-table-row">
-          <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">${idx + 1}</td>
-          <td style="padding: 6px 12px; font-weight: 700; font-family: monospace; color: #008080; border-right: 1px solid #E5E7EB;">${item.voucherRef}</td>
-          <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB; white-space: nowrap;">${item.date} <br><small style="color:#64748B;">(${periodLabel})</small></td>
-          <td style="padding: 6px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">${item.propertyName}</td>
-          <td style="padding: 6px 12px; border-right: 1px solid #E5E7EB; color: #334155;">${item.landlordName}</td>
-          <td style="padding: 6px 12px; border-right: 1px solid #E5E7EB;">
-            <span style="background: ${catBadgeBg}; color: ${catBadgeColor}; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">
+        <tr>
+          <td style="text-align: center; width: 44px;">${idx + 1}</td>
+          <td><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-primary);">${item.voucherRef}</span></td>
+          <td style="text-align: center; white-space: nowrap;">${item.date} <br><small style="color: var(--text-muted);">(${periodLabel})</small></td>
+          <td style="font-weight: 600; color: var(--text-primary);">${item.propertyName}</td>
+          <td>${item.landlordName}</td>
+          <td>
+            <span class="badge-status ${badgeClass}">
               ${item.category}
             </span>
           </td>
-          <td style="padding: 6px 12px; border-right: 1px solid #E5E7EB;">
-            <strong>${item.payee}</strong>
-            ${item.notes ? `<div style="font-size: 11px; color: #64748B; margin-top: 2px;">${item.notes}</div>` : ''}
+          <td>
+            <strong style="color: var(--text-primary);">${item.payee}</strong>
+            ${item.notes ? `<div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">${item.notes}</div>` : ''}
           </td>
-          <td style="padding: 6px 12px; text-align: right; font-weight: 800; color: #111827; border-right: 1px solid #E5E7EB; font-variant-numeric: tabular-nums;">
+          <td style="text-align: right; font-weight: 800; color: var(--text-primary); font-variant-numeric: tabular-nums;">
             ${Number(item.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
           </td>
-          <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">
-            <span style="background: #ECFDF5; color: #047857; padding: 2px 8px; border-radius: 2px; font-weight: 700; font-size: 10.5px;">
-              ● Approved
+          <td style="text-align: center;">
+            <span class="badge-status badge-status-completed">
+              Approved
             </span>
           </td>
-          <td style="padding: 4px 8px; text-align: center; white-space: nowrap;">
-            <button type="button" class="btn-action-pill" onclick="deleteLandlordDeduction('${item.id}')" style="padding: 3px 8px; font-size: 11px; font-weight: 700; color: #DC2626; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 3px; cursor: pointer;" title="Delete this deduction">
+          <td style="text-align: center; white-space: nowrap;">
+            <button type="button" class="btn-action-pill" onclick="deleteLandlordDeduction('${item.id}')" title="Delete this deduction" style="color: #F87171; border-color: rgba(248, 113, 113, 0.3);">
               🗑️ Delete
             </button>
           </td>
@@ -466,27 +461,27 @@
         : `<strong>${m.feePct || 8}%</strong> <small style="display:block; color:var(--text-muted); font-size:0.72rem;">Gross Rent</small>`;
 
       return `
-        <tr class="pm-table-row">
-          <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">
+        <tr>
+          <td>
             <div style="display: flex; align-items: center; gap: 6px;">
-              <strong>${m.landlordName}</strong>
-              <span class="badge-status" style="font-weight: 800; font-size: 0.72rem; background: var(--accent-primary); color: #FFFFFF; padding: 1px 6px; border-radius: 3px;">${landlord.landlordCode || landlord.id || 'LL'}</span>
+              <strong style="color: var(--text-primary);">${m.landlordName}</strong>
+              <span class="badge-status" style="font-weight: 800; font-size: 0.72rem; background: var(--accent-primary); color: #FFFFFF; padding: 1px 6px;">${landlord.landlordCode || landlord.id || 'LL'}</span>
             </div>
             <div style="font-size:0.75rem; color:var(--text-muted); margin-top: 2px;">${landlord.entityType || 'Individual'} • ${landlord.kraPin || 'N/A'}</div>
           </td>
-          <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">
-            <strong>${m.propertyName}</strong>
+          <td>
+            <strong style="color: var(--text-primary);">${m.propertyName}</strong>
             <div style="font-size:0.75rem; color:var(--text-muted); margin-top: 2px;">${property.lr || 'L.R NAIROBI'}</div>
           </td>
-          <td style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;"><span class="badge-status" style="font-size:0.75rem;">${unitsCount || 10} Units</span></td>
-          <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">${commText}</td>
-          <td style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">${m.vat ? '<span style="color: #047857; font-weight: 700;">✓ 16% VAT</span>' : 'Exempt'}</td>
-          <td style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">${m.mri ? '<span style="color: #B45309; font-weight: 700;">✓ 7.5% MRI</span>' : 'Exempt'}</td>
-          <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB; font-size:0.8rem;">${m.manager || 'Dean Enterprise'}</td>
-          <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB; font-size:0.78rem;">${remitText}</td>
-          <td style="padding: 8px 10px; text-align: center;">
-            <button type="button" class="btn-action-pill" onclick="prepareQuickStatement('${landlord.id}', '${property.id || ''}')" style="padding: 4px 10px; font-size: 11px; font-weight: 700; color: #008080; background: #E6FFFA; border: 1px solid #81E6D9; border-radius: 3px; cursor: pointer;">
-              ⚡ Generate Statement
+          <td style="text-align: center;"><span class="badge-status" style="font-size:0.75rem;">${unitsCount || 10} Units</span></td>
+          <td>${commText}</td>
+          <td style="text-align: center;">${m.vat ? '<span class="badge-status badge-status-completed">✓ 16% VAT</span>' : '<span style="color: var(--text-muted);">Exempt</span>'}</td>
+          <td style="text-align: center;">${m.mri ? '<span class="badge-status badge-priority-medium">✓ 7.5% MRI</span>' : '<span style="color: var(--text-muted);">Exempt</span>'}</td>
+          <td style="font-size:0.8rem;">${m.manager || 'Dean Enterprise'}</td>
+          <td style="font-size:0.78rem;">${remitText}</td>
+          <td style="text-align: center;">
+            <button type="button" class="btn-action-pill" onclick="prepareQuickStatement('${landlord.id}', '${property.id || ''}')" style="color: var(--accent-primary);">
+              ⚡ Statement
             </button>
           </td>
         </tr>
@@ -532,25 +527,25 @@
     if (netEl) netEl.textContent = `KES ${totalNetDisbursed.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
 
     tbody.innerHTML = stmts.map(s => `
-      <tr class="pm-table-row">
-        <td style="padding: 8px 12px; font-weight: 700; color: #008080; border-right: 1px solid #E5E7EB;">${s.id}</td>
-        <td style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">${monthNames[s.periodMonth]} ${s.periodYear}</td>
-        <td style="padding: 8px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">${s.landlordName}</td>
-        <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB;">${s.propertyName}</td>
-        <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB; font-size:0.8rem; color: #475569;">${s.remitDetails || 'Co-op Bank Direct EFT'}</td>
-        <td style="padding: 8px 12px; text-align: right; border-right: 1px solid #E5E7EB;"><strong style="color: #047857; font-size: 0.95rem;">KES ${Number(s.netPayable || 0).toLocaleString()}</strong></td>
-        <td style="padding: 8px 10px; text-align: center; border-right: 1px solid #E5E7EB;">
-          <span class="badge-status" style="background: ${s.status === 'Paid' ? '#ECFDF5' : '#FEF3C7'}; color: ${s.status === 'Paid' ? '#047857' : '#B45309'}; padding: 2px 8px; border-radius: 3px; font-weight: 700; font-size: 11px;">
+      <tr>
+        <td style="font-weight: 700; color: var(--accent-primary); font-family: 'JetBrains Mono', monospace;">${s.id}</td>
+        <td style="text-align: center;">${monthNames[s.periodMonth]} ${s.periodYear}</td>
+        <td style="font-weight: 600; color: var(--text-primary);">${s.landlordName}</td>
+        <td>${s.propertyName}</td>
+        <td style="font-size:0.8rem; color: var(--text-muted);">${s.remitDetails || 'Co-op Bank Direct EFT'}</td>
+        <td style="text-align: right;"><strong style="color: var(--accent-secondary); font-size: 0.95rem;">KES ${Number(s.netPayable || 0).toLocaleString()}</strong></td>
+        <td style="text-align: center;">
+          <span class="badge-status ${s.status === 'Paid' ? 'badge-status-completed' : 'badge-priority-medium'}">
             ${s.status === 'Paid' ? 'Settled' : 'Pending Payout'}
           </span>
         </td>
-        <td style="padding: 8px 12px; border-right: 1px solid #E5E7EB; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
-          ${s.payoutRef ? `<span style="color:#0F172A; font-weight:600;">${s.payoutRef}</span>` : '—'}
+        <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">
+          ${s.payoutRef ? `<span style="color: var(--text-primary); font-weight:600;">${s.payoutRef}</span>` : '<span style="color: var(--text-muted);">—</span>'}
         </td>
-        <td style="padding: 6px 10px; text-align: center;">
+        <td style="text-align: center;">
           ${s.status !== 'Paid'
-            ? `<button type="button" class="btn-action-pill" style="padding: 4px 10px; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #008080; border: none; border-radius: 3px; cursor: pointer;" onclick="openLandlordPayoutModal('${s.id}')">💳 Mark Paid</button>`
-            : `<span style="font-size:0.75rem; color:#64748B;">✓ ${s.payoutDate || 'Settled'}</span>`}
+            ? `<button type="button" class="btn-elevated-primary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="openLandlordPayoutModal('${s.id}')">💳 Mark Paid</button>`
+            : `<span style="font-size: 0.78rem; color: var(--text-muted);">✓ ${s.payoutDate || 'Settled'}</span>`}
         </td>
       </tr>
     `).join('');
@@ -614,9 +609,8 @@
       return;
     }
     const toast = document.createElement('div');
-    toast.className = 'glass-toast toast-success';
-    toast.style.cssText = 'background: #0F172A; color: #FFFFFF; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 13px; font-weight: 600; margin-top: 8px; border-left: 4px solid #10B981; display: flex; align-items: center; gap: 8px;';
-    toast.innerHTML = `<span>✓</span><span>${message}</span>`;
+    toast.className = 'toast-bubble';
+    toast.innerHTML = `<span style="color: var(--accent-secondary); font-weight: 700;">✓</span><span>${message}</span>`;
     tray.appendChild(toast);
     setTimeout(() => {
       toast.style.opacity = '0';
