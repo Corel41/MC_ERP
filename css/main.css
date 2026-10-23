@@ -1297,10 +1297,44 @@ input[type="number"].receipt-alloc-input,
 
 .receipting-middle-row .receipting-summary-col {
   flex: 0 0 38%;
-  max-width: 440px;
-  min-width: 310px;
+  max-width: 460px;
+  min-width: 330px;
   padding: 14px 16px;
   box-sizing: border-box;
+}
+
+.receipting-auto-allocate-bar {
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.receipting-payment-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.receipting-payment-input-group #receipt-amount-paid {
+  flex: 1;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+
+.receipting-payment-input-group #btn-receipt-auto-allocate {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .receipting-payment-input-group {
+    flex-direction: column;
+  }
+  .receipting-payment-input-group #btn-receipt-auto-allocate {
+    width: 100%;
+  }
 }
 
 .receipting-middle-row .receipting-billing-col {
