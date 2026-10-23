@@ -805,17 +805,20 @@
 
     if (amtInput) {
       amtInput.readOnly = true;
-      amtInput.style.background = '#EEF2F6 !important';
+      amtInput.style.background = 'rgba(255, 255, 255, 0.04)';
+      amtInput.style.opacity = '0.7';
       amtInput.title = 'Payment Received is locked in Edit Mode';
     }
     if (dateInput) {
       dateInput.readOnly = true;
-      dateInput.style.background = '#EEF2F6 !important';
+      dateInput.style.background = 'rgba(255, 255, 255, 0.04)';
+      dateInput.style.opacity = '0.7';
     }
     if (methodSel) methodSel.disabled = true;
     if (refInput) {
       refInput.readOnly = true;
-      refInput.style.background = '#EEF2F6 !important';
+      refInput.style.background = 'rgba(255, 255, 255, 0.04)';
+      refInput.style.opacity = '0.7';
     }
     if (propSel) propSel.disabled = true;
     if (tenantSel) tenantSel.disabled = true;
@@ -867,20 +870,23 @@
     const amtInput = document.getElementById('receipt-amount-paid');
     if (amtInput) {
       amtInput.readOnly = false;
-      amtInput.style.background = '#FFFFFF !important';
+      amtInput.style.background = '';
+      amtInput.style.opacity = '1';
       amtInput.title = '';
     }
     const dateInput = document.getElementById('receipt-payment-date');
     if (dateInput) {
       dateInput.readOnly = false;
-      dateInput.style.background = '#FFFFFF !important';
+      dateInput.style.background = '';
+      dateInput.style.opacity = '1';
     }
     const methodSel = document.getElementById('receipt-method-select');
     if (methodSel) methodSel.disabled = false;
     const refInput = document.getElementById('receipt-ref-code');
     if (refInput) {
       refInput.readOnly = false;
-      refInput.style.background = '#FFFFFF !important';
+      refInput.style.background = '';
+      refInput.style.opacity = '1';
     }
     const propSel = document.getElementById('receipt-property-select');
     if (propSel) propSel.disabled = false;
