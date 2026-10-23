@@ -1211,24 +1211,25 @@
 
         <!-- Printable Receipt Body -->
         <div id="printable-receipt-content" style="padding: 26px 32px; color: #111827; background: #FFFFFF;">
-          <!-- UNIFORM CORPORATE HEADER -->
-          <div style="display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
-            <!-- Left Side -->
-            <div style="display: flex; align-items: center;">
-              <img id="receipt-modal-logo" src="assets/logo.png" alt="Metrocosmo Logo" style="max-width: 140px; max-height: 80px; object-fit: contain;">
+          <!-- STANDARDIZED CORPORATE HEADER -->
+          <div id="receipt-modal-header-container" style="position: relative; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; min-height: 70px;">
+            <img src="assets/logo.png" alt="Company Logo" style="position: absolute; left: 0; top: 0; max-width: 90px; max-height: 60px; object-fit: contain;">
+            <div style="display: inline-block; text-align: center;">
+              <h2 style="margin: 0; font-size: 15px; font-weight: bold;">METROCOSMO LTD - NAIROBI</h2>
+              <p style="margin: 2px 0; font-size: 10px; font-style: italic; font-weight: bold;">REAL ESTATE MANAGERS &amp; VALUERS</p>
+              <p style="margin: 2px 0; font-size: 10px;">P.O. BOX 40656 - 00100 Nairobi</p>
+              <p style="margin: 2px 0; font-size: 10px;">Cell: 020 2244218, 0721 737093</p>
+              <p style="margin: 2px 0; font-size: 10px; font-weight: bold;">PIN: P051189201A</p>
             </div>
+          </div>
 
-            <!-- Right/Center -->
-            <div style="text-align: right; font-size: 11.5px; color: #111827; line-height: 1.4;">
-              <h1 id="receipt-modal-company-name" style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; color: #111827; text-transform: uppercase;">METROCOSMO LTD - NAIROBI</h1>
-              <div id="receipt-modal-slogan" style="font-size: 11.5px; font-style: italic; font-weight: 600; color: #374151; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</div>
-              <div id="receipt-modal-address" style="margin-top: 3px;">P.O. BOX 40656 - 00100 Nairobi | Hughes Building, 7th Floor</div>
-              <div id="receipt-modal-pin">Cell: 020 2244218, 0721 737093 | E-Mail: info@metrocosmo.com</div>
-              <div style="margin-top: 4px; display: flex; justify-content: flex-end; align-items: baseline; gap: 12px;">
-                <span style="font-size: 12px; font-weight: 800; color: #FA8900; letter-spacing: 0.5px;">ORIGINAL RECEIPT:</span>
-                <span style="font-size: 15px; font-weight: 800; color: #111827;" id="receipt-modal-number">REC-2026-001</span>
-                <span style="font-size: 11.5px; color: #4B5563;">Date: <span id="receipt-modal-date" style="font-weight: 700; color: #111827;">21/10/2026</span></span>
-              </div>
+          <!-- Document Title & Receipt Metadata Bar -->
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding: 4px 0; border-bottom: 1px dotted #CBD5E1;">
+            <span style="font-size: 13.5px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: #111827;">OFFICIAL PAYMENT RECEIPT</span>
+            <div style="display: flex; align-items: baseline; gap: 12px;">
+              <span style="font-size: 11.5px; font-weight: 800; color: #FA8900; letter-spacing: 0.5px;">ORIGINAL RECEIPT:</span>
+              <span style="font-size: 14px; font-weight: 800; color: #111827;" id="receipt-modal-number">REC-2026-001</span>
+              <span style="font-size: 11.5px; color: #4B5563;">Date: <span id="receipt-modal-date" style="font-weight: 700; color: #111827;">21/10/2026</span></span>
             </div>
           </div>
 

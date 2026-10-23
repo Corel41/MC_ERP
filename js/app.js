@@ -2488,7 +2488,8 @@ const AppState = {
       if (targetTabId === 'tab-invoices' || targetTabId === 'invoices') {
         switchInvoiceSubTab(AppState.activeInvoiceSubTab || 'single');
       } else if (targetTabId === 'tab-receipting' || targetTabId === 'receipting') {
-        initTenantReceipting();
+        window.location.href = 'receipts.html';
+        return;
       } else if (targetTabId === 'tab-leases' || targetTabId === 'leases') {
         populateTenantDropdowns();
         renderLeasesTable();
@@ -4123,20 +4124,25 @@ const AppState = {
       const modal = document.getElementById('modal-official-receipt');
       if (!modal) return;
 
-      // Populate Company Profile
-      const cp = AppState.companyProfile || {};
-      const cName = document.getElementById('receipt-modal-company-name');
-      const cSlogan = document.getElementById('receipt-modal-slogan');
-      const cAddress = document.getElementById('receipt-modal-address');
-      const cPin = document.getElementById('receipt-modal-pin');
-      const cLogo = document.getElementById('receipt-modal-logo');
+      // Look up property to resolve dynamic branch
+      const selectedProperty = (AppState.properties || []).find(p => p.id === receipt.property_id) || {};
+      const branchName = selectedProperty.branch_name || selectedProperty.branch || (selectedProperty.officeBranch ? selectedProperty.officeBranch.replace(/\s*(Head\s*)?Office/i, '').trim() : '') || 'NAIROBI';
 
-      if (cName) cName.textContent = cp.company_name || 'METROCOSMO ENTERPRISE';
-      if (cSlogan) cSlogan.textContent = cp.slogan || 'Professional Property Management & Valuation Services';
-      if (cAddress) cAddress.textContent = `${cp.address1 || 'P.O. Box 48190'} ${cp.postal_code || '00100'} ${cp.city_town || 'Nairobi'} | Tel: ${cp.phone || '+254 722 000 000'}`;
-      if (cPin) cPin.textContent = `P.I.N: ${cp.pin_no || 'P051189201A'} | Email: ${cp.email || 'accounts@metrocosmo.com'}`;
-      if (cLogo && (cp.logo_url || cp.tempLogoBase64)) {
-        cLogo.src = cp.tempLogoBase64 || cp.logo_url;
+      // Inject standardized centered header layout
+      const headerContainer = document.getElementById('receipt-modal-header-container');
+      if (headerContainer) {
+        headerContainer.outerHTML = `
+<div id="receipt-modal-header-container" style="position: relative; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; min-height: 70px;">
+    <img src="assets/logo.png" alt="Company Logo" style="position: absolute; left: 0; top: 0; max-width: 90px; max-height: 60px; object-fit: contain;">
+    <div style="display: inline-block; text-align: center;">
+        <h2 style="margin: 0; font-size: 15px; font-weight: bold;">METROCOSMO LTD - ${branchName.toUpperCase()}</h2>
+        <p style="margin: 2px 0; font-size: 10px; font-style: italic; font-weight: bold;">REAL ESTATE MANAGERS & VALUERS</p>
+        <p style="margin: 2px 0; font-size: 10px;">P.O. BOX 40656 - 00100 Nairobi</p>
+        <p style="margin: 2px 0; font-size: 10px;">Cell: 020 2244218, 0721 737093</p>
+        <p style="margin: 2px 0; font-size: 10px; font-weight: bold;">PIN: P051189201A</p>
+    </div>
+</div>
+`;
       }
 
       // Populate Receipt Details
