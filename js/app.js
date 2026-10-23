@@ -347,7 +347,14 @@ const AppState = {
 
     navItems.forEach(item => {
       item.addEventListener('click', () => {
-        switchView(item.getAttribute('data-view'), item.getAttribute('data-tooltip'));
+        const link = item.querySelector('a[href]');
+        if (link && link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
+          return; // Let standard MPA link navigation occur
+        }
+        const view = item.getAttribute('data-view');
+        if (view) {
+          switchView(view, item.getAttribute('data-tooltip'));
+        }
       });
     });
 
@@ -7935,7 +7942,16 @@ const AppState = {
     loadAccountingPeriods();
     loadTenantReceipts();
 
-    const initialView = AppState.activeView || 'estate-reg';
+    const hashView = window.location.hash ? window.location.hash.substring(1) : null;
+    const initialView = (hashView && moduleFileMap[hashView]) ? hashView : (AppState.activeView || 'estate-reg');
     const initialNav = document.querySelector(`.nav-item[data-view="${initialView}"]`);
     const initialTitle = initialNav ? initialNav.getAttribute('data-tooltip') : 'Registration';
     loadModule(initialView, initialTitle);
+
+    window.addEventListener('hashchange', () => {
+      const hView = window.location.hash ? window.location.hash.substring(1) : null;
+      if (hView && moduleFileMap[hView]) {
+        const hNav = document.querySelector(`.nav-item[data-view="${hView}"]`);
+        loadModule(hView, hNav ? hNav.getAttribute('data-tooltip') : '');
+      }
+    });
