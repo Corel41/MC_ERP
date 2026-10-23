@@ -67,84 +67,281 @@
             <span class="live-pulse-badge">dbo_Landlord_Payments / Pro_PayToLLComm Sync</span>
           </div>
 
-          <!-- Statement Calculator Form -->
-          <form id="form-landlord-statement" onsubmit="handleStatementSubmit(event)">
-            <div class="form-grid-3">
-              <div class="form-group">
-                <label class="form-label">Landlord</label>
-                <select class="form-input" id="stmt-landlord-select" required onchange="handleStmtLandlordChange(this.value)">
-                  <!-- Dynamically populated -->
-                </select>
+          <!-- 1. GENERATOR CONTROL PANEL (TWO DISTINCT HORIZONTAL SECTIONS A & B) -->
+          <div class="landlord-stmt-control-panel" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 18px 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
+              <div>
+                <h3 style="margin: 0; font-size: 15px; font-weight: 800; color: #111827;">Property Account Statement Generator</h3>
+                <p style="margin: 2px 0 0 0; font-size: 12px; color: #6B7280;">Generate official A4 Property Account Statements for Landlord Remittance (Rent &amp; Utilities) matching Propwings standard.</p>
               </div>
-              <div class="form-group">
-                <label class="form-label">Managed Property</label>
-                <select class="form-input" id="stmt-property-select" required onchange="handleStmtPropertyChange(this.value)">
-                  <!-- Dynamically populated -->
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Statement Period</label>
-                <div style="display: flex; gap: 8px;">
-                  <select class="form-input" id="stmt-period-month" style="flex: 1;" onchange="calculateStatementNet()">
-                    <option value="1">January</option>
-                    <option value="2">February</option>
-                    <option value="3">March</option>
-                    <option value="4">April</option>
-                    <option value="5">May</option>
-                    <option value="6">June</option>
-                    <option value="7">July</option>
-                    <option value="8">August</option>
-                    <option value="9">September</option>
-                    <option value="10" selected>October</option>
-                    <option value="11">November</option>
-                    <option value="12">December</option>
-                  </select>
-                  <select class="form-input" id="stmt-period-year" style="width: 100px;">
-                    <option value="2026" selected>2026</option>
-                    <option value="2027">2027</option>
-                  </select>
+              <button type="button" id="btn-print-landlord-statement" onclick="printLandlordStatement()" style="padding: 8px 24px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; background: #008080; color: #FFFFFF; border: none; border-radius: 4px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                <span>🖨️</span> Print Statement
+              </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              
+              <!-- SECTION A: RENT STATEMENTS -->
+              <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 16px; background: #F9FAFB;">
+                <legend style="color: #F97316; font-size: 12px; font-weight: 800; padding: 0 6px;">— Section A: Rent Statements (001-Rent) —</legend>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div>
+                    <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Property</label>
+                    <select id="landlord-stmt-property-rent" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                      <!-- Populated dynamically -->
+                    </select>
+                  </div>
+                  <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1.2;">
+                      <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Month</label>
+                      <select id="landlord-stmt-month-rent" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                        <option value="1">1 - January</option>
+                        <option value="2">2 - February</option>
+                        <option value="3">3 - March</option>
+                        <option value="4">4 - April</option>
+                        <option value="5">5 - May</option>
+                        <option value="6">6 - June</option>
+                        <option value="7">7 - July</option>
+                        <option value="8">8 - August</option>
+                        <option value="9">9 - September</option>
+                        <option value="10" selected>10 - October</option>
+                        <option value="11">11 - November</option>
+                        <option value="12">12 - December</option>
+                      </select>
+                    </div>
+                    <div style="flex: 0.8;">
+                      <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Year</label>
+                      <select id="landlord-stmt-year-rent" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style="margin-top: 4px;">
+                    <button type="button" class="pm-btn-orange" onclick="generateLandlordRentStatement()" style="width: 100%; padding: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px;">
+                      <span>⚡</span> Generate Rent Statement
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Gross Rent Collected (KES)</label>
-                <input type="number" step="0.01" class="form-input" id="stmt-gross-rent" required value="32000.00" oninput="calculateStatementNet()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Contractual Agency Fee %</label>
-                <input type="number" step="0.1" class="form-input" id="stmt-fee-pct" readonly value="8.5" style="color: var(--accent-primary); font-weight: 700;">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Agency Commission Amount (KES)</label>
-                <input type="number" step="0.01" class="form-input" id="stmt-comm-amount" readonly value="2720.00" style="color: var(--accent-primary); font-weight: 700;">
-              </div>
-              <div class="form-group">
-                <label class="form-label">16% VAT on Commission (KES)</label>
-                <input type="number" step="0.01" class="form-input" id="stmt-vat-amount" readonly value="435.20" style="color: var(--text-muted);">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Maintenance / LPO Deductions (KES)</label>
-                <input type="number" step="0.01" class="form-input" id="stmt-maintenance-deductions" value="0.00" oninput="calculateStatementNet()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">7.5% KRA MRI Withholding Tax (KES)</label>
-                <input type="number" step="0.01" class="form-input" id="stmt-mri-tax" readonly value="2400.00" style="color: var(--accent-amber); font-weight: 700;">
-              </div>
-              <div class="form-group span-full" style="background: var(--nav-active-bg); padding: 16px; border-radius: 16px; border: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.04em;">Net Payable Remittance to Landlord</div>
-                  <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent-secondary);" id="stmt-net-payable-display">KES 26,444.80</div>
-                  <input type="hidden" id="stmt-net-payable" value="26444.80">
+              </fieldset>
+
+              <!-- SECTION B: UTILITY / OTHER PAYABLES -->
+              <fieldset style="border: 1px solid #D1D5DB; border-radius: 4px; padding: 14px 16px; background: #F9FAFB;">
+                <legend style="color: #008080; font-size: 12px; font-weight: 800; padding: 0 6px;">— Section B: Utility &amp; Other Payables —</legend>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1.2;">
+                      <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Property</label>
+                      <select id="landlord-stmt-property-util" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                        <!-- Populated dynamically -->
+                      </select>
+                    </div>
+                    <div style="flex: 1;">
+                      <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Payable</label>
+                      <select id="landlord-stmt-payable-type" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                        <option value="002" selected>002 - Water Bill</option>
+                        <option value="009">009 - Service Charge</option>
+                        <option value="017">017 - Garbage Collection</option>
+                        <option value="015">015 - Security Levy</option>
+                        <option value="035">035 - Late Payment Penalty</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1.2;">
+                      <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Month</label>
+                      <select id="landlord-stmt-month-util" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                        <option value="1">1 - January</option>
+                        <option value="2">2 - February</option>
+                        <option value="3">3 - March</option>
+                        <option value="4">4 - April</option>
+                        <option value="5">5 - May</option>
+                        <option value="6">6 - June</option>
+                        <option value="7">7 - July</option>
+                        <option value="8">8 - August</option>
+                        <option value="9">9 - September</option>
+                        <option value="10" selected>10 - October</option>
+                        <option value="11">11 - November</option>
+                        <option value="12">12 - December</option>
+                      </select>
+                    </div>
+                    <div style="flex: 0.8;">
+                      <label style="display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px;">Select Year</label>
+                      <select id="landlord-stmt-year-util" class="pm-legacy-input" style="width: 100%; height: 34px; font-size: 12.5px;">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style="margin-top: 4px;">
+                    <button type="button" class="pm-btn-teal" onclick="generateLandlordUtilityStatement()" style="width: 100%; padding: 8px; font-size: 13px; font-weight: 700; background: #008080; color: #FFF; border: none; border-radius: 3px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px;">
+                      <span>💧</span> Generate Utility Statement
+                    </button>
+                  </div>
                 </div>
-                <div style="display: flex; gap: 12px; align-items: center;">
-                  <select class="form-input" id="stmt-initial-status" style="width: 140px;">
-                    <option value="Approved">Approved</option>
-                    <option value="Draft">Draft</option>
-                  </select>
-                  <button type="submit" class="btn-elevated-primary">⚡ Generate Statement</button>
-                </div>
+              </fieldset>
+
+            </div>
+          </div>
+
+          <!-- 2. PRINTABLE STATEMENT CONTAINER (Strictly matching landlord Statement - Jan.pdf) -->
+          <div id="printable-landlord-statement" class="landlord-statement-sheet" style="background: #FFFFFF; border: 1px solid #D1D5DB; border-radius: 4px; padding: 40px 48px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); max-width: 1050px; margin: 0 auto 30px auto; color: #000000; font-family: Arial, Helvetica, sans-serif; position: relative;">
+            
+            <!-- TOP RIGHT PIN AND TIMESTAMP -->
+            <div style="position: absolute; top: 32px; right: 48px; text-align: right; font-size: 12px; line-height: 1.4;">
+              <div id="ll-stmt-header-pin" style="font-weight: 700; font-family: monospace; font-size: 13px; letter-spacing: 0.5px;">P051112708J</div>
+              <div id="ll-stmt-header-date" style="margin-top: 8px; font-weight: 600;">06-Mar-2026</div>
+              <div id="ll-stmt-header-time" style="font-weight: 600;">15:06:13</div>
+            </div>
+
+            <!-- CENTER-ALIGNED CORPORATE HEADER -->
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h1 style="margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; color: #000000; text-transform: uppercase;">METROCOSMO LTD - NAIROBI</h1>
+              <div style="font-size: 12px; font-style: italic; font-weight: 600; color: #1F2937; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.3px;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</div>
+              <div style="font-size: 11.5px; color: #000000; margin-top: 4px;">P.O. BOX 40656 - 00100 Nairobi</div>
+              <div style="font-size: 11.5px; color: #000000;">Hughes Building, 7th Floor</div>
+              <div style="font-size: 11.5px; color: #000000;">Cell: 020 2244218, 0721 737093</div>
+              <div style="font-size: 11.5px; color: #000000;">E-Mail: info@metrocosmo.com</div>
+            </div>
+
+            <!-- DOCUMENT TITLE -->
+            <div style="text-align: center; margin: 16px 0 16px 0;">
+              <h2 style="margin: 0; font-size: 15px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: #000000;">PROPERTY ACCOUNT STATEMENT</h2>
+            </div>
+
+            <!-- METADATA BLOCK -->
+            <div style="font-size: 12px; font-weight: 700; color: #000000; line-height: 1.8; margin-bottom: 8px;">
+              <div>
+                PRINCIPAL: <span id="ll-stmt-principal">L042 - COUNTY HOME DEVELOPERS LIMITED</span>
+              </div>
+              <!-- Dotted line separator -->
+              <div style="border-bottom: 1px dotted #000000; margin: 4px 0 6px 0; width: 100%;"></div>
+              <div>
+                PROPERTY L.R NO. <span id="ll-stmt-property-lr">RUNDA VIEW</span>
+              </div>
+              <div>
+                PAYMENT PERIOD: <span id="ll-stmt-payment-period">January 2026</span>
               </div>
             </div>
-          </form>
+
+            <!-- DOUBLE LINE SEPARATOR -->
+            <div style="border-top: 3px double #000000; margin: 8px 0 12px 0;"></div>
+
+            <!-- STATEMENT LEDGER TABLE -->
+            <div style="overflow-x: auto;">
+              <table class="landlord-statement-table" style="width: 100%; border-collapse: collapse; font-size: 11.5px; font-family: Arial, Helvetica, sans-serif;">
+                <thead>
+                  <tr style="border-top: 1px solid #000000; border-bottom: 1px solid #000000; background: #FFFFFF;">
+                    <th style="padding: 5px 6px; width: 65px; text-align: left; font-weight: 800; border-right: 1px solid #000000;">Unit</th>
+                    <th style="padding: 5px 8px; text-align: left; font-weight: 800; border-right: 1px solid #000000;">Tenant</th>
+                    <th style="padding: 5px 8px; width: 100px; text-align: right; font-weight: 800; border-right: 1px solid #000000;">Monthly Bill</th>
+                    <th style="padding: 5px 8px; width: 110px; text-align: right; font-weight: 800; border-right: 1px solid #000000;">Opening Arrears</th>
+                    <th style="padding: 5px 8px; width: 110px; text-align: right; font-weight: 800; border-right: 1px solid #000000;">Total Expected</th>
+                    <th style="padding: 5px 8px; width: 105px; text-align: right; font-weight: 800; border-right: 1px solid #000000;">AmountPaid</th>
+                    <th style="padding: 5px 8px; width: 110px; text-align: right; font-weight: 800;">Closing Balance</th>
+                  </tr>
+                </thead>
+                <tbody id="ll-stmt-table-body">
+                  <!-- Dynamically rendered rows: group header, unit rows, sub-totals, totals -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- SUMMARY & DEDUCTIONS FOOTER (RENT ONLY) -->
+            <div id="ll-stmt-rent-summary-block" style="margin-top: 24px;">
+              
+              <!-- Row: Count of tenants & Monthly Collected -->
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; font-size: 12.5px; font-weight: 700; margin-bottom: 16px;">
+                <div>
+                  No. of tenants in this statement: <span id="ll-stmt-tenants-count">9</span>
+                </div>
+                <div style="text-align: right; width: 340px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>Monthly Collected:</span>
+                    <span id="ll-stmt-monthly-collected" style="font-variant-numeric: tabular-nums;">292,950.00</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-top: 18px;">
+                    <span>Expected Remittance:</span>
+                    <span id="ll-stmt-expected-remittance" style="font-variant-numeric: tabular-nums;">292,950.00</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Deductions Block -->
+              <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                <div style="width: 480px; font-size: 12px; font-weight: 700;">
+                  <div style="text-decoration: underline; margin-bottom: 6px;">Deductions</div>
+                  
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="width: 220px;">Management Fee on Rent:</span>
+                    <span id="ll-stmt-fee-pct" style="width: 70px; text-align: right;">5.50 %</span>
+                    <span id="ll-stmt-mgmt-fee" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">16,112.25</span>
+                  </div>
+                  
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="width: 220px;">V.A.T on Fees</span>
+                    <span style="width: 70px; text-align: right;">16.00 %</span>
+                    <span id="ll-stmt-vat-amount" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">2,577.96</span>
+                  </div>
+
+                  <div style="border-top: 1px solid #000000; margin: 4px 0 6px 0; display: flex; justify-content: flex-end;">
+                    <span id="ll-stmt-total-deductions" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums; border-bottom: 1px solid #000000; padding: 2px 0;">18,690.21</span>
+                  </div>
+
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 13px;">
+                    <span style="width: 220px; text-align: right; padding-right: 20px;">Net Due:</span>
+                    <span id="ll-stmt-net-due" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums; border-top: 1px solid #000000; border-bottom: 3px double #000000; padding: 2px 0;">274,259.79</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- BOTTOM FOOTER -->
+            <div style="margin-top: 28px; font-size: 11.5px; line-height: 1.8;">
+              <div style="font-weight: 700;">
+                Current vacant units: <span id="ll-stmt-vacant-units" style="font-weight: 600;">D11 , D2 , D30 , D31 , D7</span>
+              </div>
+              
+              <div style="margin-top: 8px; font-weight: 700;">
+                Comments:
+              </div>
+
+              <!-- Signatures -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 22px; font-weight: 700;">
+                <div>Prepared By: <span style="display: inline-block; width: 140px; border-bottom: 1px solid #000000; margin-left: 6px;"></span></div>
+                <div>Checked By: <span style="display: inline-block; width: 140px; border-bottom: 1px solid #000000; margin-left: 6px;"></span></div>
+                <div>Approved By: <span style="display: inline-block; width: 140px; border-bottom: 1px solid #000000; margin-left: 6px;"></span></div>
+              </div>
+
+              <!-- Payment details & Rubber Stamp -->
+              <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px;">
+                <div style="line-height: 2; font-weight: 700;">
+                  <div>Pay to: <span id="ll-stmt-pay-to">- - CO-OPERATIVE BANK</span> &nbsp;&nbsp; Date: <span style="display: inline-block; width: 100px; border-bottom: 1px solid #000000;"></span> &nbsp;&nbsp; Bank: <span style="display: inline-block; width: 100px; border-bottom: 1px solid #000000;"></span></div>
+                  <div>Cheque No: <span style="display: inline-block; width: 120px; border-bottom: 1px solid #000000;"></span></div>
+                </div>
+
+                <!-- Rubber Stamp Box -->
+                <div style="border: 2px solid #1D4ED8; border-radius: 4px; padding: 8px 18px; text-align: center; color: #1D4ED8; font-weight: 900; font-size: 11.5px; line-height: 1.3; transform: rotate(-1.5deg);">
+                  <div>METROCOSMO LIMITED</div>
+                  <div>P. O. BOX 40656 - 00100,</div>
+                  <div>NAIROBI - KENYA.</div>
+                </div>
+              </div>
+
+              <!-- Generated note -->
+              <div style="text-align: center; margin-top: 24px; font-size: 10px; font-style: italic; color: #4B5563;">
+                Generated using Propwings System ~ Colorchase Ltd(0723729248)
+              </div>
+
+            </div>
+
+          </div>
 
           <!-- Statements History Table -->
           <div style="margin-top: 14px;">

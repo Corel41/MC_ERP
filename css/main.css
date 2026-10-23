@@ -1481,7 +1481,9 @@
   #modal-official-receipt,
   #modal-official-receipt *,
   #printable-tenant-statement,
-  #printable-tenant-statement * {
+  #printable-tenant-statement *,
+  #printable-landlord-statement,
+  #printable-landlord-statement * {
     visibility: visible;
   }
   #modal-official-receipt {
@@ -1505,7 +1507,8 @@
     box-shadow: none !important;
     border: none !important;
   }
-  #printable-tenant-statement {
+  #printable-tenant-statement,
+  #printable-landlord-statement {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
@@ -1519,6 +1522,8 @@
     border: none !important;
   }
   .statement-filter-bar,
+  .landlord-stmt-control-panel,
+  .landlord-nav-tabs,
   .tenant-subtab-strip,
   .module-header-strip,
   button {
@@ -1640,4 +1645,50 @@ input[type="number"].receipt-alloc-input,
   border-bottom: 3px double #000000;
   font-weight: 800;
   background: #F9FAFB;
+}
+
+
+/* --------------------------------------------------------------------------
+   LANDLORD PROPERTY ACCOUNT STATEMENT ENGINE (landlord Statement - Jan.pdf)
+   -------------------------------------------------------------------------- */
+.landlord-statement-sheet {
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
+  border-radius: 4px;
+  padding: 40px 48px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  max-width: 1050px;
+  margin: 0 auto 30px auto;
+  color: #000000;
+  font-family: Arial, Helvetica, sans-serif;
+  box-sizing: border-box;
+}
+
+.landlord-statement-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.landlord-statement-table th {
+  padding: 5px 6px;
+  font-weight: 800;
+  color: #000000;
+  border-right: 1px solid #000000;
+  border-top: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+  background: #FFFFFF;
+}
+
+.landlord-statement-table td {
+  padding: 4px 6px;
+  color: #000000;
+  border-right: 1px solid #000000;
+  font-variant-numeric: tabular-nums;
+}
+
+.landlord-statement-table th:last-child,
+.landlord-statement-table td:last-child {
+  border-right: none;
 }

@@ -271,6 +271,9 @@ const AppState = {
       'estate-reg': '1_1_registration.html',
       'estate-tenants': '1_2_tenants.html',
       'estate-landlords': '1_3_landlords.html',
+      'estate-landlords-1-4': '1_4_landlords.html',
+      '1_4_landlords': '1_4_landlords.html',
+      '1_3_landlords': '1_3_landlords.html',
       'estate-repairs': '1_4_repairs.html',
       'estate-admin': '1_5_admin.html',
       'mod-agency': '02_agency.html',
@@ -424,11 +427,15 @@ const AppState = {
           break;
 
         case 'estate-landlords':
+        case 'estate-landlords-1-4':
+        case '1_4_landlords':
+        case '1_3_landlords':
           setupLandlordTabs();
           populateLandlordDropdowns();
           renderLandlordPortfolioTable();
           renderLandlordStatementsTable();
           renderLandlordPayoutQueueTable();
+          initLandlordStatementGenerator();
           if (AppState.activeLandlordTab) {
             const btn = document.querySelector(`[data-landlord-target="${AppState.activeLandlordTab}"]`);
             if (btn) btn.click();
@@ -5305,6 +5312,446 @@ const AppState = {
 
     /* SUB-MODULE 1.3: LANDLORDS LOGIC & INTERACTION ENGINES */
 
+
+    /* --------------------------------------------------------------------------
+       LANDLORD PROPERTY ACCOUNT STATEMENT ENGINE (landlord Statement - Jan.pdf)
+       -------------------------------------------------------------------------- */
+
+    function getLandlordStatementCurrentDate() {
+      const now = new Date();
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const day = String(now.getDate()).padStart(2, '0');
+      const mon = months[now.getMonth()];
+      const yr = now.getFullYear();
+      return `${day}-${mon}-${yr}`;
+    }
+
+    function getLandlordStatementCurrentTime() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+    }
+
+    function formatLandlordAmount(val, isTotals = false) {
+      const num = Number(val) || 0;
+      if (num === 0) return '0.00';
+      if (num < 0) {
+        if (isTotals) {
+          return '(' + Math.abs(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ')';
+        }
+        return '-' + Math.abs(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function initLandlordStatementGenerator() {
+      const rentPropSel = document.getElementById('landlord-stmt-property-rent');
+      const utilPropSel = document.getElementById('landlord-stmt-property-util');
+      if (!rentPropSel && !utilPropSel) return;
+
+      const props = AppState.properties || [];
+      const propOptions = props.map(p => `<option value="${p.id}">${p.name} (${p.lr || p.propertyIdCode || 'LR No.'})</option>`).join('');
+
+      if (rentPropSel) {
+        rentPropSel.innerHTML = propOptions;
+        if (props.length > 0) rentPropSel.value = props[0].id;
+      }
+      if (utilPropSel) {
+        utilPropSel.innerHTML = propOptions;
+        if (props.length > 0) utilPropSel.value = props[0].id;
+      }
+
+      // Default to rent statement generation
+      generateLandlordRentStatement();
+    }
+
+    function generateLandlordRentStatement() {
+      const rentPropSel = document.getElementById('landlord-stmt-property-rent');
+      const monthSel = document.getElementById('landlord-stmt-month-rent');
+      const yearSel = document.getElementById('landlord-stmt-year-rent');
+      if (!rentPropSel) return;
+
+      const propId = rentPropSel.value || (AppState.properties[0] ? AppState.properties[0].id : '');
+      const month = (monthSel && parseInt(monthSel.value, 10)) || 10;
+      const year = (yearSel && parseInt(yearSel.value, 10)) || 2026;
+
+      executeGenerateLandlordStatement(propId, month, year, '001');
+    }
+
+    function generateLandlordUtilityStatement() {
+      const utilPropSel = document.getElementById('landlord-stmt-property-util');
+      const payableSel = document.getElementById('landlord-stmt-payable-type');
+      const monthSel = document.getElementById('landlord-stmt-month-util');
+      const yearSel = document.getElementById('landlord-stmt-year-util');
+      if (!utilPropSel) return;
+
+      const propId = utilPropSel.value || (AppState.properties[0] ? AppState.properties[0].id : '');
+      const payableCode = (payableSel && payableSel.value) || '002';
+      const month = (monthSel && parseInt(monthSel.value, 10)) || 10;
+      const year = (yearSel && parseInt(yearSel.value, 10)) || 2026;
+
+      executeGenerateLandlordStatement(propId, month, year, payableCode);
+    }
+
+    function getLandlordPayableAmountFromLines(lines, payableCode) {
+      let total = 0;
+      lines.forEach(line => {
+        const desc = (line.description || '').toLowerCase();
+        if (payableCode === '001' || payableCode.toLowerCase().includes('rent')) {
+          if (desc.includes('rent')) total += Number(line.amount) || 0;
+        } else if (payableCode === '002' || payableCode.toLowerCase().includes('water')) {
+          if (desc.includes('water')) total += Number(line.amount) || 0;
+        } else if (payableCode === '009' || payableCode.toLowerCase().includes('service')) {
+          if (desc.includes('service charge')) total += Number(line.amount) || 0;
+        } else if (payableCode === '017' || payableCode.toLowerCase().includes('garbage')) {
+          if (desc.includes('garbage')) total += Number(line.amount) || 0;
+        } else if (payableCode === '015' || payableCode.toLowerCase().includes('security')) {
+          if (desc.includes('security')) total += Number(line.amount) || 0;
+        } else if (payableCode === '035' || payableCode.toLowerCase().includes('penalty')) {
+          if (desc.includes('penalty')) total += Number(line.amount) || 0;
+        }
+      });
+      return total;
+    }
+
+    function getLandlordReceiptPayableAmount(rc, payableCode, tenantInvs, allLines) {
+      if (Array.isArray(rc.allocations) && rc.allocations.length > 0) {
+        let amt = 0;
+        rc.allocations.forEach(al => {
+          const pName = (al.payable_name || al.payableName || al.description || '').toLowerCase();
+          if ((payableCode === '001' || payableCode.toLowerCase().includes('rent')) && pName.includes('rent')) amt += Number(al.amount) || 0;
+          else if ((payableCode === '002' || payableCode.toLowerCase().includes('water')) && pName.includes('water')) amt += Number(al.amount) || 0;
+          else if ((payableCode === '009' || payableCode.toLowerCase().includes('service')) && pName.includes('service')) amt += Number(al.amount) || 0;
+          else if ((payableCode === '017' || payableCode.toLowerCase().includes('garbage')) && pName.includes('garbage')) amt += Number(al.amount) || 0;
+          else if ((payableCode === '015' || payableCode.toLowerCase().includes('security')) && pName.includes('security')) amt += Number(al.amount) || 0;
+          else if ((payableCode === '035' || payableCode.toLowerCase().includes('penalty')) && pName.includes('penalty')) amt += Number(al.amount) || 0;
+        });
+        return amt;
+      }
+
+      const rawDate = rc.payment_date || rc.paymentDate || '2026-05-03';
+      const rDate = rawDate.split('T')[0].split(' ')[0];
+      const matchedInv = tenantInvs.find(i => {
+        const invD = i.dueDate ? i.dueDate.substring(0, 7) : `${i.periodYear}-${String(i.periodMonth).padStart(2, '0')}`;
+        return invD === rDate.substring(0, 7);
+      });
+
+      if (matchedInv) {
+        const invLines = allLines.filter(l => l.invoice_id === matchedInv.id);
+        const totalPaid = Number(rc.amount_paid || rc.amountPaid || 0);
+        if (invLines.length > 0) {
+          if (Math.abs(matchedInv.totalAmount - totalPaid) < 1) {
+            return getLandlordPayableAmountFromLines(invLines, payableCode);
+          }
+          // Waterfall allocation
+          let remaining = totalPaid;
+          for (const line of invLines) {
+            if (remaining <= 0) break;
+            const lineAmt = Number(line.amount) || 0;
+            const alloc = Math.min(remaining, lineAmt);
+            const desc = (line.description || '').toLowerCase();
+            let matches = false;
+            if ((payableCode === '001' || payableCode.toLowerCase().includes('rent')) && desc.includes('rent')) matches = true;
+            else if ((payableCode === '002' || payableCode.toLowerCase().includes('water')) && desc.includes('water')) matches = true;
+            else if ((payableCode === '009' || payableCode.toLowerCase().includes('service')) && desc.includes('service charge')) matches = true;
+            else if ((payableCode === '017' || payableCode.toLowerCase().includes('garbage')) && desc.includes('garbage')) matches = true;
+            else if ((payableCode === '015' || payableCode.toLowerCase().includes('security')) && desc.includes('security')) matches = true;
+            else if ((payableCode === '035' || payableCode.toLowerCase().includes('penalty')) && desc.includes('penalty')) matches = true;
+            if (matches) return alloc;
+            remaining -= alloc;
+          }
+          return 0;
+        }
+      }
+
+      if (payableCode === '001' || payableCode.toLowerCase().includes('rent')) {
+        return Number(rc.amount_paid || rc.amountPaid || 0);
+      }
+      return 0;
+    }
+
+    function executeGenerateLandlordStatement(propertyId, monthNum, yearNum, payableCode) {
+      const tbody = document.getElementById('ll-stmt-table-body');
+      if (!tbody) return;
+
+      const prop = (AppState.properties || []).find(p => p.id === propertyId) || (AppState.properties || [])[0];
+      if (!prop) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No property selected or available.</td></tr>';
+        return;
+      }
+
+      const landlord = (AppState.landlords || []).find(l => l.id === prop.landlordId) || (AppState.landlords || [])[0] || {};
+      const mandate = (AppState.mandates || []).find(m => m.propertyId === prop.id) || (AppState.mandates || [])[0] || {};
+
+      const monthNames = ['', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthLabel = monthNames[monthNum] || 'Month';
+      const startOfMonth = `${yearNum}-${String(monthNum).padStart(2, '0')}-01`;
+      const lastDay = new Date(yearNum, monthNum, 0).getDate();
+      const endOfMonth = `${yearNum}-${String(monthNum).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+      // Set Metadata Headers
+      const pinEl = document.getElementById('ll-stmt-header-pin');
+      if (pinEl) pinEl.textContent = landlord.kraPin || 'P051112708J';
+
+      const dateEl = document.getElementById('ll-stmt-header-date');
+      if (dateEl) dateEl.textContent = getLandlordStatementCurrentDate();
+
+      const timeEl = document.getElementById('ll-stmt-header-time');
+      if (timeEl) timeEl.textContent = getLandlordStatementCurrentTime();
+
+      const princEl = document.getElementById('ll-stmt-principal');
+      if (princEl) princEl.textContent = `${landlord.landlordCode || 'L042'} - ${(landlord.name || 'COUNTY HOME DEVELOPERS LIMITED').toUpperCase()}`;
+
+      const lrEl = document.getElementById('ll-stmt-property-lr');
+      if (lrEl) lrEl.textContent = prop.lr || prop.name || 'RUNDA VIEW';
+
+      const periodEl = document.getElementById('ll-stmt-payment-period');
+      if (periodEl) periodEl.textContent = `${monthLabel} ${yearNum}`;
+
+      // Payable Group Header Name
+      let payableHeader = '001-Rent';
+      if (payableCode === '002') payableHeader = '002-Water Bill';
+      else if (payableCode === '009') payableHeader = '009-Service Charge';
+      else if (payableCode === '017') payableHeader = '017-Garbage Collection';
+      else if (payableCode === '015') payableHeader = '015-Security Levy';
+      else if (payableCode === '035') payableHeader = '035-Penalty';
+
+      // Query Units for this property
+      const units = (AppState.units || []).filter(u => u.propertyId === prop.id);
+      units.sort((a, b) => (a.code || '').localeCompare(b.code || '', undefined, { numeric: true }));
+
+      let totalMonthlyBill = 0;
+      let totalOpeningArrears = 0;
+      let totalExpected = 0;
+      let totalAmountPaid = 0;
+      let totalClosingBalance = 0;
+      let occupiedCount = 0;
+      let vacantUnits = [];
+
+      const rowsHtml = [];
+
+      // Group Header Row
+      rowsHtml.push(`
+        <tr style="background: #FFFFFF; font-weight: 800;">
+          <td colspan="7" style="padding: 5px 6px; font-weight: 800; border-top: 1px solid #000; border-bottom: 1px solid #000; border-right: none;">
+            ${payableHeader}
+          </td>
+        </tr>
+      `);
+
+      units.forEach(u => {
+        const lease = (AppState.leases || []).find(l => (l.unitCode === u.code || l.unitId === u.id) && l.startDate <= endOfMonth && (!l.endDate || l.endDate >= startOfMonth));
+        const tenant = lease ? (AppState.tenants || []).find(t => t.id === lease.tenantId) : null;
+
+        if (!lease || !tenant || u.status === 'VACANT') {
+          vacantUnits.push(u.code);
+          const baselineBill = (payableCode === '001' ? (Number(u.rent) || 0) : (payableCode === '009' ? (Number(u.sc) || 0) : 0));
+          totalMonthlyBill += baselineBill;
+
+          rowsHtml.push(`
+            <tr style="border-bottom: 1px solid #E5E7EB;">
+              <td style="padding: 4px 6px; border-right: 1px solid #000000; font-weight: 600;">${u.code}</td>
+              <td style="padding: 4px 8px; border-right: 1px solid #000000; font-style: italic; color: #374151;">**Vacant**</td>
+              <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(baselineBill)}</td>
+              <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">0.00</td>
+              <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">0.00</td>
+              <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">0.00</td>
+              <td style="padding: 4px 8px; text-align: right;">0.00</td>
+            </tr>
+          `);
+          return;
+        }
+
+        occupiedCount++;
+        const tenantInvs = (AppState.invoices || []).filter(i => i.tenantId === tenant.id || i.tenantName === tenant.name);
+        const tenantReceipts = (AppState.tenantReceipts || []).filter(r => r.tenant_id === tenant.id || r.tenant_name === tenant.name);
+        const allLines = AppState.tenantInvoiceLines || [];
+
+        // 1. Opening Arrears prior to startOfMonth
+        let priorDebits = 0;
+        let priorCredits = 0;
+
+        tenantInvs.forEach(inv => {
+          const invDate = inv.issueDate ? inv.issueDate.substring(0, 10) : (inv.dueDate ? inv.dueDate.substring(0, 7) + '-01' : `${inv.periodYear}-${String(inv.periodMonth).padStart(2, '0')}-01`);
+          if (invDate < startOfMonth) {
+            const invLines = allLines.filter(l => l.invoice_id === inv.id);
+            if (invLines.length > 0) {
+              priorDebits += getLandlordPayableAmountFromLines(invLines, payableCode);
+            } else if (payableCode === '001') {
+              priorDebits += (Number(inv.rent) || Number(inv.totalAmount) || 0);
+            } else if (payableCode === '009') {
+              priorDebits += (Number(inv.serviceCharge) || 0);
+            } else if (payableCode === '002') {
+              priorDebits += (Number(inv.utilities) || 0);
+            }
+          }
+        });
+
+        tenantReceipts.forEach(rc => {
+          const rawDate = rc.payment_date || rc.paymentDate || '2026-05-03';
+          const rDate = rawDate.split('T')[0].split(' ')[0];
+          if (rDate < startOfMonth) {
+            priorCredits += getLandlordReceiptPayableAmount(rc, payableCode, tenantInvs, allLines);
+          }
+        });
+
+        const openingArrears = priorDebits - priorCredits;
+
+        // 2. Current Month Bill
+        let currentBill = 0;
+        tenantInvs.forEach(inv => {
+          const invDate = inv.issueDate ? inv.issueDate.substring(0, 10) : (inv.dueDate ? inv.dueDate.substring(0, 7) + '-01' : `${inv.periodYear}-${String(inv.periodMonth).padStart(2, '0')}-01`);
+          if (invDate >= startOfMonth && invDate <= endOfMonth) {
+            const invLines = allLines.filter(l => l.invoice_id === inv.id);
+            if (invLines.length > 0) {
+              currentBill += getLandlordPayableAmountFromLines(invLines, payableCode);
+            } else if (payableCode === '001') {
+              currentBill += (Number(inv.rent) || Number(inv.totalAmount) || 0);
+            } else if (payableCode === '009') {
+              currentBill += (Number(inv.serviceCharge) || 0);
+            } else if (payableCode === '002') {
+              currentBill += (Number(inv.utilities) || 0);
+            }
+          }
+        });
+
+        const rowExpected = openingArrears + currentBill;
+
+        // 3. Current Month Paid
+        let currentPaid = 0;
+        tenantReceipts.forEach(rc => {
+          const rawDate = rc.payment_date || rc.paymentDate || '2026-05-03';
+          const rDate = rawDate.split('T')[0].split(' ')[0];
+          if (rDate >= startOfMonth && rDate <= endOfMonth) {
+            currentPaid += getLandlordReceiptPayableAmount(rc, payableCode, tenantInvs, allLines);
+          }
+        });
+
+        // 4. Closing Balance
+        const closingBalance = rowExpected - currentPaid;
+
+        totalMonthlyBill += currentBill;
+        totalOpeningArrears += openingArrears;
+        totalExpected += rowExpected;
+        totalAmountPaid += currentPaid;
+        totalClosingBalance += closingBalance;
+
+        rowsHtml.push(`
+          <tr style="border-bottom: 1px solid #E5E7EB;">
+            <td style="padding: 4px 6px; border-right: 1px solid #000000; font-weight: 600;">${u.code}</td>
+            <td style="padding: 4px 8px; border-right: 1px solid #000000;">${tenant.name}</td>
+            <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(currentBill)}</td>
+            <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(openingArrears)}</td>
+            <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(rowExpected)}</td>
+            <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(currentPaid)}</td>
+            <td style="padding: 4px 8px; text-align: right;">${formatLandlordAmount(closingBalance)}</td>
+          </tr>
+        `);
+      });
+
+      // Sub totals Row
+      rowsHtml.push(`
+        <tr style="font-weight: 800; border-top: 1px solid #000000;">
+          <td colspan="2" style="padding: 4px 8px; text-align: right; font-style: italic; border-right: 1px solid #000000;">Sub totals</td>
+          <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(totalMonthlyBill)}</td>
+          <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(totalOpeningArrears)}</td>
+          <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(totalExpected)}</td>
+          <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(totalAmountPaid)}</td>
+          <td style="padding: 4px 8px; text-align: right;">${formatLandlordAmount(totalClosingBalance)}</td>
+        </tr>
+      `);
+
+      // Totals Row (with double underline)
+      rowsHtml.push(`
+        <tr style="font-weight: 800; border-top: 1px solid #000000; border-bottom: 3px double #000000;">
+          <td colspan="2" style="padding: 4px 8px; text-align: right; font-style: italic; border-right: 1px solid #000000;">Totals</td>
+          <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(totalMonthlyBill, true)}</td>
+          <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(totalOpeningArrears, true)}</td>
+          <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(totalExpected, true)}</td>
+          <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(totalAmountPaid, true)}</td>
+          <td style="padding: 4px 8px; text-align: right;">${formatLandlordAmount(totalClosingBalance, true)}</td>
+        </tr>
+      `);
+
+      tbody.innerHTML = rowsHtml.join('');
+
+      // Render Summary Block & Deductions
+      const summaryBlock = document.getElementById('ll-stmt-rent-summary-block');
+      const isRentStatement = (payableCode === '001');
+
+      if (summaryBlock) {
+        summaryBlock.style.display = 'block';
+
+        const countEl = document.getElementById('ll-stmt-tenants-count');
+        if (countEl) countEl.textContent = occupiedCount;
+
+        const collectedEl = document.getElementById('ll-stmt-monthly-collected');
+        if (collectedEl) collectedEl.textContent = formatLandlordAmount(totalAmountPaid);
+
+        const expectedRemitEl = document.getElementById('ll-stmt-expected-remittance');
+        if (expectedRemitEl) expectedRemitEl.textContent = formatLandlordAmount(totalAmountPaid);
+
+        // Deductions
+        const feePct = isRentStatement ? (Number(mandate.feePct) || 8.0) : 0;
+        const mgmtFee = isRentStatement ? (totalAmountPaid * (feePct / 100)) : 0;
+        const vatAmt = isRentStatement ? (mgmtFee * 0.16) : 0;
+        const totalDeductions = mgmtFee + vatAmt;
+        const netDue = totalAmountPaid - totalDeductions;
+
+        const feePctEl = document.getElementById('ll-stmt-fee-pct');
+        if (feePctEl) feePctEl.textContent = `${feePct.toFixed(2)} %`;
+
+        const mgmtFeeEl = document.getElementById('ll-stmt-mgmt-fee');
+        if (mgmtFeeEl) mgmtFeeEl.textContent = formatLandlordAmount(mgmtFee);
+
+        const vatEl = document.getElementById('ll-stmt-vat-amount');
+        if (vatEl) vatEl.textContent = formatLandlordAmount(vatAmt);
+
+        const totalDedEl = document.getElementById('ll-stmt-total-deductions');
+        if (totalDedEl) totalDedEl.textContent = formatLandlordAmount(totalDeductions);
+
+        const netDueEl = document.getElementById('ll-stmt-net-due');
+        if (netDueEl) netDueEl.textContent = formatLandlordAmount(netDue);
+
+        // Hide deductions container for utility statements if not applicable
+        const dedContainer = summaryBlock.querySelector('div[style*="justify-content: flex-end"]');
+        if (dedContainer) {
+          if (!isRentStatement) {
+            dedContainer.style.display = 'none';
+          } else {
+            dedContainer.style.display = 'flex';
+          }
+        }
+      }
+
+      // Vacant units
+      const vacantEl = document.getElementById('ll-stmt-vacant-units');
+      if (vacantEl) vacantEl.textContent = vacantUnits.length > 0 ? vacantUnits.join(' , ') : 'None';
+
+      // Pay to details
+      const payToEl = document.getElementById('ll-stmt-pay-to');
+      if (payToEl) {
+        const bName = landlord.bank || prop.bankName || 'CO-OPERATIVE BANK';
+        const bAcc = landlord.accNo || prop.bankAccountNo || '';
+        const bBranch = landlord.branch || prop.bankBranch || '';
+        const accInfo = bAcc ? ` (A/C: ${bAcc}${bBranch ? ' • ' + bBranch : ''})` : '';
+        payToEl.textContent = `- - ${bName.toUpperCase()}${accInfo}`;
+      }
+
+      // Enable print button
+      const printBtn = document.getElementById('btn-print-landlord-statement');
+      if (printBtn) {
+        printBtn.style.opacity = '1';
+        printBtn.removeAttribute('disabled');
+      }
+    }
+
+    function printLandlordStatement() {
+      window.print();
+    }
+
     // Tab switching for 1.3 Landlords
     function setupLandlordTabs() {
       const landlordTabBtns = document.querySelectorAll('.landlord-tab-btn');
@@ -5318,6 +5765,10 @@ const AppState = {
           document.querySelectorAll('.landlord-panel').forEach(p => p.classList.remove('active'));
           const targetPanel = document.getElementById(`panel-landlord-${target}`);
           if (targetPanel) targetPanel.classList.add('active');
+
+          if (target === 'statements') {
+            initLandlordStatementGenerator();
+          }
         });
       });
     }
@@ -7454,6 +7905,13 @@ const AppState = {
     window.closeOfficialReceiptModal = closeOfficialReceiptModal;
     window.printOfficialReceipt = printOfficialReceipt;
     window.numberToWords = numberToWords;
+
+    // Landlord Statement Engine Handlers (landlord Statement - Jan.pdf)
+    window.initLandlordStatementGenerator = initLandlordStatementGenerator;
+    window.generateLandlordRentStatement = generateLandlordRentStatement;
+    window.generateLandlordUtilityStatement = generateLandlordUtilityStatement;
+    window.executeGenerateLandlordStatement = executeGenerateLandlordStatement;
+    window.printLandlordStatement = printLandlordStatement;
 
     // Tenant Statement of Account Engine Handlers (image_f7715c.png)
     window.initTenantStatementEngine = initTenantStatementEngine;
