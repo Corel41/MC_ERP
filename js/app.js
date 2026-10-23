@@ -3462,9 +3462,9 @@ const AppState = {
         });
 
         if (badge) {
-          badge.innerHTML = `<span style="color: #047857; font-weight: 800;">✓ Balanced: Matrix equals Payment Received (KES ${paymentReceived.toLocaleString('en-US', {minimumFractionDigits: 2})})</span>`;
-          badge.style.background = '#ECFDF5';
-          badge.style.borderColor = '#10B981';
+          badge.innerHTML = '<span style="color: var(--accent-secondary); font-weight: 700; letter-spacing: 0.3px;">✓ Allocation Balanced</span>';
+          badge.style.background = 'rgba(16, 185, 129, 0.14)';
+          badge.style.borderColor = 'rgba(16, 185, 129, 0.35)';
         }
 
         if (warnBox) warnBox.style.display = 'none';
@@ -3485,8 +3485,8 @@ const AppState = {
             badge.style.background = 'var(--glass-pill)';
             badge.style.borderColor = 'var(--glass-border)';
           } else {
-            badge.innerHTML = `<span style="color: #EF4444; font-weight: 800;">⚠️ Unbalanced: Matrix KES ${matrixSum.toLocaleString('en-US', {minimumFractionDigits: 2})} ≠ Payment KES ${paymentReceived.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>`;
-            badge.style.background = 'rgba(239, 68, 68, 0.15)';
+            badge.innerHTML = '<span style="color: #F87171; font-weight: 700;">⚠️ Unbalanced: Matrix ≠ Payment</span>';
+            badge.style.background = 'rgba(239, 68, 68, 0.14)';
             badge.style.borderColor = 'rgba(239, 68, 68, 0.35)';
           }
         }
