@@ -236,10 +236,10 @@
   <div class="tenant-panel" id="panel-tab-receipting" style="display: none;">
 
     <!-- TOP HEADER STRIP & EDIT MODE NOTIFICATION -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; margin-left: 0;">
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="font-size: 1.25rem; font-weight: 800; letter-spacing: 0.5px;">Receipts</span>
-        <span class="stat-pill" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 600;">Tenant Payment Intake &amp; Strict Allocation</span>
+        <span class="stat-pill" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 600;">Tenant Payment Intake &amp; Strict Waterfall Allocation</span>
       </div>
       <!-- Mode Badge: Standard or Edit -->
       <div id="receipt-mode-indicator-badge" style="display: none; background: rgba(245, 158, 11, 0.18); color: var(--accent-amber); border: 1px solid var(--accent-amber); font-size: 11.5px; font-weight: 800; padding: 4px 12px; border-radius: 6px; align-items: center; gap: 8px;">
@@ -249,15 +249,15 @@
     </div>
 
     <!-- MAIN FORM CONTAINER -->
-    <form id="form-tenant-receipt" onsubmit="event.preventDefault(); executePaymentReceipt('save');">
+    <form id="form-tenant-receipt" onsubmit="event.preventDefault(); executePaymentReceipt('save');" style="margin-left: 0; width: 100%;">
 
       <!-- =========================================================================
-           TOP ROW: TENANT & UNIT PROFILE (LEFT) + PAYMENT RECEIVED & SUMMARY (RIGHT)
+           TOP ROW: TENANT & UNIT PROFILE (LEFT ~58%) + PAYMENT RECEIVED & SUMMARY (RIGHT ~40%)
            ========================================================================= -->
-      <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: stretch; margin-bottom: 20px;">
+      <div class="receipting-top-row">
         
         <!-- Top Row Left: Tenant & Unit Profile -->
-        <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div class="glass-card receipting-profile-box" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
           <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
             <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
               — Tenant &amp; Unit Profile —
@@ -315,7 +315,7 @@
         </div>
 
         <!-- Top Row Right: Payment Received & Status Summary -->
-        <div class="glass-card" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div class="glass-card receipting-summary-box" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
           <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px;">
             <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
               — Payment Received &amp; Status Summary —
@@ -370,16 +370,60 @@
       </div>
 
       <!-- =========================================================================
-           MIDDLE ROW: PAYMENT & TRANSACTION DETAILS (FULL WORKSPACE WIDTH)
+           MIDDLE ZONE: BILLING BREAKDOWN (MOVED UP FROM LOWER ZONE / DIRECTLY BELOW SUMMARY)
            ========================================================================= -->
-      <div class="glass-card" style="padding: 20px; margin-bottom: 20px;">
+      <div class="glass-card" style="padding: 20px; margin-bottom: 18px; width: 100%; margin-left: 0;">
+        <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px; margin-bottom: 14px;">
+          <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+            — Billing Breakdown —
+          </h4>
+        </div>
+
+        <div class="builder-table-wrap">
+          <table class="builder-table" style="width: 100%; table-layout: fixed;">
+            <colgroup>
+              <col style="width: 34%;">
+              <col style="width: 22%;">
+              <col style="width: 22%;">
+              <col style="width: 22%;">
+            </colgroup>
+            <thead>
+              <tr>
+                <th style="text-align: left;">Payable Item</th>
+                <th style="text-align: right;">Monthly Bill</th>
+                <th style="text-align: right;">Total Bill Due</th>
+                <th style="text-align: right;">Amount Paid</th>
+              </tr>
+            </thead>
+            <tbody id="receipt-invoices-allocation-body">
+              <!-- Dynamically populated rows -->
+            </tbody>
+            <tfoot>
+              <tr style="font-weight: 800; border-top: 2px solid var(--glass-border-strong); background: rgba(255, 255, 255, 0.03);">
+                <td style="padding: 10px 12px; color: var(--text-primary);">Total</td>
+                <td id="receipt-matrix-sum-month-bill" style="padding: 10px 12px; text-align: right; color: var(--text-muted);">KES 0.00</td>
+                <td id="receipt-matrix-sum-total-due" style="padding: 10px 12px; text-align: right; color: var(--accent-primary);">KES 0.00</td>
+                <td id="receipt-matrix-sum-amount-paid" style="padding: 10px 12px; text-align: right; color: var(--accent-secondary); font-weight: 800;">KES 0.00</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); font-style: italic; margin-top: 8px;">
+          * Sum of "Amount Paid" column must strictly match the "Payment Received" input.
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           LOWER ZONE: PAYMENT & TRANSACTION DETAILS (MOVED DOWN / DIRECTLY ABOVE ACTIONS)
+           ========================================================================= -->
+      <div class="glass-card" style="padding: 20px; margin-bottom: 24px; width: 100%; margin-left: 0;">
         <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px; margin-bottom: 16px;">
           <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
             — Payment &amp; Transaction Details —
           </h4>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: end;">
+        <div class="receipting-tx-grid">
           <!-- Receipt Number -->
           <div class="form-group">
             <label class="form-label">Receipt Number</label>
@@ -448,53 +492,9 @@
             <input type="text" id="receipt-notes" class="form-input" placeholder="e.g. October 2026 Rent settlement">
           </div>
         </div>
-      </div>
-
-      <!-- =========================================================================
-           BOTTOM ROW: BILLING BREAKDOWN (FULL-WIDTH WATERFALL ALLOCATION TABLE)
-           ========================================================================= -->
-      <div class="glass-card" style="padding: 20px; margin-bottom: 24px;">
-        <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px; margin-bottom: 14px;">
-          <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
-            — Billing Breakdown —
-          </h4>
-        </div>
-
-        <div class="builder-table-wrap">
-          <table class="builder-table" style="width: 100%; table-layout: fixed;">
-            <colgroup>
-              <col style="width: 34%;">
-              <col style="width: 22%;">
-              <col style="width: 22%;">
-              <col style="width: 22%;">
-            </colgroup>
-            <thead>
-              <tr>
-                <th style="text-align: left;">Payable Item</th>
-                <th style="text-align: right;">Monthly Bill</th>
-                <th style="text-align: right;">Total Bill Due</th>
-                <th style="text-align: right;">Amount Paid</th>
-              </tr>
-            </thead>
-            <tbody id="receipt-invoices-allocation-body">
-              <!-- Dynamically populated rows -->
-            </tbody>
-            <tfoot>
-              <tr style="font-weight: 800; border-top: 2px solid var(--glass-border-strong); background: rgba(255, 255, 255, 0.03);">
-                <td style="padding: 10px 12px; color: var(--text-primary);">Total</td>
-                <td id="receipt-matrix-sum-month-bill" style="padding: 10px 12px; text-align: right; color: var(--text-muted);">KES 0.00</td>
-                <td id="receipt-matrix-sum-total-due" style="padding: 10px 12px; text-align: right; color: var(--accent-primary);">KES 0.00</td>
-                <td id="receipt-matrix-sum-amount-paid" style="padding: 10px 12px; text-align: right; color: var(--accent-secondary); font-weight: 800;">KES 0.00</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-        <div style="font-size: 0.78rem; color: var(--text-muted); font-style: italic; margin-top: 8px;">
-          * Sum of "Amount Paid" column must strictly match the "Payment Received" input.
-        </div>
 
         <!-- Action Footer (Centered Workflow Buttons) -->
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--divider-color);">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--divider-color);">
           <div style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;">
             <button type="button" id="btn-receipt-save" class="btn-action-pill" onclick="executePaymentReceipt('save')" style="min-width: 110px; padding: 9px 24px; font-weight: 700;">
               Save
@@ -524,7 +524,7 @@
     <!-- =========================================================================
          MASTER DIRECTORY: LIST OF RECORDED TENANT RECEIPTS (.glass-card)
          ========================================================================= -->
-    <div class="glass-card clean-module-container" style="padding: 24px;">
+    <div class="glass-card clean-module-container" style="padding: 24px; width: 100%; margin-left: 0;">
       
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--divider-color); padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
         <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
