@@ -205,12 +205,12 @@
               <span class="nav-text">Receipting</span>
             </a>
           </li>
-          <li class="nav-item" data-tooltip="Landlord Statements">
-            <a class="nav-link" href="landlord-statements.html">
+          <li class="nav-item" data-tooltip="Landlords">
+            <a class="nav-link" href="landlords.html">
               <span class="nav-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="8 11 12 15 16 11"/></svg>
               </span>
-              <span class="nav-text">Landlord Statements</span>
+              <span class="nav-text">Landlords</span>
             </a>
           </li>
           <li class="nav-item" data-tooltip="Repairs">
@@ -523,6 +523,7 @@
                     <select id="receipt-method-select" class="pm-legacy-input" onchange="onReceiptPaymentModeChange(this.value)" required style="width: 100%; box-sizing: border-box;">
                       <option value="M-Pesa Paybill">M-Pesa Paybill</option>
                       <option value="Bank Deposit">Bank Deposit / Transfer</option>
+                      <option value="Paid to Landlord">Paid to Landlord</option>
                       <option value="Cash">Cash (Office Cashier)</option>
                       <option value="Cheque">Banker's Cheque</option>
                       <option value="EFT / RTGS">EFT / RTGS</option>
@@ -535,7 +536,7 @@
                     <input type="text" id="receipt-ref-code" class="pm-legacy-input" placeholder="e.g. QKD829104A" required style="width: 100%; box-sizing: border-box;">
                   </div>
 
-                  <!-- Destination Account: Dynamic M-Pesa / Bank / Cash -->
+                  <!-- Destination Account: Dynamic M-Pesa / Bank / Landlord / Cash -->
                   <div id="receipt-dest-mpesa-container" style="display: flex; flex-direction: column; gap: 3px;">
                     <label style="font-size: 11.5px; font-weight: 700; color: #1E293B;">Destination: <span style="color: #DC2626;">*</span></label>
                     <select id="receipt-mpesa-paybill-select" class="pm-legacy-input" style="width: 100%; box-sizing: border-box;">
@@ -548,6 +549,11 @@
                     <select id="receipt-bank-account-select" class="pm-legacy-input" style="width: 100%; box-sizing: border-box;">
                       <!-- Populated dynamically -->
                     </select>
+                  </div>
+
+                  <div id="receipt-dest-landlord-container" style="display: none; flex-direction: column; gap: 3px;">
+                    <label style="font-size: 11.5px; font-weight: 700; color: #1E293B;">Destination: <span style="color: #DC2626;">*</span></label>
+                    <input type="text" class="pm-legacy-input" value="Direct Landlord Account / Direct Settlement" readonly style="background: #EEF2F6 !important; color: #4B5563 !important; width: 100%; box-sizing: border-box;">
                   </div>
 
                   <div id="receipt-dest-cash-container" style="display: none; flex-direction: column; gap: 3px;">
@@ -646,6 +652,7 @@
               <option value="ALL">Filter By: All</option>
               <option value="M-Pesa Paybill">M-Pesa Paybill</option>
               <option value="Bank Deposit">Bank Deposit</option>
+              <option value="Paid to Landlord">Paid to Landlord</option>
               <option value="Cash">Cash</option>
               <option value="Cheque">Cheque</option>
             </select>

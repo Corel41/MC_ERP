@@ -3609,32 +3609,36 @@ const AppState = {
       const bankCont = document.getElementById('receipt-dest-bank-container');
       const mpesaCont = document.getElementById('receipt-dest-mpesa-container');
       const cashCont = document.getElementById('receipt-dest-cash-container');
+      const landlordCont = document.getElementById('receipt-dest-landlord-container');
       const refInput = document.getElementById('receipt-ref-code');
 
-      if (!bankCont || !mpesaCont || !cashCont) return;
+      if (bankCont) bankCont.style.display = 'none';
+      if (mpesaCont) mpesaCont.style.display = 'none';
+      if (cashCont) cashCont.style.display = 'none';
+      if (landlordCont) landlordCont.style.display = 'none';
 
       if (method === 'M-Pesa Paybill') {
-        bankCont.style.display = 'none';
-        mpesaCont.style.display = 'flex';
-        cashCont.style.display = 'none';
-        if (refInput && (!refInput.value || refInput.value.startsWith('BNK-') || refInput.value.startsWith('CSH-'))) {
+        if (mpesaCont) mpesaCont.style.display = 'flex';
+        if (refInput && (!refInput.value || refInput.value.startsWith('BNK-') || refInput.value.startsWith('CSH-') || refInput.value.startsWith('DIR-'))) {
           refInput.placeholder = 'e.g. QKD829104A';
           refInput.value = 'QKD' + Math.floor(100000 + Math.random() * 900000);
         }
       } else if (method === 'Bank Deposit' || method === 'Cheque' || method === 'EFT / RTGS') {
-        bankCont.style.display = 'flex';
-        mpesaCont.style.display = 'none';
-        cashCont.style.display = 'none';
-        if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('CSH-'))) {
+        if (bankCont) bankCont.style.display = 'flex';
+        if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('CSH-') || refInput.value.startsWith('DIR-'))) {
           refInput.placeholder = 'e.g. BNK-782910';
           refInput.value = 'BNK-' + Math.floor(100000 + Math.random() * 900000);
         }
+      } else if (method === 'Paid to Landlord') {
+        if (landlordCont) landlordCont.style.display = 'flex';
+        if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('BNK-') || refInput.value.startsWith('CSH-'))) {
+          refInput.placeholder = 'e.g. DIR-LL-001 or Direct Ref';
+          refInput.value = 'DIR-' + Math.floor(100000 + Math.random() * 900000);
+        }
       } else {
         // Cash
-        bankCont.style.display = 'none';
-        mpesaCont.style.display = 'none';
-        cashCont.style.display = 'flex';
-        if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('BNK-'))) {
+        if (cashCont) cashCont.style.display = 'flex';
+        if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('BNK-') || refInput.value.startsWith('DIR-'))) {
           refInput.placeholder = 'e.g. CSH-001';
           refInput.value = 'CSH-' + Math.floor(1000 + Math.random() * 9000);
         }
@@ -3698,6 +3702,9 @@ const AppState = {
         const bRecord = AppState.bankAccounts.find(b => b.id === bId);
         bankAccName = bRecord ? `${bRecord.bank_name} (${bRecord.account_no})` : (bankSel.options[bankSel.selectedIndex]?.text || 'Bank Account');
         destLabel = bankAccName;
+      } else if (method === 'Paid to Landlord') {
+        destLabel = 'Direct Landlord Settlement';
+        bankAccName = 'Direct Landlord Account';
       }
 
       // Collect allocations from List of Payables matrix
@@ -4022,7 +4029,11 @@ const AppState = {
       }
 
       tbody.innerHTML = list.map((item, idx) => {
-        const dest = item.mpesa_paybill_number ? `Paybill: ${item.mpesa_paybill_number}` : (item.bank_account_name || 'Cash Office');
+        const isLandlord = item.payment_method === 'Paid to Landlord';
+        const isMpesa = item.payment_method === 'M-Pesa Paybill';
+        const badgeBg = isLandlord ? '#FEF3C7' : (isMpesa ? '#ECFDF5' : '#EFF6FF');
+        const badgeColor = isLandlord ? '#B45309' : (isMpesa ? '#047857' : '#1D4ED8');
+        const dest = isLandlord ? 'Direct Landlord Settlement' : (item.mpesa_paybill_number ? `Paybill: ${item.mpesa_paybill_number}` : (item.bank_account_name || 'Cash Office'));
         const dtFormatted = item.payment_date ? item.payment_date.split('T')[0].split(' ')[0] : '-';
         return `
           <tr class="pm-table-row">
@@ -4032,7 +4043,7 @@ const AppState = {
             <td style="padding: 6px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">${item.tenant_name}</td>
             <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Unit ${item.unit_code || '-'}</td>
             <td style="padding: 6px 12px; border-right: 1px solid #E5E7EB;">
-              <span style="background: ${item.payment_method === 'M-Pesa Paybill' ? '#ECFDF5' : '#EFF6FF'}; color: ${item.payment_method === 'M-Pesa Paybill' ? '#047857' : '#1D4ED8'}; padding: 2px 8px; border-radius: 2px; font-weight: 700; font-size: 11px;">
+              <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 2px 8px; border-radius: 2px; font-weight: 700; font-size: 11px;">
                 ${item.payment_method}
               </span>
             </td>
@@ -5548,6 +5559,16 @@ const AppState = {
       const units = (AppState.units || []).filter(u => u.propertyId === prop.id);
       units.sort((a, b) => (a.code || '').localeCompare(b.code || '', undefined, { numeric: true }));
 
+      // Hydrate latest tenant receipts from localStorage if present
+      try {
+        const storedRecs = localStorage.getItem('mc_erp_tenant_receipts');
+        if (storedRecs) {
+          AppState.tenantReceipts = JSON.parse(storedRecs);
+        }
+      } catch (e) {
+        console.warn('Could not sync tenant receipts from localStorage', e);
+      }
+
       let totalMonthlyBill = 0;
       let totalOpeningArrears = 0;
       let totalExpected = 0;
@@ -5555,6 +5576,7 @@ const AppState = {
       let totalClosingBalance = 0;
       let occupiedCount = 0;
       let vacantUnits = [];
+      const directToLandlordPayments = [];
 
       const rowsHtml = [];
 
@@ -5651,7 +5673,16 @@ const AppState = {
           const rawDate = rc.payment_date || rc.paymentDate || '2026-05-03';
           const rDate = rawDate.split('T')[0].split(' ')[0];
           if (rDate >= startOfMonth && rDate <= endOfMonth) {
-            currentPaid += getLandlordReceiptPayableAmount(rc, payableCode, tenantInvs, allLines);
+            const recAmt = getLandlordReceiptPayableAmount(rc, payableCode, tenantInvs, allLines);
+            currentPaid += recAmt;
+            if (rc.payment_method === 'Paid to Landlord' && recAmt > 0) {
+              directToLandlordPayments.push({
+                unitCode: u.code,
+                tenantName: tenant.name,
+                amount: recAmt,
+                reference: rc.reference_code || ''
+              });
+            }
           }
         });
 
@@ -5713,8 +5744,11 @@ const AppState = {
         const countEl = document.getElementById('ll-stmt-tenants-count');
         if (countEl) countEl.textContent = occupiedCount;
 
+        const totalDirectPaidToLandlord = directToLandlordPayments.reduce((sum, d) => sum + d.amount, 0);
+        const monthlyAgencyCollected = Math.max(0, totalAmountPaid - totalDirectPaidToLandlord);
+
         const collectedEl = document.getElementById('ll-stmt-monthly-collected');
-        if (collectedEl) collectedEl.textContent = formatLandlordAmount(totalAmountPaid);
+        if (collectedEl) collectedEl.textContent = formatLandlordAmount(monthlyAgencyCollected);
 
         const expectedRemitEl = document.getElementById('ll-stmt-expected-remittance');
         if (expectedRemitEl) expectedRemitEl.textContent = formatLandlordAmount(totalAmountPaid);
@@ -5723,8 +5757,23 @@ const AppState = {
         const feePct = isRentStatement ? (Number(mandate.feePct) || 8.0) : 0;
         const mgmtFee = isRentStatement ? (totalAmountPaid * (feePct / 100)) : 0;
         const vatAmt = isRentStatement ? (mgmtFee * 0.16) : 0;
-        const totalDeductions = mgmtFee + vatAmt;
+        const totalDeductions = mgmtFee + vatAmt + totalDirectPaidToLandlord;
         const netDue = totalAmountPaid - totalDeductions;
+
+        const dynDedEl = document.getElementById('ll-stmt-dynamic-deductions');
+        if (dynDedEl) {
+          if (directToLandlordPayments.length > 0) {
+            dynDedEl.innerHTML = directToLandlordPayments.map(dp => `
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #9A3412;">
+                <span style="width: 220px;">Direct Payment - Unit ${dp.unitCode}:</span>
+                <span style="width: 70px; text-align: right; font-size: 10px; font-weight: 700; color: #B45309;">(Direct)</span>
+                <span style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">${formatLandlordAmount(dp.amount)}</span>
+              </div>
+            `).join('');
+          } else {
+            dynDedEl.innerHTML = '';
+          }
+        }
 
         const feePctEl = document.getElementById('ll-stmt-fee-pct');
         if (feePctEl) feePctEl.textContent = `${feePct.toFixed(2)} %`;

@@ -361,6 +361,16 @@
     const units = (AppState.units || []).filter(u => u.propertyId === prop.id);
     units.sort((a, b) => (a.code || '').localeCompare(b.code || '', undefined, { numeric: true }));
 
+    // Hydrate latest tenant receipts from localStorage if present
+    try {
+      const storedRecs = localStorage.getItem('mc_erp_tenant_receipts');
+      if (storedRecs) {
+        AppState.tenantReceipts = JSON.parse(storedRecs);
+      }
+    } catch (e) {
+      console.warn('Could not sync tenant receipts from localStorage', e);
+    }
+
     let totalMonthlyBill = 0;
     let totalOpeningArrears = 0;
     let totalExpected = 0;
@@ -368,6 +378,7 @@
     let totalClosingBalance = 0;
     let occupiedCount = 0;
     let vacantUnits = [];
+    const directToLandlordPayments = [];
 
     const rowsHtml = [];
 
@@ -464,7 +475,16 @@
         const rawDate = rc.payment_date || rc.paymentDate || '2026-05-03';
         const rDate = rawDate.split('T')[0].split(' ')[0];
         if (rDate >= startOfMonth && rDate <= endOfMonth) {
-          currentPaid += getLandlordReceiptPayableAmount(rc, payableCode, tenantInvs, allLines);
+          const recAmt = getLandlordReceiptPayableAmount(rc, payableCode, tenantInvs, allLines);
+          currentPaid += recAmt;
+          if (rc.payment_method === 'Paid to Landlord' && recAmt > 0) {
+            directToLandlordPayments.push({
+              unitCode: u.code,
+              tenantName: tenant.name,
+              amount: recAmt,
+              reference: rc.reference_code || ''
+            });
+          }
         }
       });
 
@@ -526,8 +546,11 @@
       const countEl = document.getElementById('ll-stmt-tenants-count');
       if (countEl) countEl.textContent = occupiedCount;
 
+      const totalDirectPaidToLandlord = directToLandlordPayments.reduce((sum, d) => sum + d.amount, 0);
+      const monthlyAgencyCollected = Math.max(0, totalAmountPaid - totalDirectPaidToLandlord);
+
       const collectedEl = document.getElementById('ll-stmt-monthly-collected');
-      if (collectedEl) collectedEl.textContent = formatLandlordAmount(totalAmountPaid);
+      if (collectedEl) collectedEl.textContent = formatLandlordAmount(monthlyAgencyCollected);
 
       const expectedRemitEl = document.getElementById('ll-stmt-expected-remittance');
       if (expectedRemitEl) expectedRemitEl.textContent = formatLandlordAmount(totalAmountPaid);
@@ -536,8 +559,23 @@
       const feePct = isRentStatement ? (Number(mandate.feePct) || 8.0) : 0;
       const mgmtFee = isRentStatement ? (totalAmountPaid * (feePct / 100)) : 0;
       const vatAmt = isRentStatement ? (mgmtFee * 0.16) : 0;
-      const totalDeductions = mgmtFee + vatAmt;
+      const totalDeductions = mgmtFee + vatAmt + totalDirectPaidToLandlord;
       const netDue = totalAmountPaid - totalDeductions;
+
+      const dynDedEl = document.getElementById('ll-stmt-dynamic-deductions');
+      if (dynDedEl) {
+        if (directToLandlordPayments.length > 0) {
+          dynDedEl.innerHTML = directToLandlordPayments.map(dp => `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #9A3412;">
+              <span style="width: 220px;">Direct Payment - Unit ${dp.unitCode}:</span>
+              <span style="width: 70px; text-align: right; font-size: 10px; font-weight: 700; color: #B45309;">(Direct)</span>
+              <span style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">${formatLandlordAmount(dp.amount)}</span>
+            </div>
+          `).join('');
+        } else {
+          dynDedEl.innerHTML = '';
+        }
+      }
 
       const feePctEl = document.getElementById('ll-stmt-fee-pct');
       if (feePctEl) feePctEl.textContent = `${feePct.toFixed(2)} %`;

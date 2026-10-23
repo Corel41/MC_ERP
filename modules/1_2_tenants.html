@@ -553,6 +553,7 @@
                   <select id="receipt-method-select" class="pm-legacy-input" onchange="onReceiptPaymentModeChange(this.value)" required style="width: 100%; box-sizing: border-box;">
                     <option value="M-Pesa Paybill">M-Pesa Paybill</option>
                     <option value="Bank Deposit">Bank Deposit / Transfer</option>
+                    <option value="Paid to Landlord">Paid to Landlord</option>
                     <option value="Cash">Cash (Office Cashier)</option>
                     <option value="Cheque">Banker's Cheque</option>
                     <option value="EFT / RTGS">EFT / RTGS</option>
@@ -578,6 +579,11 @@
                   <select id="receipt-bank-account-select" class="pm-legacy-input" style="width: 100%; box-sizing: border-box;">
                     <!-- Dynamically populated from AppState.bankAccounts -->
                   </select>
+                </div>
+
+                <div id="receipt-dest-landlord-container" style="display: none; flex-direction: column; gap: 3px;">
+                  <label style="font-size: 11.5px; font-weight: 700; color: #1E293B;">Destination: <span style="color: #DC2626;">*</span></label>
+                  <input type="text" class="pm-legacy-input" value="Direct Landlord Account / Direct Settlement" readonly style="background: #EEF2F6 !important; color: #4B5563 !important; width: 100%; box-sizing: border-box;">
                 </div>
 
                 <div id="receipt-dest-cash-container" style="display: none; flex-direction: column; gap: 3px;">
@@ -677,6 +683,7 @@
             <option value="ALL">Filter By: All</option>
             <option value="M-Pesa Paybill">M-Pesa Paybill</option>
             <option value="Bank Deposit">Bank Deposit</option>
+              <option value="Paid to Landlord">Paid to Landlord</option>
             <option value="Cash">Cash</option>
             <option value="Cheque">Cheque</option>
           </select>

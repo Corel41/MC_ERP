@@ -117,12 +117,12 @@
               <span class="nav-text">Receipting</span>
             </a>
           </li>
-          <li class="nav-item active" data-tooltip="Landlord Statements">
-            <a class="nav-link" href="landlord-statements.html">
+          <li class="nav-item" data-tooltip="Landlords">
+            <a class="nav-link" href="landlords.html">
               <span class="nav-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="8 11 12 15 16 11"/></svg>
               </span>
-              <span class="nav-text">Landlord Statements</span>
+              <span class="nav-text">Landlords</span>
             </a>
           </li>
           <li class="nav-item" data-tooltip="Repairs">
@@ -261,6 +261,13 @@
               <p>Calculate monthly net remittance per property by deducting agreed agency commissions, 16% agency VAT, approved maintenance/repair costs, and statutory 7.5% MRI withholding tax.</p>
             </div>
             <span class="live-pulse-badge">dbo_Landlord_Payments / Pro_PayToLLComm Sync</span>
+          </div>
+
+          <!-- Back to Landlords Hub navigation -->
+          <div style="display: flex; justify-content: flex-start; margin-bottom: 14px;">
+            <a href="landlords.html" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 700; font-size: 12.5px; color: #008080; background: #E6FFFA; padding: 6px 14px; border: 1px solid #81E6D9; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+              <span>&larr;</span> Back to Landlords Hub &amp; Deductions
+            </a>
           </div>
 
           <!-- 1. GENERATOR CONTROL PANEL (TWO DISTINCT HORIZONTAL SECTIONS A & B) -->
@@ -479,6 +486,8 @@
                       <span style="width: 70px; text-align: right;">16.00 %</span>
                       <span id="ll-stmt-vat-amount" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">2,577.96</span>
                     </div>
+
+                    <div id="ll-stmt-dynamic-deductions"></div>
 
                     <div style="border-top: 1px solid #000000; margin: 4px 0 6px 0; display: flex; justify-content: flex-end;">
                       <span id="ll-stmt-total-deductions" style="width: 120px; text-align: right; font-variant-numeric: tabular-nums; border-bottom: 1px solid #000000; padding: 2px 0;">18,690.21</span>

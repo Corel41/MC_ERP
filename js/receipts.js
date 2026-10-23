@@ -898,31 +898,35 @@
     const bankCont = document.getElementById('receipt-dest-bank-container');
     const mpesaCont = document.getElementById('receipt-dest-mpesa-container');
     const cashCont = document.getElementById('receipt-dest-cash-container');
+    const landlordCont = document.getElementById('receipt-dest-landlord-container');
     const refInput = document.getElementById('receipt-ref-code');
 
-    if (!bankCont || !mpesaCont || !cashCont) return;
+    if (bankCont) bankCont.style.display = 'none';
+    if (mpesaCont) mpesaCont.style.display = 'none';
+    if (cashCont) cashCont.style.display = 'none';
+    if (landlordCont) landlordCont.style.display = 'none';
 
     if (method === 'M-Pesa Paybill') {
-      bankCont.style.display = 'none';
-      mpesaCont.style.display = 'flex';
-      cashCont.style.display = 'none';
-      if (refInput && (!refInput.value || refInput.value.startsWith('BNK-') || refInput.value.startsWith('CSH-'))) {
+      if (mpesaCont) mpesaCont.style.display = 'flex';
+      if (refInput && (!refInput.value || refInput.value.startsWith('BNK-') || refInput.value.startsWith('CSH-') || refInput.value.startsWith('DIR-'))) {
         refInput.placeholder = 'e.g. QKD829104A';
         refInput.value = 'QKD' + Math.floor(100000 + Math.random() * 900000);
       }
     } else if (method === 'Bank Deposit' || method === 'Cheque' || method === 'EFT / RTGS') {
-      bankCont.style.display = 'flex';
-      mpesaCont.style.display = 'none';
-      cashCont.style.display = 'none';
-      if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('CSH-'))) {
+      if (bankCont) bankCont.style.display = 'flex';
+      if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('CSH-') || refInput.value.startsWith('DIR-'))) {
         refInput.placeholder = 'e.g. BNK-782910';
         refInput.value = 'BNK-' + Math.floor(100000 + Math.random() * 900000);
       }
+    } else if (method === 'Paid to Landlord') {
+      if (landlordCont) landlordCont.style.display = 'flex';
+      if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('BNK-') || refInput.value.startsWith('CSH-'))) {
+        refInput.placeholder = 'e.g. DIR-LL-001 or Direct Ref';
+        refInput.value = 'DIR-' + Math.floor(100000 + Math.random() * 900000);
+      }
     } else {
-      bankCont.style.display = 'none';
-      mpesaCont.style.display = 'none';
-      cashCont.style.display = 'flex';
-      if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('BNK-'))) {
+      if (cashCont) cashCont.style.display = 'flex';
+      if (refInput && (!refInput.value || refInput.value.startsWith('QKD') || refInput.value.startsWith('BNK-') || refInput.value.startsWith('DIR-'))) {
         refInput.placeholder = 'e.g. CSH-001';
         refInput.value = 'CSH-' + Math.floor(1000 + Math.random() * 9000);
       }
@@ -986,6 +990,9 @@
       const bRecord = (AppState.bankAccounts || []).find(b => b.id === bId);
       bankAccName = bRecord ? `${bRecord.bank_name} (${bRecord.account_no})` : (bankSel.options[bankSel.selectedIndex]?.text || 'Bank Account');
       destLabel = bankAccName;
+    } else if (method === 'Paid to Landlord') {
+      destLabel = 'Direct Landlord Settlement';
+      bankAccName = 'Direct Landlord Account';
     }
 
     // Collect allocations from List of Payables matrix
@@ -1282,7 +1289,11 @@
     }
 
     tbody.innerHTML = list.map((item, idx) => {
-      const dest = item.mpesa_paybill_number ? `Paybill: ${item.mpesa_paybill_number}` : (item.bank_account_name || 'Cash Office');
+      const isLandlord = item.payment_method === 'Paid to Landlord';
+      const isMpesa = item.payment_method === 'M-Pesa Paybill';
+      const badgeBg = isLandlord ? '#FEF3C7' : (isMpesa ? '#ECFDF5' : '#EFF6FF');
+      const badgeColor = isLandlord ? '#B45309' : (isMpesa ? '#047857' : '#1D4ED8');
+      const dest = isLandlord ? 'Direct Landlord Settlement' : (item.mpesa_paybill_number ? `Paybill: ${item.mpesa_paybill_number}` : (item.bank_account_name || 'Cash Office'));
       const dtFormatted = item.payment_date ? item.payment_date.split('T')[0].split(' ')[0] : '-';
       return `
         <tr class="pm-table-row">
@@ -1292,7 +1303,7 @@
           <td style="padding: 6px 12px; font-weight: 600; border-right: 1px solid #E5E7EB;">${item.tenant_name}</td>
           <td style="padding: 6px 10px; text-align: center; border-right: 1px solid #E5E7EB;">Unit ${item.unit_code || '-'}</td>
           <td style="padding: 6px 12px; border-right: 1px solid #E5E7EB;">
-            <span style="background: ${item.payment_method === 'M-Pesa Paybill' ? '#ECFDF5' : '#EFF6FF'}; color: ${item.payment_method === 'M-Pesa Paybill' ? '#047857' : '#1D4ED8'}; padding: 2px 8px; border-radius: 2px; font-weight: 700; font-size: 11px;">
+            <span style="background: ${badgeBg}; color: ${badgeColor}; padding: 2px 8px; border-radius: 2px; font-weight: 700; font-size: 11px;">
               ${item.payment_method}
             </span>
           </td>
