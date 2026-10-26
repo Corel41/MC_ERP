@@ -1,4 +1,4 @@
-/**
+﻿/**
  * js/landlords.js — Standalone Landlord Management & Statement Generation Engine
  * Decoupled MPA architecture for Metrocosmo ERP
  */
@@ -243,7 +243,22 @@
   }
 
   function getLandlordReceiptPayableAmount(rc, payableCode, tenantInvs, allLines) {
-    if (Array.isArray(rc.allocations) && rc.allocations.length > 0) {
+    const allocs = (Array.isArray(rc.allocations) && rc.allocations.length > 0) ? rc.allocations : ((Array.isArray(rc.allocated_invoices) && rc.allocated_invoices.length > 0) ? rc.allocated_invoices : null);
+    if (allocs) {
+      let amt = 0;
+      allocs.forEach(al => {
+        const pCode = (al.payable_code || al.payableCode || '').toLowerCase();
+        const pName = (al.payable_name || al.payableName || al.description || '').toLowerCase();
+        if ((payableCode === '001' || payableCode.toLowerCase().includes('rent')) && (pCode === '001' || pName.includes('rent'))) amt += Number(al.amount) || 0;
+        else if ((payableCode === '002' || payableCode.toLowerCase().includes('water')) && (pCode === '002' || pName.includes('water'))) amt += Number(al.amount) || 0;
+        else if ((payableCode === '009' || payableCode.toLowerCase().includes('service')) && (pCode === '009' || pName.includes('service'))) amt += Number(al.amount) || 0;
+        else if ((payableCode === '017' || payableCode.toLowerCase().includes('garbage')) && (pCode === '017' || pName.includes('garbage'))) amt += Number(al.amount) || 0;
+        else if ((payableCode === '015' || payableCode.toLowerCase().includes('security')) && (pCode === '015' || pName.includes('security'))) amt += Number(al.amount) || 0;
+        else if ((payableCode === '035' || payableCode.toLowerCase().includes('penalty')) && (pCode === '035' || pName.includes('penalty'))) amt += Number(al.amount) || 0;
+      });
+      return amt;
+    }
+    if (false) {
       let amt = 0;
       rc.allocations.forEach(al => {
         const pName = (al.payable_name || al.payableName || al.description || '').toLowerCase();

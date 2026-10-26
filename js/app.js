@@ -1,4 +1,4 @@
-const SUPABASE_CONFIG = {
+﻿const SUPABASE_CONFIG = {
   url: 'https://uwkqihhvkegiadelowft.supabase.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3a3FpaGh2a2VnaWFkZWxvd2Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzNjM2MTEsImV4cCI6MjEwNzkzOTYxMX0.dfhqF7xAi5_a-wDnZgRCtAimE52dNoWzb-3WuYpGtj8'
 };
@@ -3239,6 +3239,42 @@ const AppState = {
 
       payables.sort((a, b) => a.priority - b.priority);
 
+      // Apply payable-specific carry-forward balance math:
+      // When computing Total Bill Due, subtract each payable's historical overpayment from its billed amount
+      const tenantReceipts = (AppState.tenantReceipts || []).filter(r => r.tenant_id === actualTenantId || (tenant && r.tenant_name === tenant.name));
+      payables.forEach(p => {
+        let payableOverpayCredit = 0;
+        tenantReceipts.forEach(r => {
+          const allocs = r.allocated_invoices || r.allocations || [];
+          allocs.forEach(a => {
+            const aCode = a.payable_code || a.code || '';
+            const aDesc = (a.description || a.item || '').toLowerCase();
+            const matches = (aCode === p.code) ||
+              (p.code === '001' && aDesc.includes('rent')) ||
+              (p.code === '002' && aDesc.includes('water')) ||
+              (p.code === '009' && aDesc.includes('service')) ||
+              (p.code === '017' && aDesc.includes('garbage')) ||
+              (p.code === '035' && aDesc.includes('penalty'));
+
+            if (matches) {
+              if (a.overpayment_amount && Number(a.overpayment_amount) > 0) {
+                payableOverpayCredit += Number(a.overpayment_amount);
+              } else if (a.amount && a.balance && Number(a.amount) > Number(a.balance)) {
+                payableOverpayCredit += (Number(a.amount) - Number(a.balance));
+              }
+            }
+          });
+        });
+
+        // If tenant overpaid Rent/utility historically, reduce next period Total Bill Due
+        if (payableOverpayCredit > 0) {
+          p.totalDue = Math.max(0, Math.round((p.totalDue - payableOverpayCredit) * 100) / 100);
+        } else if (p.code === '001' && netLedgerBalance < 0) {
+          const advanceCredit = Math.abs(netLedgerBalance);
+          p.totalDue = Math.max(0, Math.round((p.totalDue - advanceCredit) * 100) / 100);
+        }
+      });
+
       let rowsHtml = '';
       payables.forEach((p, idx) => {
         rowsHtml += `
@@ -3304,14 +3340,16 @@ const AppState = {
       const inputs = Array.from(document.querySelectorAll('#receipt-invoices-allocation-body .receipt-alloc-input'));
       if (inputs.length === 0) return;
 
-      // Clear inputs
+      // Clear inputs and existing per-row overpayment badges
       inputs.forEach(inp => { 
         inp.value = ''; 
         delete inp.dataset.manuallyEdited;
       });
+      document.querySelectorAll('.receipt-row-overpay-badge').forEach(el => el.remove());
 
       // Cascade cash down rows in priority order (Rent -> Service Charge -> Penalty)
-      inputs.forEach((inp, idx) => {
+      // No upper cap — cashier can allocate more than totalDue for overpayment absorption
+      inputs.forEach((inp) => {
         if (cash <= 0) {
           inp.value = '0.00';
           return;
@@ -3322,7 +3360,7 @@ const AppState = {
         cash -= alloc;
       });
 
-      // If cash still remains (overpayment/advance rent), place excess into the first row (Rent)
+      // If cash still remains (overpayment), squeeze entire excess into the first row (Rent/primary)
       if (cash > 0 && inputs[0]) {
         const cur = parseFloat(inputs[0].value) || 0;
         inputs[0].value = (cur + cash).toFixed(2);
@@ -3434,10 +3472,37 @@ const AppState = {
 
       // 3. DYNAMICALLY calculate Outstanding Arrears = Invoice Total - Allocated Amount Paid
       const outstandingArrears = Math.max(0, Math.round((invoiceTotal - matrixSum) * 100) / 100);
+      const totalOverpayment = Math.max(0, Math.round((matrixSum - invoiceTotal) * 100) / 100);
       const arrEl = document.getElementById('receipt-status-outstanding-arrears');
       if (arrEl) {
-        arrEl.textContent = `KES ${outstandingArrears.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        if (totalOverpayment > 0) {
+          arrEl.textContent = `KES 0.00 (Overpayment = Kshs ${totalOverpayment.toLocaleString('en-US', {minimumFractionDigits: 2})})`;
+          arrEl.style.color = 'var(--accent-secondary)';
+        } else {
+          arrEl.textContent = `KES ${outstandingArrears.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+          arrEl.style.color = '';
+        }
       }
+
+      // 3b. Render per-row overpayment badges in billing breakdown table
+      document.querySelectorAll('.receipt-row-overpay-badge').forEach(el => el.remove());
+      document.querySelectorAll('#receipt-invoices-allocation-body tr').forEach(row => {
+        const inp = row.querySelector('.receipt-alloc-input');
+        if (!inp) return;
+        const due = parseFloat(inp.getAttribute('data-due')) || 0;
+        const paid = parseFloat(inp.value) || 0;
+        const rowOverpay = Math.round((paid - due) * 100) / 100;
+        if (rowOverpay > 0.005) {
+          const td = inp.closest('td');
+          if (td) {
+            const badge = document.createElement('div');
+            badge.className = 'receipt-row-overpay-badge';
+            badge.style.cssText = 'font-size:0.70rem;font-weight:700;color:var(--accent-secondary);margin-top:2px;text-align:right;white-space:nowrap;';
+            badge.textContent = `(Overpayment = Kshs ${rowOverpay.toLocaleString('en-US', {minimumFractionDigits: 2})})`;
+            td.appendChild(badge);
+          }
+        }
+      });
 
       // 4. Check strict equality with Payment Received
       const diff = Math.round((matrixSum - paymentReceived) * 100) / 100;
@@ -3462,7 +3527,10 @@ const AppState = {
         });
 
         if (badge) {
-          badge.innerHTML = '<span style="color: var(--accent-secondary); font-weight: 700; letter-spacing: 0.3px;">✓ Allocation Balanced</span>';
+          const overpayLabel = totalOverpayment > 0
+            ? ` (Overpayment = Kshs ${totalOverpayment.toLocaleString('en-US', {minimumFractionDigits: 2})})`
+            : '';
+          badge.innerHTML = `<span style="color: var(--accent-secondary); font-weight: 700; letter-spacing: 0.3px;">✓ Allocation Balanced${overpayLabel}</span>`;
           badge.style.background = 'rgba(16, 185, 129, 0.14)';
           badge.style.borderColor = 'rgba(16, 185, 129, 0.35)';
         }
@@ -3803,6 +3871,7 @@ const AppState = {
           `Are you sure you want to update payable allocations for Official Receipt <strong>${existingReceipt.receipt_number}</strong>?<br><br>Allocated Total: <strong>KES ${totalAllocated.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> (Core transaction facts remain locked)`,
           async () => {
             existingReceipt.allocated_invoices = allocatedList;
+            existingReceipt.allocations = allocatedList;
             if (notes) existingReceipt.notes = notes;
             localStorage.setItem('mc_erp_tenant_receipts', JSON.stringify(AppState.tenantReceipts));
 
@@ -3818,6 +3887,7 @@ const AppState = {
                 },
                 body: JSON.stringify({
                   allocated_invoices: allocatedList,
+            allocations: allocatedList,
                   notes: existingReceipt.notes
                 })
               });
@@ -3864,6 +3934,30 @@ const AppState = {
         `Are you sure you want to issue Official Receipt <strong>${receiptNo}</strong> for <strong>KES ${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong> received from <strong>${tenant.name}</strong> (${tenant.unitCode || 'Unit'}) via <strong>${method}</strong> [Ref: ${refCode}]?<br><br>Destination: <strong>${destLabel}</strong>${isSmsRequested ? '<br><span style="color: #008080; font-weight: 700;">✓ Africa\'s Talking SMS notification enabled</span>' : ''}`,
         async () => {
           const nowIso = new Date().toISOString();
+
+          // Compute per-item overpayment amounts and total overpayment
+          const matrixTotalDue = allocatedList.reduce((s, a) => s + (parseFloat(a.balance) || 0), 0);
+          const receiptOverpayment = Math.max(0, Math.round((amount - matrixTotalDue) * 100) / 100);
+
+          // Annotate each allocation with its individual overpayment
+          allocatedList.forEach(a => {
+            const rowOverpay = Math.max(0, Math.round((a.amount - (parseFloat(a.balance) || 0)) * 100) / 100);
+            if (rowOverpay > 0.005) {
+              a.overpayment_amount = rowOverpay;
+            }
+          });
+
+          // Build notes with overpayment tag if applicable
+          let finalNotes = notes || `${method} payment for ${tenant.name}`;
+          if (receiptOverpayment > 0) {
+            const primaryItem = allocatedList.find(a => a.overpayment_amount > 0);
+            const itemLabel = primaryItem ? ` - ${primaryItem.description}` : '';
+            const overpayTag = `(Overpayment = Kshs ${receiptOverpayment.toLocaleString('en-US', {minimumFractionDigits: 2})}${itemLabel})`;
+            if (!finalNotes.includes('Overpayment =')) {
+              finalNotes = `${finalNotes} ${overpayTag}`.trim();
+            }
+          }
+
           const newReceipt = {
             id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + Date.now().toString(16).padStart(12, '0'),
             organization_id: getActiveOrgId(),
@@ -3881,8 +3975,10 @@ const AppState = {
             reference_code: refCode,
             payment_date: paymentDate + ' ' + (new Date().toTimeString().split(' ')[0]),
             posting_date: postingDate,
-            notes: notes || `${method} payment for ${tenant.name}`,
+            notes: finalNotes,
             allocated_invoices: allocatedList,
+            allocations: allocatedList,
+            overpayment_amount: receiptOverpayment,
             issued_by: 'DEAN',
             created_at: nowIso
           };
@@ -4102,6 +4198,7 @@ const AppState = {
             <td style="padding: 6px 12px; font-family: monospace; font-weight: 600; border-right: 1px solid var(--table-border);">${item.reference_code || '-'}</td>
             <td style="padding: 6px 12px; text-align: right; font-weight: 800; color: var(--text-primary); border-right: 1px solid var(--table-border);">
               ${Number(item.amount_paid || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
+              ${(item.overpayment_amount > 0) ? `<div style="font-size:0.72rem;font-weight:700;color:var(--accent-secondary);margin-top:1px;">(Overpayment = Kshs ${Number(item.overpayment_amount).toLocaleString('en-US', {minimumFractionDigits: 2})})</div>` : ''}
             </td>
             <td style="padding: 6px 10px; text-align: center; border-right: 1px solid var(--table-border); font-size: 11.5px;">${item.issued_by || 'DEAN'}</td>
             <td style="padding: 4px 8px; text-align: center; white-space: nowrap;">
@@ -4241,17 +4338,24 @@ const AppState = {
       const tbody = document.getElementById('receipt-modal-breakdown-body');
       if (tbody) {
         if (receipt.allocated_invoices && receipt.allocated_invoices.length > 0) {
-          tbody.innerHTML = receipt.allocated_invoices.map(alloc => `
+          tbody.innerHTML = receipt.allocated_invoices.map(alloc => {
+            const rowOverpay = alloc.overpayment_amount > 0 ? alloc.overpayment_amount : 0;
+            const overpayHtml = rowOverpay > 0
+              ? `<div style="font-size:10px;font-weight:700;color:#047857;margin-top:2px;">(Overpayment = Kshs ${Number(rowOverpay).toLocaleString('en-US', {minimumFractionDigits: 2})})</div>`
+              : '';
+            return `
             <tr>
               <td style="padding: 8px 12px; border-bottom: 1px solid #E5E7EB; font-weight: 600;">
                 <span style="background: #E0F2FE; color: #0369A1; padding: 2px 6px; border-radius: 2px; font-weight: 700; font-size: 11px; margin-right: 8px;">${alloc.payable_code || '001'}</span>
                 ${alloc.description || 'Settlement'}
+                ${overpayHtml}
               </td>
               <td style="padding: 8px 12px; text-align: right; border-bottom: 1px solid #E5E7EB; font-weight: 700;">
                 ${Number(alloc.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
               </td>
             </tr>
-          `).join('');
+          `;
+          }).join('');
         } else {
           tbody.innerHTML = `
             <tr>
@@ -4270,10 +4374,13 @@ const AppState = {
       const pBal = document.getElementById('receipt-modal-prev-balance');
       const pPaid = document.getElementById('receipt-modal-paid-summary');
       const pNet = document.getElementById('receipt-modal-net-balance');
+      const receiptOverpayDisplay = Number(receipt.overpayment_amount || 0);
 
       if (pBal) pBal.textContent = `KES ${amountVal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
       if (pPaid) pPaid.textContent = `KES ${amountVal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-      if (pNet) pNet.textContent = `KES 0.00`;
+      if (pNet) pNet.textContent = receiptOverpayDisplay > 0
+        ? `KES 0.00 (Overpayment = Kshs ${receiptOverpayDisplay.toLocaleString('en-US', {minimumFractionDigits: 2})})`
+        : `KES 0.00`;
 
       modal.style.display = 'flex';
     }
