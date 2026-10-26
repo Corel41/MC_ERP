@@ -1,4 +1,4 @@
-﻿/**
+/**
  * js/receipts.js — Standalone Tenant Receipting & Waterfall Allocation Engine
  * Decoupled MPA architecture for Metrocosmo ERP
  */
@@ -89,16 +89,98 @@
     };
   }
 
-  // Hydrate Cached Receipts
+  // Hydrate Cached Receipts, Invoices, and Ledger from LocalStorage
   try {
     const cachedReceipts = localStorage.getItem('mc_erp_tenant_receipts');
     if (cachedReceipts) {
       const parsed = JSON.parse(cachedReceipts);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        AppState.tenantReceipts = parsed;
+        const map = new Map();
+        parsed.forEach(rec => {
+          const key = rec.id || rec.receipt_number || rec.receiptNo;
+          if (key) map.set(key, rec);
+        });
+        (AppState.tenantReceipts || []).forEach(rec => {
+          const key = rec.id || rec.receipt_number || rec.receiptNo;
+          if (key && !map.has(key)) map.set(key, rec);
+        });
+        AppState.tenantReceipts = Array.from(map.values());
       }
     }
-  } catch (e) {}
+
+    const cachedTenantInvoices = localStorage.getItem('mc_erp_tenant_invoices');
+    if (cachedTenantInvoices) {
+      const parsed = JSON.parse(cachedTenantInvoices);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const map = new Map();
+        parsed.forEach(ti => {
+          const key = ti.id || `${ti.tenant_id}_${ti.payable_code}_${ti.period_month}_${ti.period_year}`;
+          if (key) map.set(key, ti);
+        });
+        (AppState.tenantInvoices || []).forEach(ti => {
+          const key = ti.id || `${ti.tenant_id}_${ti.payable_code}_${ti.period_month}_${ti.period_year}`;
+          if (key && !map.has(key)) map.set(key, ti);
+        });
+        AppState.tenantInvoices = Array.from(map.values());
+      }
+    }
+
+    const cachedInvoices = localStorage.getItem('mc_erp_invoices');
+    if (cachedInvoices) {
+      const parsed = JSON.parse(cachedInvoices);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const map = new Map();
+        parsed.forEach(inv => {
+          const key = inv.id || inv.invoiceNumber;
+          if (key) map.set(key, inv);
+        });
+        (AppState.invoices || []).forEach(inv => {
+          const key = inv.id || inv.invoiceNumber;
+          if (key && !map.has(key)) map.set(key, inv);
+        });
+        AppState.invoices = Array.from(map.values());
+      }
+    }
+
+    const cachedLedger = localStorage.getItem('mc_erp_ledger');
+    if (cachedLedger) {
+      const parsed = JSON.parse(cachedLedger);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const map = new Map();
+        parsed.forEach(entry => {
+          const key = entry.id || entry.refNo;
+          if (key) map.set(key, entry);
+        });
+        (AppState.ledger || []).forEach(entry => {
+          const key = entry.id || entry.refNo;
+          if (key && !map.has(key)) map.set(key, entry);
+        });
+        AppState.ledger = Array.from(map.values());
+      }
+    }
+  } catch (e) {
+    console.warn('Error hydrating state from localStorage in receipts.js:', e);
+  }
+
+  function persistBillingState() {
+    try {
+      if (AppState.tenantInvoices) {
+        localStorage.setItem('mc_erp_tenant_invoices', JSON.stringify(AppState.tenantInvoices));
+      }
+      if (AppState.invoices) {
+        localStorage.setItem('mc_erp_invoices', JSON.stringify(AppState.invoices));
+      }
+      if (AppState.ledger) {
+        localStorage.setItem('mc_erp_ledger', JSON.stringify(AppState.ledger));
+      }
+      if (AppState.tenantReceipts) {
+        localStorage.setItem('mc_erp_tenant_receipts', JSON.stringify(AppState.tenantReceipts));
+      }
+    } catch (err) {
+      console.warn('Error persisting billing state to localStorage:', err);
+    }
+  }
+  window.persistBillingState = persistBillingState;
 
   window.AppState = AppState;
 
@@ -1294,7 +1376,24 @@
             } catch (_) {}
           }
         });
-        localStorage.setItem('mc_erp_tenant_invoices', JSON.stringify(AppState.tenantInvoices));
+
+        // Also mark matching invoices in AppState.invoices as Paid
+        if (AppState.invoices) {
+          AppState.invoices.forEach(inv => {
+            if (inv.tenantId === tenant.id && inv.status !== 'Paid') {
+              inv.status = 'Paid';
+            }
+          });
+        }
+        if (typeof persistBillingState === 'function') {
+          persistBillingState();
+        } else if (typeof window.persistBillingState === 'function') {
+          window.persistBillingState();
+        } else {
+          localStorage.setItem('mc_erp_tenant_invoices', JSON.stringify(AppState.tenantInvoices));
+          if (AppState.invoices) localStorage.setItem('mc_erp_invoices', JSON.stringify(AppState.invoices));
+          if (AppState.ledger) localStorage.setItem('mc_erp_ledger', JSON.stringify(AppState.ledger));
+        }
 
         // Supabase async post
         try {

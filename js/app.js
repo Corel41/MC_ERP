@@ -1,4 +1,4 @@
-﻿const SUPABASE_CONFIG = {
+const SUPABASE_CONFIG = {
   url: 'https://uwkqihhvkegiadelowft.supabase.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV3a3FpaGh2a2VnaWFkZWxvd2Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzNjM2MTEsImV4cCI6MjEwNzkzOTYxMX0.dfhqF7xAi5_a-wDnZgRCtAimE52dNoWzb-3WuYpGtj8'
 };
@@ -201,6 +201,120 @@ const AppState = {
         }
       });
     }
+
+    // Synchronous hydration of persisted billing, invoices, receipts, and ledger from localStorage
+    try {
+      const cachedTenantInvoices = localStorage.getItem('mc_erp_tenant_invoices');
+      if (cachedTenantInvoices) {
+        const parsed = JSON.parse(cachedTenantInvoices);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map();
+          parsed.forEach(ti => {
+            const key = ti.id || `${ti.tenant_id}_${ti.payable_code}_${ti.period_month}_${ti.period_year}`;
+            if (key) map.set(key, ti);
+          });
+          (AppState.tenantInvoices || []).forEach(ti => {
+            const key = ti.id || `${ti.tenant_id}_${ti.payable_code}_${ti.period_month}_${ti.period_year}`;
+            if (key && !map.has(key)) map.set(key, ti);
+          });
+          AppState.tenantInvoices = Array.from(map.values());
+        }
+      }
+
+      const cachedInvoices = localStorage.getItem('mc_erp_invoices');
+      if (cachedInvoices) {
+        const parsed = JSON.parse(cachedInvoices);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map();
+          parsed.forEach(inv => {
+            const key = inv.id || inv.invoiceNumber;
+            if (key) map.set(key, inv);
+          });
+          (AppState.invoices || []).forEach(inv => {
+            const key = inv.id || inv.invoiceNumber;
+            if (key && !map.has(key)) map.set(key, inv);
+          });
+          AppState.invoices = Array.from(map.values());
+        }
+      }
+
+      const cachedLedger = localStorage.getItem('mc_erp_ledger');
+      if (cachedLedger) {
+        const parsed = JSON.parse(cachedLedger);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map();
+          parsed.forEach(entry => {
+            const key = entry.id || entry.refNo;
+            if (key) map.set(key, entry);
+          });
+          (AppState.ledger || []).forEach(entry => {
+            const key = entry.id || entry.refNo;
+            if (key && !map.has(key)) map.set(key, entry);
+          });
+          AppState.ledger = Array.from(map.values());
+        }
+      }
+
+      const cachedReadings = localStorage.getItem('mc_erp_utility_readings');
+      if (cachedReadings) {
+        const parsed = JSON.parse(cachedReadings);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map();
+          parsed.forEach(r => {
+            const key = r.id || `${r.unitId}_${r.readingDate}`;
+            if (key) map.set(key, r);
+          });
+          (AppState.utilityReadings || []).forEach(r => {
+            const key = r.id || `${r.unitId}_${r.readingDate}`;
+            if (key && !map.has(key)) map.set(key, r);
+          });
+          AppState.utilityReadings = Array.from(map.values());
+        }
+      }
+
+      const cachedTenantReceipts = localStorage.getItem('mc_erp_tenant_receipts');
+      if (cachedTenantReceipts) {
+        const parsed = JSON.parse(cachedTenantReceipts);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map();
+          parsed.forEach(rec => {
+            const key = rec.id || rec.receipt_number || rec.receiptNo;
+            if (key) map.set(key, rec);
+          });
+          (AppState.tenantReceipts || []).forEach(rec => {
+            const key = rec.id || rec.receipt_number || rec.receiptNo;
+            if (key && !map.has(key)) map.set(key, rec);
+          });
+          AppState.tenantReceipts = Array.from(map.values());
+        }
+      }
+    } catch (e) {
+      console.warn('Error hydrating billing state from localStorage:', e);
+    }
+
+    function persistBillingState() {
+      try {
+        if (AppState.tenantInvoices) {
+          localStorage.setItem('mc_erp_tenant_invoices', JSON.stringify(AppState.tenantInvoices));
+        }
+        if (AppState.invoices) {
+          localStorage.setItem('mc_erp_invoices', JSON.stringify(AppState.invoices));
+        }
+        if (AppState.ledger) {
+          localStorage.setItem('mc_erp_ledger', JSON.stringify(AppState.ledger));
+        }
+        if (AppState.utilityReadings) {
+          localStorage.setItem('mc_erp_utility_readings', JSON.stringify(AppState.utilityReadings));
+        }
+        if (AppState.tenantReceipts) {
+          localStorage.setItem('mc_erp_tenant_receipts', JSON.stringify(AppState.tenantReceipts));
+        }
+      } catch (err) {
+        console.warn('Error persisting billing state to localStorage:', err);
+      }
+    }
+    window.persistBillingState = persistBillingState;
+    window.AppState = AppState;
 
 
     const root = document.documentElement;
@@ -2505,6 +2619,11 @@ const AppState = {
         switchInvoiceSubTab(sub);
         return;
       }
+      if (targetTabId === 'tab-billing' || targetTabId === 'billing') {
+        switchTenantTab('tab-invoices');
+        switchInvoiceSubTab('batch');
+        return;
+      }
 
       AppState.activeTenantTab = targetTabId;
 
@@ -2576,6 +2695,13 @@ const AppState = {
         initSingleTenantBilling();
       } else if (subTabId === 'bulk') {
         initBulkTenantsBilling();
+      } else if (subTabId === 'batch' || subTabId === 'monthly') {
+        const propSel = document.getElementById('bill-target-property');
+        if (propSel && AppState.properties && AppState.properties.length > 0) {
+          propSel.innerHTML = `<option value="ALL">All Properties (Consolidated Run)</option>` + 
+            AppState.properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+        renderInvoicesTable();
       }
     }
 
@@ -2761,6 +2887,36 @@ const AppState = {
             postedCount++;
           }
 
+          // Post to Consolidated Invoices Roll (AppState.invoices)
+          const singleInvNum = `INV-${yearVal}-${String(monthVal).padStart(2, '0')}-${String((AppState.invoices || []).length + 1).padStart(3, '0')}`;
+          const rentItem = selectedItems.find(i => i.code === '001');
+          const scItem = selectedItems.find(i => i.code === '009');
+          const utilItems = selectedItems.filter(i => i.code !== '001' && i.code !== '009');
+          const rentAmt = rentItem ? rentItem.amount : 0;
+          const scAmt = scItem ? scItem.amount : 0;
+          const utilAmt = utilItems.reduce((sum, i) => sum + i.amount, 0);
+
+          const singleConsolidatedInvoice = {
+            id: singleInvNum,
+            leaseId: tenant.leaseId || tenant.unitId || tenant.id,
+            invoiceNumber: singleInvNum,
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            unitCode: tenant.unitCode || '',
+            propertyName: prop ? prop.name : '',
+            periodMonth: parseInt(monthVal, 10),
+            periodYear: parseInt(yearVal, 10),
+            rent: rentAmt,
+            serviceCharge: scAmt,
+            utilities: utilAmt,
+            arrears: 0,
+            totalAmount: totalBilled,
+            dueDate: `${yearVal}-${String(monthVal).padStart(2, '0')}-05`,
+            status: 'Unpaid'
+          };
+          if (!AppState.invoices) AppState.invoices = [];
+          AppState.invoices.unshift(singleConsolidatedInvoice);
+
           // Post to Tenant Ledger
           AppState.ledger.push({
             id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
@@ -2776,6 +2932,8 @@ const AppState = {
             balanceAfter: totalBilled
           });
 
+          persistBillingState();
+          renderInvoicesTable();
           renderLedgerTable();
           showToast(`✓ Billed KES ${totalBilled.toLocaleString()} to ${tenant.name} (${postedCount} payables for ${periodLabel}) successfully.`);
         },
@@ -2939,6 +3097,31 @@ const AppState = {
               console.warn('Supabase bulk tenant_invoices insert warning:', err);
             }
 
+            // Post to Consolidated Invoices Roll (AppState.invoices)
+            const bulkInvNum = `INV-${yearVal}-${String(monthVal).padStart(2, '0')}-${String((AppState.invoices || []).length + 1).padStart(3, '0')}`;
+            const isRent = payableCode === '001';
+            const isSC = payableCode === '009';
+            const bulkInvoice = {
+              id: bulkInvNum,
+              leaseId: item.tenant.leaseId || item.tenant.unitId || item.tenant.id,
+              invoiceNumber: bulkInvNum,
+              tenantId: item.tenant.id,
+              tenantName: item.tenant.name,
+              unitCode: item.tenant.unitCode || '',
+              propertyName: prop ? prop.name : '',
+              periodMonth: parseInt(monthVal, 10),
+              periodYear: parseInt(yearVal, 10),
+              rent: isRent ? item.amount : 0,
+              serviceCharge: isSC ? item.amount : 0,
+              utilities: (!isRent && !isSC) ? item.amount : 0,
+              arrears: 0,
+              totalAmount: item.amount,
+              dueDate: `${yearVal}-${String(monthVal).padStart(2, '0')}-05`,
+              status: 'Unpaid'
+            };
+            if (!AppState.invoices) AppState.invoices = [];
+            AppState.invoices.unshift(bulkInvoice);
+
             // Post ledger entry
             AppState.ledger.push({
               id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
@@ -2957,6 +3140,8 @@ const AppState = {
             count++;
           }
 
+          persistBillingState();
+          renderInvoicesTable();
           renderLedgerTable();
           showToast(`✓ Bulk billing executed: ${count} tenants billed KES ${totalAmount.toLocaleString()} for ${periodLabel} successfully.`);
         },
@@ -4056,7 +4241,16 @@ const AppState = {
               } catch (_) {}
             }
           });
-          localStorage.setItem('mc_erp_tenant_invoices', JSON.stringify(AppState.tenantInvoices));
+
+          // Also mark matching invoices in AppState.invoices as Paid
+          if (AppState.invoices) {
+            AppState.invoices.forEach(inv => {
+              if (inv.tenantId === tenant.id && inv.status !== 'Paid') {
+                inv.status = 'Paid';
+              }
+            });
+          }
+          persistBillingState();
 
           // 4. Async Supabase POST
           try {
@@ -4077,6 +4271,7 @@ const AppState = {
           // 5. Update UI components
           renderTenantReceiptsTable();
           renderLedgerTable();
+          renderInvoicesTable();
 
           // 6. Action Routing & Notifications
           if (isSmsRequested) {
@@ -4841,6 +5036,7 @@ const AppState = {
             generatedCount++;
           });
 
+          persistBillingState();
           renderInvoicesTable();
           renderReadingsTable();
           renderLedgerTable();
@@ -4855,41 +5051,115 @@ const AppState = {
       const tbody = document.getElementById('table-invoices-body');
       if (!tbody) return;
 
-      const totalInvoiced = AppState.invoices.reduce((sum, i) => sum + i.totalAmount, 0);
-      const totalPaid = AppState.invoices.filter(i => i.status === 'Paid').reduce((sum, i) => sum + i.totalAmount, 0);
+      const invoicesList = AppState.invoices || [];
+      const totalInvoiced = invoicesList.reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
+      const totalPaid = invoicesList.filter(i => i.status === 'Paid').reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
       const totalArrears = totalInvoiced - totalPaid;
 
-      document.getElementById('stat-total-invoiced').textContent = `KES ${totalInvoiced.toLocaleString()}`;
-      document.getElementById('stat-total-collected').textContent = `KES ${totalPaid.toLocaleString()}`;
-      document.getElementById('stat-total-arrears').textContent = `KES ${totalArrears.toLocaleString()}`;
-      document.getElementById('stat-invoice-count').textContent = `${AppState.invoices.length} Invoices`;
+      const elInvoiced = document.getElementById('stat-total-invoiced');
+      if (elInvoiced) elInvoiced.textContent = `KES ${totalInvoiced.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const elPaid = document.getElementById('stat-total-collected');
+      if (elPaid) elPaid.textContent = `KES ${totalPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const elArrears = document.getElementById('stat-total-arrears');
+      if (elArrears) elArrears.textContent = `KES ${totalArrears.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const elCount = document.getElementById('stat-invoice-count');
+      if (elCount) elCount.textContent = `${invoicesList.length} Invoices`;
 
       const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-      tbody.innerHTML = AppState.invoices.map(inv => `
+      tbody.innerHTML = invoicesList.map(inv => {
+        const isPaid = inv.status === 'Paid';
+        const isPartial = inv.status === 'Partial';
+        const statusColor = isPaid ? 'var(--accent-secondary)' : isPartial ? 'var(--accent-tertiary)' : 'var(--accent-amber)';
+        const statusBg = isPaid ? 'rgba(16, 185, 129, 0.12)' : isPartial ? 'rgba(59, 130, 246, 0.12)' : 'rgba(245, 158, 11, 0.12)';
+        const statusBorder = isPaid ? 'rgba(16, 185, 129, 0.35)' : isPartial ? 'rgba(59, 130, 246, 0.35)' : 'rgba(245, 158, 11, 0.35)';
+        const invIdStr = String(inv.id || inv.invoiceNumber);
+
+        return `
         <tr>
-          <td><strong>${inv.invoiceNumber}</strong></td>
-          <td>${monthNames[inv.periodMonth]} ${inv.periodYear}</td>
+          <td><strong>${inv.invoiceNumber || inv.id}</strong></td>
+          <td>${monthNames[inv.periodMonth] || ''} ${inv.periodYear || ''}</td>
           <td><strong>${inv.tenantName}</strong></td>
-          <td>${inv.propertyName} • ${inv.unitCode}</td>
-          <td>KES ${inv.rent.toLocaleString()}</td>
-          <td>KES ${inv.serviceCharge.toLocaleString()}</td>
-          <td>KES ${inv.utilities.toLocaleString()}</td>
-          <td><strong>KES ${inv.totalAmount.toLocaleString()}</strong></td>
-          <td><span style="font-size:0.78rem;">${inv.dueDate}</span></td>
+          <td>${inv.propertyName || ''} • ${inv.unitCode || ''}</td>
+          <td>KES ${(Number(inv.rent) || 0).toLocaleString()}</td>
+          <td>KES ${(Number(inv.serviceCharge) || 0).toLocaleString()}</td>
+          <td>KES ${(Number(inv.utilities) || 0).toLocaleString()}</td>
+          <td><strong>KES ${(Number(inv.totalAmount) || 0).toLocaleString()}</strong></td>
+          <td><span style="font-size:0.78rem;">${inv.dueDate || '—'}</span></td>
           <td>
-            <span class="badge-status" style="color: ${inv.status === 'Paid' ? 'var(--accent-secondary)' : inv.status === 'Partial' ? 'var(--accent-tertiary)' : 'var(--accent-amber)'};">
-              ${inv.status}
-            </span>
+            <button type="button" class="badge-status" 
+              onclick="toggleInvoicePaymentStatus('${invIdStr}')" 
+              title="Click to toggle Paid / Invoiced status (Persists to Storage)"
+              style="cursor: pointer; background: ${statusBg}; border: 1px solid ${statusBorder}; color: ${statusColor}; font-weight: 700; padding: 4px 10px; border-radius: 9999px; transition: all 0.2s ease;">
+              ${isPaid ? '✓ Paid' : isPartial ? '◑ Partial' : '⏳ Invoiced'}
+            </button>
           </td>
           <td>
-            ${inv.status !== 'Paid' 
-              ? `<button class="btn-action-pill" onclick="openReceiptModal('${inv.tenantId}', '${inv.id}')">💳 Pay</button>` 
-              : `<span style="font-size:0.75rem; color:var(--accent-secondary);">✓ Settled</span>`}
+            <div style="display: flex; gap: 6px; align-items: center;">
+              ${!isPaid 
+                ? `<button type="button" class="btn-action-pill" onclick="openReceiptModal('${inv.tenantId}', '${inv.id}')" style="background: var(--accent-primary); color: #fff;">💳 Pay</button>` 
+                : `<span style="font-size:0.75rem; color:var(--accent-secondary); font-weight: 600;">✓ Settled</span>`}
+              <button type="button" class="btn-action-pill" 
+                onclick="toggleInvoicePaymentStatus('${invIdStr}')" 
+                title="Toggle payment status"
+                style="font-size: 0.72rem; padding: 3px 8px; border: 1px solid var(--glass-border); background: var(--glass-card); cursor: pointer;">
+                ${isPaid ? 'Mark Unpaid' : 'Mark Paid'}
+              </button>
+            </div>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
     }
+
+    function toggleInvoicePaymentStatus(invoiceId) {
+      if (!invoiceId) return;
+      const inv = (AppState.invoices || []).find(i => String(i.id) === String(invoiceId) || String(i.invoiceNumber) === String(invoiceId));
+      if (!inv) {
+        showToast('Invoice not found: ' + invoiceId);
+        return;
+      }
+
+      const prevStatus = inv.status;
+      const nextStatus = (prevStatus === 'Paid') ? 'Unpaid' : 'Paid';
+      inv.status = nextStatus;
+
+      // Synchronize matching tenantInvoices items
+      if (AppState.tenantInvoices && AppState.tenantInvoices.length > 0) {
+        AppState.tenantInvoices.forEach(ti => {
+          const matchTenant = ti.tenant_id === inv.tenantId;
+          const matchPeriod = String(ti.period_month) === String(inv.periodMonth) && String(ti.period_year) === String(inv.periodYear);
+          const matchInvId = ti.id === inv.id || ti.invoice_number === inv.invoiceNumber;
+          if (matchInvId || (matchTenant && matchPeriod)) {
+            ti.is_paid = (nextStatus === 'Paid');
+          }
+        });
+      }
+
+      const nowIso = new Date().toISOString();
+      if (nextStatus === 'Paid') {
+        AppState.ledger.push({
+          id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+          timestamp: nowIso.replace('T', ' ').substring(0, 16),
+          refNo: `SETTLE-${Date.now().toString().slice(-6)}`,
+          tenantId: inv.tenantId,
+          tenantName: inv.tenantName,
+          unitCode: inv.unitCode || '',
+          type: 'Payment',
+          description: `Direct Status Settle: Invoice ${inv.invoiceNumber || inv.id} marked Paid`,
+          debit: 0,
+          credit: inv.totalAmount,
+          balanceAfter: 0
+        });
+      }
+
+      // Persist strictly to localStorage immediately
+      persistBillingState();
+
+      renderInvoicesTable();
+      renderLedgerTable();
+      showToast(`✓ Invoice ${inv.invoiceNumber || inv.id} status updated: ${prevStatus} ➔ ${nextStatus}`);
+    }
+    window.toggleInvoicePaymentStatus = toggleInvoicePaymentStatus;
 
     /* --------------------------------------------------------------------------
        TENANT STATEMENT OF ACCOUNT & DOUBLE-ENTRY FINANCIAL LEDGER (image_f7715c.png)
@@ -5453,6 +5723,16 @@ const AppState = {
             }
           });
 
+          // Sync matching AppState.tenantInvoices
+          if (AppState.tenantInvoices) {
+            AppState.tenantInvoices.forEach(ti => {
+              if (ti.tenant_id === tenantId) {
+                const isSettled = targetInvoices.some(inv => inv.status === 'Paid' && String(inv.periodMonth) === String(ti.period_month) && String(inv.periodYear) === String(ti.period_year));
+                if (isSettled) ti.is_paid = true;
+              }
+            });
+          }
+
           // ProMatrix Waterfall Overpayment Routing for excess receipts
           if (remainingCredit > 0) {
             const tenantProp = lease ? AppState.properties.find(p => p.name === lease.propertyName) : null;
@@ -5482,6 +5762,7 @@ const AppState = {
             });
           }
 
+          persistBillingState();
           closeReceiptModal();
           renderLedgerTable();
           renderInvoicesTable();
@@ -7019,6 +7300,10 @@ const AppState = {
     }
 
     function showToast(msg) {
+      if (!toastTray) {
+        console.log('[Toast]:', msg);
+        return;
+      }
       const bubble = document.createElement('div');
       bubble.className = 'toast-bubble';
       bubble.innerHTML = `
@@ -8058,6 +8343,7 @@ const AppState = {
             }
           }
 
+          persistBillingState();
           renderAccountingPeriodsTable();
           renderLedgerTable();
           showToast(`✓ Period ${newPeriodNo} (${fullMonthDesc} ${yearVal}) opened successfully! ${billedCount} active tenancies billed (KES ${totalBilled.toLocaleString()}).`);
@@ -8155,6 +8441,10 @@ const AppState = {
     window.getStatementCurrentTimestamp = getStatementCurrentTimestamp;
     window.formatStatementNumber = formatStatementNumber;
     window.formatDisplayDate = formatDisplayDate;
+    window.renderInvoicesTable = renderInvoicesTable;
+    window.executeMonthlyBillingRun = executeMonthlyBillingRun;
+    window.toggleInvoicePaymentStatus = toggleInvoicePaymentStatus;
+    window.persistBillingState = persistBillingState;
 
     // Initialize Theme and Load Active Module
     const savedTheme = localStorage.getItem('mc_erp_theme_choice') || 'developer';

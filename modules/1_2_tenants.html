@@ -77,6 +77,9 @@
       <button type="button" class="inv-subtab-btn" id="btn-subtab-bulk" onclick="switchInvoiceSubTab('bulk')">
         Bulk Tenants
       </button>
+      <button type="button" class="inv-subtab-btn" id="btn-subtab-batch" onclick="switchInvoiceSubTab('batch')">
+        Monthly Billing Run &amp; Invoices
+      </button>
     </div>
 
     <!-- SUB-PANEL A: SINGLE TENANT INVOICING (image_731002.png) -->
@@ -229,6 +232,110 @@
           </button>
         </div>
       </fieldset>
+    </div>
+
+    <!-- SUB-PANEL C: MONTHLY BILLING RUN & INVOICES DIRECTORY -->
+    <div class="invoice-subpanel" id="subpanel-inv-batch" style="display: none;">
+      <div class="glass-card clean-module-container" style="padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h4 style="margin: 0; font-size: 1.1rem; font-weight: 700;">Monthly Billing Run &amp; Invoices Roll</h4>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Consolidated Tenant Billing Engine • Auto-Synced to LocalStorage &amp; Financial Ledger</span>
+          </div>
+          <span class="badge-status" style="color: var(--accent-secondary); font-size: 0.78rem;">✓ Live Sync</span>
+        </div>
+
+        <!-- Billing Trigger Strip -->
+        <div style="background: var(--nav-active-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 14px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; margin-bottom: 16px;">
+          <div class="form-group" style="min-width: 130px;">
+            <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">Billing Month</label>
+            <select class="form-input pm-legacy-input" id="bill-period-month" style="height: 36px;">
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10" selected>October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
+          <div class="form-group" style="min-width: 100px;">
+            <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">Billing Year</label>
+            <select class="form-input pm-legacy-input" id="bill-period-year" style="height: 36px;">
+              <option value="2026" selected>2026</option>
+              <option value="2027">2027</option>
+            </select>
+          </div>
+          <div class="form-group" style="min-width: 220px; flex: 1;">
+            <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">Target Property</label>
+            <select class="form-input pm-legacy-input" id="bill-target-property" style="height: 36px;">
+              <option value="ALL">All Properties (Consolidated Run)</option>
+            </select>
+          </div>
+          <div class="form-group" style="min-width: 150px;">
+            <label class="form-label" style="font-size: 11px; font-weight: 700; text-transform: uppercase;">Invoice Due Date</label>
+            <input type="date" class="form-input pm-legacy-input" id="bill-due-date" value="2026-10-05" style="height: 36px;">
+          </div>
+          <div>
+            <button type="button" class="btn-elevated-primary" onclick="executeMonthlyBillingRun()" style="height: 36px; padding: 0 16px; font-weight: 700; background: #008080; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
+              ⚡ Execute Monthly Billing Run
+            </button>
+          </div>
+        </div>
+
+        <!-- Billing Stats Strip -->
+        <div class="stat-pill-group" style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+          <div class="stat-pill" style="flex: 1; min-width: 160px; padding: 10px 14px; background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 8px;">
+            <span class="stat-pill-title" style="display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Total Invoiced</span>
+            <span class="stat-pill-value" id="stat-total-invoiced" style="font-size: 1.15rem; font-weight: 800; color: var(--accent-primary);">KES 0.00</span>
+          </div>
+          <div class="stat-pill" style="flex: 1; min-width: 160px; padding: 10px 14px; background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 8px;">
+            <span class="stat-pill-title" style="display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Total Collected / Settled</span>
+            <span class="stat-pill-value" id="stat-total-collected" style="font-size: 1.15rem; font-weight: 800; color: var(--accent-secondary);">KES 0.00</span>
+          </div>
+          <div class="stat-pill" style="flex: 1; min-width: 160px; padding: 10px 14px; background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 8px;">
+            <span class="stat-pill-title" style="display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Outstanding Period Arrears</span>
+            <span class="stat-pill-value" id="stat-total-arrears" style="font-size: 1.15rem; font-weight: 800; color: var(--accent-amber);">KES 0.00</span>
+          </div>
+          <div class="stat-pill" style="flex: 1; min-width: 140px; padding: 10px 14px; background: var(--glass-card); border: 1px solid var(--glass-border); border-radius: 8px;">
+            <span class="stat-pill-title" style="display: block; font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Total Invoices</span>
+            <span class="stat-pill-value" id="stat-invoice-count" style="font-size: 1.15rem; font-weight: 800;">0 Invoices</span>
+          </div>
+        </div>
+
+        <!-- Invoices Directory Table -->
+        <div style="margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="font-size: 1rem; font-weight: 700; margin: 0;">Generated Tenant Invoices</h3>
+            <span class="badge-status" style="color: var(--accent-secondary); font-size: 0.78rem;">✓ Live Sync (LocalStorage &amp; Ledger)</span>
+          </div>
+          <div class="builder-table-wrap">
+            <table class="builder-table">
+              <thead>
+                <tr>
+                  <th>Invoice No.</th>
+                  <th>Period</th>
+                  <th>Tenant</th>
+                  <th>Unit &amp; Property</th>
+                  <th>Rent</th>
+                  <th>Service Chg</th>
+                  <th>Water / Util</th>
+                  <th>Total Invoiced</th>
+                  <th>Due Date</th>
+                  <th>Payment Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="table-invoices-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -749,105 +856,6 @@
                   </tr>
                 </thead>
                 <tbody id="table-readings-body"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MONTHLY BILLING RUN PANEL -->
-      <div class="tenant-panel" id="panel-tenant-billing">
-        <div class="glass-card clean-module-container">
-          <span class="live-pulse-badge">dbo_Tenant_Bills Invoicing Engine</span>
-          </div>
-
-          <!-- Billing Trigger Strip -->
-          <div style="background: var(--nav-active-bg); border: 1px solid var(--glass-border); border-radius: 18px; padding: 18px; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px;">
-            <div class="form-group" style="min-width: 140px;">
-              <label class="form-label">Billing Month</label>
-              <select class="form-input" id="bill-period-month">
-                <option value="1">January</option>
-                <option value="2">February</option>
-                <option value="3">March</option>
-                <option value="4">April</option>
-                <option value="5">May</option>
-                <option value="6">June</option>
-                <option value="7">July</option>
-                <option value="8">August</option>
-                <option value="9">September</option>
-                <option value="10" selected>October</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
-              </select>
-            </div>
-            <div class="form-group" style="min-width: 110px;">
-              <label class="form-label">Billing Year</label>
-              <select class="form-input" id="bill-period-year">
-                <option value="2026" selected>2026</option>
-                <option value="2027">2027</option>
-              </select>
-            </div>
-            <div class="form-group" style="min-width: 220px; flex: 1;">
-              <label class="form-label">Target Property</label>
-              <select class="form-input" id="bill-target-property">
-                <option value="ALL">All Properties (Consolidated Run)</option>
-              </select>
-            </div>
-            <div class="form-group" style="min-width: 160px;">
-              <label class="form-label">Invoice Due Date</label>
-              <input type="date" class="form-input" id="bill-due-date" value="2026-10-05">
-            </div>
-            <div>
-              <button type="button" class="btn-elevated-primary" onclick="executeMonthlyBillingRun()" style="height: 42px;">
-                ⚡ Execute Monthly Billing Run
-              </button>
-            </div>
-          </div>
-
-          <!-- Billing Stats Strip -->
-          <div class="stat-pill-group">
-            <div class="stat-pill">
-              <span class="stat-pill-title">Total Invoiced (October 2026)</span>
-              <span class="stat-pill-value" id="stat-total-invoiced" style="color: var(--accent-primary);">KES 120,025</span>
-            </div>
-            <div class="stat-pill">
-              <span class="stat-pill-title">Total Collected / Settled</span>
-              <span class="stat-pill-value" id="stat-total-collected" style="color: var(--accent-secondary);">KES 37,525</span>
-            </div>
-            <div class="stat-pill">
-              <span class="stat-pill-title">Outstanding Period Arrears</span>
-              <span class="stat-pill-value" id="stat-total-arrears" style="color: var(--accent-amber);">KES 82,500</span>
-            </div>
-            <div class="stat-pill">
-              <span class="stat-pill-title">Total Invoices Issued</span>
-              <span class="stat-pill-value" id="stat-invoice-count">2 Invoices</span>
-            </div>
-          </div>
-
-          <!-- Invoices Directory Table -->
-          <div style="margin-top: 10px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h3 style="font-size: 1.05rem; font-weight: 700;">Generated Tenant Invoices</h3>
-              <span class="badge-status" style="color: var(--accent-secondary);">Auto-Synced to Ledger</span>
-            </div>
-            <div class="builder-table-wrap">
-              <table class="builder-table">
-                <thead>
-                  <tr>
-                    <th>Invoice No.</th>
-                    <th>Period</th>
-                    <th>Tenant</th>
-                    <th>Unit & Property</th>
-                    <th>Rent</th>
-                    <th>Service Chg</th>
-                    <th>Water / Util</th>
-                    <th>Total Invoiced</th>
-                    <th>Due Date</th>
-                    <th>Payment Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="table-invoices-body"></tbody>
               </table>
             </div>
           </div>
