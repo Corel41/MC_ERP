@@ -4487,11 +4487,7 @@ const AppState = {
           }
 
           if (actionType === 'print') {
-            console.log('Initiating Print View');
-            openOfficialReceiptModal(newReceipt);
-            setTimeout(() => {
-              window.print();
-            }, 350);
+            printReceiptVoucher(newReceipt);
           } else if (actionType === 'send_sms') {
             console.log("Triggering Africa's Talking SMS API");
           }
@@ -4788,7 +4784,119 @@ const AppState = {
     }
 
     function printOfficialReceipt() {
-      window.print();
+      const activeNum = document.getElementById('receipt-modal-number') ? document.getElementById('receipt-modal-number').textContent.trim() : null;
+      const r = (AppState.tenantReceipts || []).find(x => x.receipt_number === activeNum) || (AppState.tenantReceipts || [])[0];
+      if (r) {
+        printReceiptVoucher(r);
+      } else {
+        window.print();
+      }
+    }
+
+    // A5 / Thermal Printable Receipt Voucher Engine
+    function printReceiptVoucher(receiptObj) {
+      let receipt = typeof receiptObj === 'object' ? receiptObj : (
+        (AppState.tenantReceipts || []).find(r => r.id === receiptObj || r.receipt_number === receiptObj)
+      );
+      if (!receipt && AppState.tenantReceipts && AppState.tenantReceipts.length > 0) {
+        receipt = AppState.tenantReceipts[0];
+      }
+      if (!receipt) {
+        console.warn('printReceiptVoucher: No receipt data found to print.');
+        return;
+      }
+
+      let voucher = document.getElementById('printable-receipt-voucher');
+      if (!voucher) {
+        console.warn('printReceiptVoucher: #printable-receipt-voucher element not found in DOM.');
+        return;
+      }
+
+      // Ensure it is a direct child of document.body for print CSS isolation
+      if (typeof document !== 'undefined' && document.body && voucher.parentElement !== document.body) {
+        document.body.appendChild(voucher);
+      }
+
+      const receiptNo = receipt.receipt_number || receipt.receiptNo || 'REC-001';
+      const tenantName = receipt.tenant_name || receipt.tenantName || 'Tenant';
+      const propName = receipt.property_name || receipt.propertyName || 'Property';
+      const unitCode = receipt.unit_code || receipt.unitCode || '—';
+
+      let dateStr = '';
+      let timeStr = '';
+      const rawDate = receipt.payment_date || receipt.paymentDate || receipt.created_at || '';
+      if (rawDate) {
+        const parts = rawDate.split(' ');
+        dateStr = parts[0] ? parts[0].split('T')[0] : '';
+        if (parts.length > 1) {
+          timeStr = parts[1].substring(0, 5);
+        } else if (rawDate.includes('T')) {
+          const timePart = rawDate.split('T')[1];
+          if (timePart) timeStr = timePart.substring(0, 5);
+        }
+      }
+      if (!dateStr) dateStr = new Date().toISOString().split('T')[0];
+      if (!timeStr) timeStr = new Date().toTimeString().substring(0, 5);
+
+      const paymentMode = receipt.payment_method || receipt.paymentMethod || 'M-Pesa';
+      const refCode = receipt.reference_code || receipt.referenceCode || '—';
+      const totalAmount = Number(receipt.amount_paid || receipt.amountPaid || receipt.amount || 0);
+      const cashierName = receipt.issued_by || receipt.cashierName || (AppState.currentUser && AppState.currentUser.name) || 'DEAN';
+
+      const setEl = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+
+      setEl('voucher-receipt-no', receiptNo);
+      setEl('voucher-receipt-date', dateStr);
+      setEl('voucher-receipt-time', timeStr);
+      setEl('voucher-property-name', propName);
+      setEl('voucher-unit-code', unitCode);
+      setEl('voucher-tenant-name', tenantName);
+      setEl('voucher-payment-mode', paymentMode);
+      setEl('voucher-reference-no', refCode);
+      setEl('voucher-amount-words', numberToWords(totalAmount));
+      setEl('voucher-total-amount', totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+      setEl('voucher-cashier-name', cashierName);
+
+      const tbody = document.getElementById('voucher-breakdown-body');
+      if (tbody) {
+        const allocs = receipt.allocations || receipt.allocated_invoices || [];
+        if (allocs && allocs.length > 0) {
+          tbody.innerHTML = allocs.map(alloc => {
+            let desc = alloc.description || alloc.payable_code || 'Settlement';
+            const hasOverpay = (alloc.overpayment_amount !== undefined && alloc.overpayment_amount !== null && Number(alloc.overpayment_amount) > 0) || Boolean(alloc.is_overpayment);
+            if (hasOverpay && !desc.toLowerCase().includes('(overpayment)')) {
+              desc += ' (Overpayment)';
+            }
+            const amt = Number(alloc.amount || 0);
+            return `
+              <tr style="border-bottom: 1px dashed #ccc;">
+                <td style="padding: 4px 2px; text-align: left;">${desc}</td>
+                <td style="padding: 4px 2px; text-align: right; font-variant-numeric: tabular-nums;">${amt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          const fallbackDesc = receipt.notes || `${paymentMode} payment received`;
+          tbody.innerHTML = `
+            <tr style="border-bottom: 1px dashed #ccc;">
+              <td style="padding: 4px 2px; text-align: left;">${fallbackDesc}</td>
+              <td style="padding: 4px 2px; text-align: right; font-variant-numeric: tabular-nums;">${totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+          `;
+        }
+      }
+
+      voucher.style.display = 'block';
+
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          voucher.style.display = 'none';
+        }, 800);
+      }, 250);
     }
 
     function numberToWords(num) {
@@ -8828,6 +8936,7 @@ const AppState = {
     window.openOfficialReceiptModal = openOfficialReceiptModal;
     window.closeOfficialReceiptModal = closeOfficialReceiptModal;
     window.printOfficialReceipt = printOfficialReceipt;
+    window.printReceiptVoucher = printReceiptVoucher;
     window.numberToWords = numberToWords;
 
     // Landlord Statement Engine Handlers (landlord Statement - Jan.pdf)

@@ -8,6 +8,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/main.css">
+  <style>
+    @media print {
+      body > *:not(#sidebar):not(.sidebar):not(.top-header):not(header):not(script) {
+        display: block !important;
+      }
+    }
+  </style>
   <script>
     // Immediate synchronous branding hydration from localStorage to prevent flash of default logo/title
     (function() {

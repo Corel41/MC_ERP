@@ -1777,3 +1777,35 @@ input[type="number"].receipt-alloc-input,
     border: none !important;
   }
 }
+
+/* ==========================================================================
+   Printable Receipt Voucher (A5 / Thermal Layout)
+   ========================================================================== */
+@media print {
+  body > *:not(#printable-receipt-voucher) {
+    display: none !important;
+  }
+
+  #printable-receipt-voucher {
+    display: block !important;
+    width: 100% !important;
+    max-width: 148mm !important;
+    margin: 0 auto !important;
+    font-family: monospace, sans-serif !important;
+    color: #000 !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  #printable-receipt-voucher,
+  #printable-receipt-voucher * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-color: #000000 !important;
+    color: #000000 !important;
+  }
+}

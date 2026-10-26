@@ -283,6 +283,84 @@
     </div>
   </div>
 
+  <!-- PRINTABLE RECEIPT VOUCHER (A5 / THERMAL LAYOUT) -->
+    <div id="printable-receipt-voucher" style="display: none;">
+      <div style="width: 100%; max-width: 148mm; margin: 0 auto; padding: 12px 14px; font-family: monospace, 'Courier New', Courier, sans-serif; font-size: 12px; color: #000000; background: #ffffff; box-sizing: border-box;">
+        <!-- Corporate Header -->
+        <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 10px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">METROCOSMO LTD</h2>
+          <div style="font-size: 11px; margin-top: 2px; font-weight: 600;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</div>
+          <div style="font-size: 10.5px; margin-top: 2px;">P.O. BOX 40656 - 00100 Nairobi | Hughes Building, 7th Floor</div>
+          <div style="font-size: 10.5px;">Tel: 020 2244218 / 0721 737093 | Email: info@metrocosmo.com</div>
+          <div style="font-size: 10.5px; font-weight: 700;">PIN: P051189201A</div>
+          <div style="margin-top: 8px;">
+            <span style="font-size: 14px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; border: 1.5px solid #000; padding: 3px 16px; display: inline-block;">
+              OFFICIAL RECEIPT
+            </span>
+          </div>
+        </div>
+
+        <!-- Metadata Grid -->
+        <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px; font-size: 11.5px; line-height: 1.6;">
+          <div style="display: flex; justify-content: space-between;">
+            <span><strong>Receipt No:</strong> <span id="voucher-receipt-no">REC-000</span></span>
+            <span><strong>Date:</strong> <span id="voucher-receipt-date">YYYY-MM-DD</span></span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span><strong>Property:</strong> <span id="voucher-property-name">—</span></span>
+            <span><strong>Time:</strong> <span id="voucher-receipt-time">00:00</span></span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span><strong>Unit:</strong> <span id="voucher-unit-code">—</span></span>
+          </div>
+          <div style="margin-top: 4px; border-top: 1px dotted #999; padding-top: 4px;">
+            <span><strong>Received From:</strong> <span id="voucher-tenant-name" style="font-weight: 700;">—</span></span>
+          </div>
+        </div>
+
+        <!-- Payment Details -->
+        <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px; font-size: 11.5px; line-height: 1.6;">
+          <div style="display: flex; justify-content: space-between;">
+            <span><strong>Payment Mode:</strong> <span id="voucher-payment-mode">M-Pesa</span></span>
+            <span><strong>Reference No:</strong> <span id="voucher-reference-no">—</span></span>
+          </div>
+          <div style="margin-top: 4px;">
+            <span><strong>Amount in Words:</strong> <span id="voucher-amount-words" style="font-style: italic; font-weight: 600;">—</span></span>
+          </div>
+        </div>
+
+        <!-- Allocation Breakdown Table -->
+        <div style="margin-bottom: 10px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; font-family: inherit;">
+            <thead>
+              <tr style="border-top: 1.5px solid #000; border-bottom: 1.5px solid #000;">
+                <th style="text-align: left; padding: 5px 2px; font-weight: 800;">Description</th>
+                <th style="text-align: right; padding: 5px 2px; font-weight: 800; width: 120px;">Amount (KES)</th>
+              </tr>
+            </thead>
+            <tbody id="voucher-breakdown-body">
+              <!-- Dynamically populated rows -->
+            </tbody>
+            <tfoot>
+              <tr style="border-top: 1px dashed #000; border-bottom: 2px solid #000; font-weight: 800;">
+                <td style="padding: 6px 2px; text-align: left;">Total Amount Received:</td>
+                <td id="voucher-total-amount" style="padding: 6px 2px; text-align: right; font-variant-numeric: tabular-nums;">0.00</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; border-top: 1px dashed #000; padding-top: 8px; margin-top: 8px; font-size: 11px; line-height: 1.5;">
+          <div>You were served by: <strong id="voucher-cashier-name">Cashier</strong></div>
+          <div style="margin-top: 5px; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Thank you!</div>
+          <div style="font-size: 9.5px; margin-top: 4px; color: #444;">Notice: Computer-generated receipt valid without physical signature.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LANDLORDS (PORTFOLIO, STATEMENTS ENGINE, REMITTANCE & PAYOUT QUEUE) -->
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/seed_data.js"></script>
   <script src="js/app.js"></script>
