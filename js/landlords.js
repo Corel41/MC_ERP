@@ -392,19 +392,20 @@
   function getLandlordPayableAmountFromLines(lines, payableCode) {
     let total = 0;
     lines.forEach(line => {
+      const pCode = (line.payable_code || line.payableCode || '').toLowerCase();
       const desc = (line.description || '').toLowerCase();
       if (payableCode === '001' || payableCode.toLowerCase().includes('rent')) {
-        if (desc.includes('rent')) total += Number(line.amount) || 0;
+        if (pCode === '001' || desc.includes('rent')) total += Number(line.amount) || 0;
       } else if (payableCode === '002' || payableCode.toLowerCase().includes('water')) {
-        if (desc.includes('water')) total += Number(line.amount) || 0;
+        if (pCode === '002' || desc.includes('water')) total += Number(line.amount) || 0;
       } else if (payableCode === '009' || payableCode.toLowerCase().includes('service')) {
-        if (desc.includes('service charge')) total += Number(line.amount) || 0;
+        if (pCode === '009' || desc.includes('service charge') || desc.includes('service')) total += Number(line.amount) || 0;
       } else if (payableCode === '017' || payableCode.toLowerCase().includes('garbage')) {
-        if (desc.includes('garbage')) total += Number(line.amount) || 0;
+        if (pCode === '017' || desc.includes('garbage')) total += Number(line.amount) || 0;
       } else if (payableCode === '015' || payableCode.toLowerCase().includes('security')) {
-        if (desc.includes('security')) total += Number(line.amount) || 0;
+        if (pCode === '015' || desc.includes('security')) total += Number(line.amount) || 0;
       } else if (payableCode === '035' || payableCode.toLowerCase().includes('penalty')) {
-        if (desc.includes('penalty')) total += Number(line.amount) || 0;
+        if (pCode === '035' || desc.includes('penalty')) total += Number(line.amount) || 0;
       }
     });
     return total;
@@ -603,7 +604,7 @@
       }
 
       occupiedCount++;
-      const tenantInvs = (AppState.invoices || []).filter(i => i.tenantId === tenant.id || i.tenantName === tenant.name);
+      const tenantInvs = (AppState.invoices || []).filter(i => i.tenantId === tenant.id || i.tenant_id === tenant.id || i.tenantName === tenant.name);
       const tenantReceipts = (AppState.tenantReceipts || []).filter(r => r.tenant_id === tenant.id || r.tenant_name === tenant.name);
       const allLines = AppState.tenantInvoiceLines || [];
 
@@ -612,15 +613,18 @@
       let priorCredits = 0;
 
       tenantInvs.forEach(inv => {
-        const invDate = inv.issueDate ? inv.issueDate.substring(0, 10) : (inv.dueDate ? inv.dueDate.substring(0, 7) + '-01' : `${inv.periodYear}-${String(inv.periodMonth).padStart(2, '0')}-01`);
+        const invDate = inv.issueDate ? inv.issueDate.substring(0, 10) : (inv.issue_date ? inv.issue_date.substring(0, 10) : (inv.dueDate ? inv.dueDate.substring(0, 7) + '-01' : (inv.due_date ? inv.due_date.substring(0, 7) + '-01' : `${inv.periodYear || inv.period_year}-${String(inv.periodMonth || inv.period_month).padStart(2, '0')}-01`)));
         if (invDate < startOfMonth) {
-          const invLines = allLines.filter(l => l.invoice_id === inv.id);
+          let invLines = allLines.filter(l => l.invoice_id === inv.id);
+          if (invLines.length === 0) {
+            invLines = (AppState.tenantInvoices || []).filter(ti => ti.invoice_id === inv.id || (ti.tenant_id === tenant.id && String(ti.period_month) === String(inv.periodMonth || inv.period_month) && String(ti.period_year) === String(inv.periodYear || inv.period_year)));
+          }
           if (invLines.length > 0) {
             priorDebits += getLandlordPayableAmountFromLines(invLines, payableCode);
           } else if (payableCode === '001') {
-            priorDebits += (Number(inv.rent) || Number(inv.totalAmount) || 0);
+            priorDebits += (Number(inv.rent) || Number(inv.totalAmount) || Number(inv.total_amount) || 0);
           } else if (payableCode === '009') {
-            priorDebits += (Number(inv.serviceCharge) || 0);
+            priorDebits += (Number(inv.serviceCharge) || Number(inv.service_charge) || 0);
           } else if (payableCode === '002') {
             priorDebits += (Number(inv.utilities) || 0);
           }
@@ -640,15 +644,18 @@
       // 2. Current Month Bill
       let currentBill = 0;
       tenantInvs.forEach(inv => {
-        const invDate = inv.issueDate ? inv.issueDate.substring(0, 10) : (inv.dueDate ? inv.dueDate.substring(0, 7) + '-01' : `${inv.periodYear}-${String(inv.periodMonth).padStart(2, '0')}-01`);
+        const invDate = inv.issueDate ? inv.issueDate.substring(0, 10) : (inv.issue_date ? inv.issue_date.substring(0, 10) : (inv.dueDate ? inv.dueDate.substring(0, 7) + '-01' : (inv.due_date ? inv.due_date.substring(0, 7) + '-01' : `${inv.periodYear || inv.period_year}-${String(inv.periodMonth || inv.period_month).padStart(2, '0')}-01`)));
         if (invDate >= startOfMonth && invDate <= endOfMonth) {
-          const invLines = allLines.filter(l => l.invoice_id === inv.id);
+          let invLines = allLines.filter(l => l.invoice_id === inv.id);
+          if (invLines.length === 0) {
+            invLines = (AppState.tenantInvoices || []).filter(ti => ti.invoice_id === inv.id || (ti.tenant_id === tenant.id && String(ti.period_month) === String(inv.periodMonth || inv.period_month) && String(ti.period_year) === String(inv.periodYear || inv.period_year)));
+          }
           if (invLines.length > 0) {
             currentBill += getLandlordPayableAmountFromLines(invLines, payableCode);
           } else if (payableCode === '001') {
-            currentBill += (Number(inv.rent) || Number(inv.totalAmount) || 0);
+            currentBill += (Number(inv.rent) || Number(inv.totalAmount) || Number(inv.total_amount) || 0);
           } else if (payableCode === '009') {
-            currentBill += (Number(inv.serviceCharge) || 0);
+            currentBill += (Number(inv.serviceCharge) || Number(inv.service_charge) || 0);
           } else if (payableCode === '002') {
             currentBill += (Number(inv.utilities) || 0);
           }

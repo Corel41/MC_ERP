@@ -288,6 +288,23 @@ const AppState = {
           AppState.tenantReceipts = Array.from(map.values());
         }
       }
+
+      const cachedLines = localStorage.getItem('mc_erp_tenant_invoice_lines');
+      if (cachedLines) {
+        const parsed = JSON.parse(cachedLines);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const map = new Map();
+          parsed.forEach(l => {
+            const key = l.id || `${l.invoice_id}_${l.payable_code}`;
+            if (key) map.set(key, l);
+          });
+          (AppState.tenantInvoiceLines || []).forEach(l => {
+            const key = l.id || `${l.invoice_id}_${l.payable_code}`;
+            if (key && !map.has(key)) map.set(key, l);
+          });
+          AppState.tenantInvoiceLines = Array.from(map.values());
+        }
+      }
     } catch (e) {
       console.warn('Error hydrating billing state from localStorage:', e);
     }
@@ -299,6 +316,9 @@ const AppState = {
         }
         if (AppState.invoices) {
           localStorage.setItem('mc_erp_invoices', JSON.stringify(AppState.invoices));
+        }
+        if (AppState.tenantInvoiceLines) {
+          localStorage.setItem('mc_erp_tenant_invoice_lines', JSON.stringify(AppState.tenantInvoiceLines));
         }
         if (AppState.ledger) {
           localStorage.setItem('mc_erp_ledger', JSON.stringify(AppState.ledger));
@@ -2844,31 +2864,115 @@ const AppState = {
         `Are you sure you want to bill <strong>${tenant.name} (${tenant.tenantCode || ''})</strong> a total of <strong>KES ${totalBilled.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> for <strong>${periodLabel}</strong> across ${selectedItems.length} payable(s)?`,
         async () => {
           const nowIso = new Date().toISOString();
-          let postedCount = 0;
+          const periodMonthNum = parseInt(monthVal, 10);
+          const periodYearNum = parseInt(yearVal, 10);
+          const unitIdVal = tenant.unitId || tenant.unit_id || tenant.unitCode || null;
+          const unitCodeVal = tenant.unitCode || tenant.unit_code || '';
+          const propNameVal = prop ? prop.name : (tenant.propertyName || '');
 
+          // 1. Core Invoices Header
+          const singleInvNum = `INV-${yearVal}-${String(monthVal).padStart(2, '0')}-${String(((AppState.invoices || []).length) + 1).padStart(3, '0')}`;
+          const invoiceHeaderId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + Date.now().toString(16).padStart(12, '0');
+
+          const rentItem = selectedItems.find(i => i.code === '001');
+          const scItem = selectedItems.find(i => i.code === '009');
+          const utilItems = selectedItems.filter(i => i.code !== '001' && i.code !== '009');
+          const rentAmt = rentItem ? rentItem.amount : 0;
+          const scAmt = scItem ? scItem.amount : 0;
+          const utilAmt = utilItems.reduce((sum, i) => sum + i.amount, 0);
+
+          const singleConsolidatedInvoice = {
+            id: invoiceHeaderId,
+            invoice_number: singleInvNum,
+            invoiceNumber: singleInvNum,
+            lease_id: tenant.leaseId || tenant.lease_id || unitIdVal || tenant.id,
+            leaseId: tenant.leaseId || tenant.lease_id || unitIdVal || tenant.id,
+            tenant_id: tenant.id,
+            tenantId: tenant.id,
+            property_id: propertyId,
+            propertyId: propertyId,
+            unit_id: unitIdVal,
+            unitId: unitIdVal,
+            period_month: periodMonthNum,
+            periodMonth: periodMonthNum,
+            period_year: periodYearNum,
+            periodYear: periodYearNum,
+            total_amount: totalBilled,
+            totalAmount: totalBilled,
+            rent: rentAmt,
+            service_charge: scAmt,
+            serviceCharge: scAmt,
+            utilities: utilAmt,
+            arrears: 0,
+            status: 'Unpaid',
+            tenant_code: tenant.tenantCode || tenant.tenant_code || '',
+            tenantCode: tenant.tenantCode || tenant.tenant_code || '',
+            tenant_name: tenant.name,
+            tenantName: tenant.name,
+            unit_code: unitCodeVal,
+            unitCode: unitCodeVal,
+            property_name: propNameVal,
+            propertyName: propNameVal,
+            due_date: `${yearVal}-${String(monthVal).padStart(2, '0')}-05`,
+            dueDate: `${yearVal}-${String(monthVal).padStart(2, '0')}-05`,
+            issue_date: `${yearVal}-${String(monthVal).padStart(2, '0')}-01`,
+            issueDate: `${yearVal}-${String(monthVal).padStart(2, '0')}-01`,
+            created_at: nowIso
+          };
+
+          if (!AppState.invoices) AppState.invoices = [];
+          AppState.invoices.unshift(singleConsolidatedInvoice);
+
+          if (!AppState.tenantInvoiceLines) AppState.tenantInvoiceLines = [];
+          if (!AppState.tenantInvoices) AppState.tenantInvoices = [];
+
+          let postedCount = 0;
           for (const item of selectedItems) {
             const autoDesc = `${item.description} - ${periodLabel}`;
+            const lineId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + postedCount).toString(16).padStart(12, '0');
+
             const invoiceRecord = {
-              id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + postedCount).toString(16).padStart(12, '0'),
+              id: lineId,
+              invoice_id: invoiceHeaderId,
               organization_id: getActiveOrgId(),
               tenant_id: tenant.id,
+              tenantId: tenant.id,
               property_id: propertyId,
-              unit_id: tenant.unitId || null,
-              tenant_code: tenant.tenantCode || '',
+              propertyId: propertyId,
+              unit_id: unitIdVal,
+              unitId: unitIdVal,
+              tenant_code: tenant.tenantCode || tenant.tenant_code || '',
               tenant_name: tenant.name,
-              unit_code: tenant.unitCode || '',
-              property_name: prop ? prop.name : '',
+              tenantName: tenant.name,
+              unit_code: unitCodeVal,
+              unitCode: unitCodeVal,
+              property_name: propNameVal,
+              propertyName: propNameVal,
               payable_code: item.code,
               description: autoDesc,
               amount: item.amount,
               billing_type: 'Single',
-              period_month: monthVal,
-              period_year: parseInt(yearVal, 10),
+              period_month: String(periodMonthNum),
+              periodMonth: periodMonthNum,
+              period_year: periodYearNum,
+              periodYear: periodYearNum,
               is_paid: false,
               created_at: nowIso
             };
 
             AppState.tenantInvoices.unshift(invoiceRecord);
+
+            AppState.tenantInvoiceLines.push({
+              id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'LINE-' + (Date.now() + postedCount).toString(16),
+              invoice_id: invoiceHeaderId,
+              tenant_id: tenant.id,
+              property_id: propertyId,
+              unit_id: unitIdVal,
+              payable_code: item.code,
+              description: autoDesc,
+              amount: item.amount,
+              created_at: nowIso
+            });
 
             try {
               await fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices`, {
@@ -2887,51 +2991,37 @@ const AppState = {
             postedCount++;
           }
 
-          // Post to Consolidated Invoices Roll (AppState.invoices)
-          const singleInvNum = `INV-${yearVal}-${String(monthVal).padStart(2, '0')}-${String((AppState.invoices || []).length + 1).padStart(3, '0')}`;
-          const rentItem = selectedItems.find(i => i.code === '001');
-          const scItem = selectedItems.find(i => i.code === '009');
-          const utilItems = selectedItems.filter(i => i.code !== '001' && i.code !== '009');
-          const rentAmt = rentItem ? rentItem.amount : 0;
-          const scAmt = scItem ? scItem.amount : 0;
-          const utilAmt = utilItems.reduce((sum, i) => sum + i.amount, 0);
+          // 2. The Tenant Ledger (Double-Entry Debit):
+          const tenantLedgerEntries = (AppState.ledger || []).filter(l => l.tenantId === tenant.id || l.tenant_id === tenant.id);
+          const currentDebits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
+          const currentCredits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
+          const previousBal = currentDebits - currentCredits;
+          const newBalanceAfter = previousBal + totalBilled;
 
-          const singleConsolidatedInvoice = {
-            id: singleInvNum,
-            leaseId: tenant.leaseId || tenant.unitId || tenant.id,
-            invoiceNumber: singleInvNum,
-            tenantId: tenant.id,
-            tenantName: tenant.name,
-            unitCode: tenant.unitCode || '',
-            propertyName: prop ? prop.name : '',
-            periodMonth: parseInt(monthVal, 10),
-            periodYear: parseInt(yearVal, 10),
-            rent: rentAmt,
-            serviceCharge: scAmt,
-            utilities: utilAmt,
-            arrears: 0,
-            totalAmount: totalBilled,
-            dueDate: `${yearVal}-${String(monthVal).padStart(2, '0')}-05`,
-            status: 'Unpaid'
-          };
-          if (!AppState.invoices) AppState.invoices = [];
-          AppState.invoices.unshift(singleConsolidatedInvoice);
-
-          // Post to Tenant Ledger
+          if (!AppState.ledger) AppState.ledger = [];
           AppState.ledger.push({
             id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
             timestamp: nowIso.replace('T', ' ').substring(0, 16),
-            refNo: `SIN-${Date.now().toString().slice(-6)}`,
+            refNo: singleInvNum,
+            ref_no: singleInvNum,
+            tenant_id: tenant.id,
             tenantId: tenant.id,
+            tenant_name: tenant.name,
             tenantName: tenant.name,
-            unitCode: tenant.unitCode || '',
+            unit_code: unitCodeVal,
+            unitCode: unitCodeVal,
+            property_id: propertyId,
+            propertyId: propertyId,
             type: 'Invoice',
+            transaction_type: 'Invoice',
             description: selectedItems.map(i => `${i.description} - ${periodLabel}`).join(', '),
             debit: totalBilled,
             credit: 0,
-            balanceAfter: totalBilled
+            balance_after: newBalanceAfter,
+            balanceAfter: newBalanceAfter
           });
 
+          // 5. Global Persistence & UI Re-renders:
           persistBillingState();
           renderInvoicesTable();
           renderLedgerTable();
@@ -3057,30 +3147,113 @@ const AppState = {
         `Are you sure you want to execute Bulk Billing for <strong>${billedItems.length} tenant(s)</strong> totaling <strong>KES ${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> for <strong>${periodLabel}</strong> under <strong>${payableText}</strong>?`,
         async () => {
           const nowIso = new Date().toISOString();
+          const periodMonthNum = parseInt(monthVal, 10);
+          const periodYearNum = parseInt(yearVal, 10);
+          const isRent = payableCode === '001';
+          const isSC = payableCode === '009';
+          const propNameVal = prop ? prop.name : '';
+
+          if (!AppState.invoices) AppState.invoices = [];
+          if (!AppState.tenantInvoices) AppState.tenantInvoices = [];
+          if (!AppState.tenantInvoiceLines) AppState.tenantInvoiceLines = [];
+          if (!AppState.ledger) AppState.ledger = [];
+
           let count = 0;
 
           for (const item of billedItems) {
-            const invoiceRecord = {
-              id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + count).toString(16).padStart(12, '0'),
-              organization_id: getActiveOrgId(),
-              tenant_id: item.tenant.id,
+            const tenant = item.tenant;
+            const amt = item.amount;
+            const unitIdVal = tenant.unitId || tenant.unit_id || tenant.unitCode || null;
+            const unitCodeVal = tenant.unitCode || tenant.unit_code || '';
+
+            // 1. Core Invoices Header for each billed tenant
+            const bulkInvNum = `INV-${yearVal}-${String(monthVal).padStart(2, '0')}-${String(((AppState.invoices || []).length) + 1).padStart(3, '0')}`;
+            const invoiceHeaderId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + count).toString(16).padStart(12, '0');
+
+            const bulkInvoice = {
+              id: invoiceHeaderId,
+              invoice_number: bulkInvNum,
+              invoiceNumber: bulkInvNum,
+              lease_id: tenant.leaseId || tenant.lease_id || unitIdVal || tenant.id,
+              leaseId: tenant.leaseId || tenant.lease_id || unitIdVal || tenant.id,
+              tenant_id: tenant.id,
+              tenantId: tenant.id,
               property_id: propertyId,
-              unit_id: item.tenant.unitId || null,
-              tenant_code: item.tenant.tenantCode || '',
-              tenant_name: item.tenant.name,
-              unit_code: item.tenant.unitCode || '',
-              property_name: prop ? prop.name : '',
+              propertyId: propertyId,
+              unit_id: unitIdVal,
+              unitId: unitIdVal,
+              period_month: periodMonthNum,
+              periodMonth: periodMonthNum,
+              period_year: periodYearNum,
+              periodYear: periodYearNum,
+              total_amount: amt,
+              totalAmount: amt,
+              rent: isRent ? amt : 0,
+              service_charge: isSC ? amt : 0,
+              serviceCharge: isSC ? amt : 0,
+              utilities: (!isRent && !isSC) ? amt : 0,
+              arrears: 0,
+              status: 'Unpaid',
+              tenant_code: tenant.tenantCode || tenant.tenant_code || '',
+              tenantCode: tenant.tenantCode || tenant.tenant_code || '',
+              tenant_name: tenant.name,
+              tenantName: tenant.name,
+              unit_code: unitCodeVal,
+              unitCode: unitCodeVal,
+              property_name: propNameVal,
+              propertyName: propNameVal,
+              due_date: `${yearVal}-${String(monthVal).padStart(2, '0')}-05`,
+              dueDate: `${yearVal}-${String(monthVal).padStart(2, '0')}-05`,
+              issue_date: `${yearVal}-${String(monthVal).padStart(2, '0')}-01`,
+              issueDate: `${yearVal}-${String(monthVal).padStart(2, '0')}-01`,
+              created_at: nowIso
+            };
+            AppState.invoices.unshift(bulkInvoice);
+
+            // Push Line Item into AppState.tenantInvoices
+            const lineId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + count + 1000).toString(16).padStart(12, '0');
+            const invoiceRecord = {
+              id: lineId,
+              invoice_id: invoiceHeaderId,
+              organization_id: getActiveOrgId(),
+              tenant_id: tenant.id,
+              tenantId: tenant.id,
+              property_id: propertyId,
+              propertyId: propertyId,
+              unit_id: unitIdVal,
+              unitId: unitIdVal,
+              tenant_code: tenant.tenantCode || tenant.tenant_code || '',
+              tenant_name: tenant.name,
+              tenantName: tenant.name,
+              unit_code: unitCodeVal,
+              unitCode: unitCodeVal,
+              property_name: propNameVal,
+              propertyName: propNameVal,
               payable_code: payableCode,
               description: autoDesc,
-              amount: item.amount,
+              amount: amt,
               billing_type: 'Bulk',
-              period_month: monthVal,
-              period_year: parseInt(yearVal, 10),
+              period_month: String(periodMonthNum),
+              periodMonth: periodMonthNum,
+              period_year: periodYearNum,
+              periodYear: periodYearNum,
               is_paid: false,
               created_at: nowIso
             };
-
             AppState.tenantInvoices.unshift(invoiceRecord);
+
+            // Push into AppState.tenantInvoiceLines
+            AppState.tenantInvoiceLines.push({
+              id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'LINE-' + (Date.now() + count).toString(16),
+              invoice_id: invoiceHeaderId,
+              tenant_id: tenant.id,
+              property_id: propertyId,
+              unit_id: unitIdVal,
+              payable_code: payableCode,
+              description: autoDesc,
+              amount: amt,
+              created_at: nowIso
+            });
 
             try {
               await fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices`, {
@@ -3097,52 +3270,43 @@ const AppState = {
               console.warn('Supabase bulk tenant_invoices insert warning:', err);
             }
 
-            // Post to Consolidated Invoices Roll (AppState.invoices)
-            const bulkInvNum = `INV-${yearVal}-${String(monthVal).padStart(2, '0')}-${String((AppState.invoices || []).length + 1).padStart(3, '0')}`;
-            const isRent = payableCode === '001';
-            const isSC = payableCode === '009';
-            const bulkInvoice = {
-              id: bulkInvNum,
-              leaseId: item.tenant.leaseId || item.tenant.unitId || item.tenant.id,
-              invoiceNumber: bulkInvNum,
-              tenantId: item.tenant.id,
-              tenantName: item.tenant.name,
-              unitCode: item.tenant.unitCode || '',
-              propertyName: prop ? prop.name : '',
-              periodMonth: parseInt(monthVal, 10),
-              periodYear: parseInt(yearVal, 10),
-              rent: isRent ? item.amount : 0,
-              serviceCharge: isSC ? item.amount : 0,
-              utilities: (!isRent && !isSC) ? item.amount : 0,
-              arrears: 0,
-              totalAmount: item.amount,
-              dueDate: `${yearVal}-${String(monthVal).padStart(2, '0')}-05`,
-              status: 'Unpaid'
-            };
-            if (!AppState.invoices) AppState.invoices = [];
-            AppState.invoices.unshift(bulkInvoice);
+            // 2. The Tenant Ledger (Double-Entry Debit):
+            const tenantLedgerEntries = (AppState.ledger || []).filter(l => l.tenantId === tenant.id || l.tenant_id === tenant.id);
+            const currentDebits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
+            const currentCredits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
+            const previousBal = currentDebits - currentCredits;
+            const newBalanceAfter = previousBal + amt;
 
-            // Post ledger entry
             AppState.ledger.push({
               id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
               timestamp: nowIso.replace('T', ' ').substring(0, 16),
-              refNo: `BLK-${Date.now().toString().slice(-6)}`,
-              tenantId: item.tenant.id,
-              tenantName: item.tenant.name,
-              unitCode: item.tenant.unitCode || '',
+              refNo: bulkInvNum,
+              ref_no: bulkInvNum,
+              tenant_id: tenant.id,
+              tenantId: tenant.id,
+              tenant_name: tenant.name,
+              tenantName: tenant.name,
+              unit_code: unitCodeVal,
+              unitCode: unitCodeVal,
+              property_id: propertyId,
+              propertyId: propertyId,
               type: 'Invoice',
+              transaction_type: 'Invoice',
               description: autoDesc,
-              debit: item.amount,
+              debit: amt,
               credit: 0,
-              balanceAfter: item.amount
+              balance_after: newBalanceAfter,
+              balanceAfter: newBalanceAfter
             });
 
             count++;
           }
 
+          // 5. Global Persistence & UI Re-renders:
           persistBillingState();
           renderInvoicesTable();
           renderLedgerTable();
+          renderBulkTenantsTable();
           showToast(`✓ Bulk billing executed: ${count} tenants billed KES ${totalAmount.toLocaleString()} for ${periodLabel} successfully.`);
         },
         'Bulk Tenants Billing Confirmation',
@@ -3381,12 +3545,50 @@ const AppState = {
       const netLedgerBalance = debits - credits;
 
       // Locate October or latest invoice lines for this tenant
-      const tenantInvs = (AppState.invoices || []).filter(i => (i.tenantId === actualTenantId || (tenant && i.tenantName === tenant.name)));
-      const octInv = tenantInvs.find(i => i.periodMonth === 10) || tenantInvs[tenantInvs.length - 1];
+      const tenantInvs = (AppState.invoices || []).filter(i => (i.tenantId === actualTenantId || i.tenant_id === actualTenantId || (tenant && i.tenantName === tenant.name)));
+      const octInv = tenantInvs.find(i => (i.periodMonth === 10 || i.period_month === 10 || i.period_month === '10')) || tenantInvs[tenantInvs.length - 1];
       const octLines = (AppState.tenantInvoiceLines || []).filter(l => octInv && l.invoice_id === octInv.id);
 
+      // 1. Check unpaid itemized lines from AppState.tenantInvoices for this tenant
+      const unpaidTenantInvs = (AppState.tenantInvoices || []).filter(ti => 
+        (ti.tenant_id === actualTenantId || ti.tenantId === actualTenantId || (tenant && (ti.tenant_name === tenant.name || ti.tenantName === tenant.name))) &&
+        (ti.is_paid === false || ti.is_paid === 'false' || !ti.is_paid)
+      );
+
       let payables = [];
-      if (octLines.length > 0) {
+      if (unpaidTenantInvs.length > 0) {
+        const codePriority = { '001': 1, '009': 2, '002': 3, '017': 4, '035': 0, '015': 5, '008': 6 };
+        const codeNames = { '001': 'Rent', '009': 'Service Charge', '002': 'Water Bill', '017': 'Garbage Collection', '035': 'Penalty', '015': 'Security', '008': 'Tenancy Agreement' };
+        const mapByCode = new Map();
+
+        unpaidTenantInvs.forEach(ti => {
+          const code = ti.payable_code || '001';
+          const amt = Number(ti.amount) || 0;
+          let cleanDesc = (ti.description || codeNames[code] || 'Payable').replace(/\s*-\s*[A-Za-z0-9\s]+$/i, '').trim();
+          if (!cleanDesc) cleanDesc = codeNames[code] || 'Payable';
+          const priority = codePriority[code] !== undefined ? codePriority[code] : 10;
+
+          if (!mapByCode.has(code)) {
+            mapByCode.set(code, {
+              item: cleanDesc,
+              code: code,
+              monthly: amt,
+              totalDue: amt,
+              defaultPaid: 0.00,
+              priority: priority
+            });
+          } else {
+            const existing = mapByCode.get(code);
+            existing.monthly += amt;
+            existing.totalDue += amt;
+          }
+        });
+        payables = Array.from(mapByCode.values());
+        const rentPayable = payables.find(p => p.code === '001');
+        if (rentPayable && netLedgerBalance > rentPayable.totalDue) {
+          rentPayable.totalDue = netLedgerBalance;
+        }
+      } else if (octLines.length > 0) {
         payables = octLines.map((line, idx) => {
           let code = '001';
           let priority = 1;

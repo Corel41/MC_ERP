@@ -158,6 +158,23 @@
         AppState.ledger = Array.from(map.values());
       }
     }
+
+    const cachedLines = localStorage.getItem('mc_erp_tenant_invoice_lines');
+    if (cachedLines) {
+      const parsed = JSON.parse(cachedLines);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const map = new Map();
+        parsed.forEach(l => {
+          const key = l.id || `${l.invoice_id}_${l.payable_code}`;
+          if (key) map.set(key, l);
+        });
+        (AppState.tenantInvoiceLines || []).forEach(l => {
+          const key = l.id || `${l.invoice_id}_${l.payable_code}`;
+          if (key && !map.has(key)) map.set(key, l);
+        });
+        AppState.tenantInvoiceLines = Array.from(map.values());
+      }
+    }
   } catch (e) {
     console.warn('Error hydrating state from localStorage in receipts.js:', e);
   }
@@ -169,6 +186,9 @@
       }
       if (AppState.invoices) {
         localStorage.setItem('mc_erp_invoices', JSON.stringify(AppState.invoices));
+      }
+      if (AppState.tenantInvoiceLines) {
+        localStorage.setItem('mc_erp_tenant_invoice_lines', JSON.stringify(AppState.tenantInvoiceLines));
       }
       if (AppState.ledger) {
         localStorage.setItem('mc_erp_ledger', JSON.stringify(AppState.ledger));
@@ -547,17 +567,55 @@
     const actualTenantId = tenant ? tenant.id : tenantId;
     const monthlyRent = tenant && tenant.rentAmount ? Number(tenant.rentAmount) : 35000;
 
-    const tenantEntries = (AppState.ledger || []).filter(l => l.tenantId === actualTenantId);
+    const tenantEntries = (AppState.ledger || []).filter(l => l.tenantId === actualTenantId || l.tenant_id === actualTenantId);
     const debits = tenantEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
     const credits = tenantEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
     const netLedgerBalance = debits - credits;
 
-    const tenantInvs = (AppState.invoices || []).filter(i => (i.tenantId === actualTenantId || (tenant && i.tenantName === tenant.name)));
-    const octInv = tenantInvs.find(i => i.periodMonth === 10) || tenantInvs[tenantInvs.length - 1];
+    const tenantInvs = (AppState.invoices || []).filter(i => (i.tenantId === actualTenantId || i.tenant_id === actualTenantId || (tenant && i.tenantName === tenant.name)));
+    const octInv = tenantInvs.find(i => (i.periodMonth === 10 || i.period_month === 10 || i.period_month === '10')) || tenantInvs[tenantInvs.length - 1];
     const octLines = (AppState.tenantInvoiceLines || []).filter(l => octInv && l.invoice_id === octInv.id);
 
+    // 1. Check unpaid itemized lines from AppState.tenantInvoices for this tenant
+    const unpaidTenantInvs = (AppState.tenantInvoices || []).filter(ti => 
+      (ti.tenant_id === actualTenantId || ti.tenantId === actualTenantId || (tenant && (ti.tenant_name === tenant.name || ti.tenantName === tenant.name))) &&
+      (ti.is_paid === false || ti.is_paid === 'false' || !ti.is_paid)
+    );
+
     let payables = [];
-    if (octLines.length > 0) {
+    if (unpaidTenantInvs.length > 0) {
+      const codePriority = { '001': 1, '009': 2, '002': 3, '017': 4, '035': 0, '015': 5, '008': 6 };
+      const codeNames = { '001': 'Rent', '009': 'Service Charge', '002': 'Water Bill', '017': 'Garbage Collection', '035': 'Penalty', '015': 'Security', '008': 'Tenancy Agreement' };
+      const mapByCode = new Map();
+
+      unpaidTenantInvs.forEach(ti => {
+        const code = ti.payable_code || '001';
+        const amt = Number(ti.amount) || 0;
+        let cleanDesc = (ti.description || codeNames[code] || 'Payable').replace(/\s*-\s*[A-Za-z0-9\s]+$/i, '').trim();
+        if (!cleanDesc) cleanDesc = codeNames[code] || 'Payable';
+        const priority = codePriority[code] !== undefined ? codePriority[code] : 10;
+
+        if (!mapByCode.has(code)) {
+          mapByCode.set(code, {
+            item: cleanDesc,
+            code: code,
+            monthly: amt,
+            totalDue: amt,
+            defaultPaid: 0.00,
+            priority: priority
+          });
+        } else {
+          const existing = mapByCode.get(code);
+          existing.monthly += amt;
+          existing.totalDue += amt;
+        }
+      });
+      payables = Array.from(mapByCode.values());
+      const rentPayable = payables.find(p => p.code === '001');
+      if (rentPayable && netLedgerBalance > rentPayable.totalDue) {
+        rentPayable.totalDue = netLedgerBalance;
+      }
+    } else if (octLines.length > 0) {
       payables = octLines.map((line, idx) => {
         let code = '001';
         let priority = 1;
