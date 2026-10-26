@@ -507,7 +507,10 @@
       return;
     }
 
-    const amount = parseFloat(amountInput.value);
+    const rawAmt = parseFloat(amountInput.value);
+    const amount = (entryType === 'Other Income')
+      ? ((typeof formula_LandlordOtherIncomeInput === 'function') ? formula_LandlordOtherIncomeInput(rawAmt) : rawAmt)
+      : ((typeof formula_LandlordManualDeductionInput === 'function') ? formula_LandlordManualDeductionInput(rawAmt) : rawAmt);
     if (!amount || amount <= 0) {
       alert('Please enter a valid amount greater than zero.');
       amountInput.focus();

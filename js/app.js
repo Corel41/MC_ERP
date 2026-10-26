@@ -2825,7 +2825,11 @@ const AppState = {
         if (chk && chk.checked) {
           const code = input.getAttribute('data-code');
           const pDesc = input.getAttribute('data-desc');
-          const amt = parseFloat(input.value) || 0;
+          const defaultAmt = parseFloat(input.getAttribute('data-default') || 0);
+          const manualVal = input.value;
+          const amt = (typeof formula_SingleTenantLineInput === 'function')
+            ? formula_SingleTenantLineInput(defaultAmt, manualVal, true)
+            : (parseFloat(manualVal) || 0);
           selectedItems.push({ code, description: pDesc, amount: amt });
         }
       });
@@ -2835,7 +2839,9 @@ const AppState = {
         return;
       }
 
-      const totalBilled = selectedItems.reduce((acc, item) => acc + item.amount, 0);
+      const totalBilled = (typeof formula_SingleTenantInvoiceTotal === 'function')
+        ? formula_SingleTenantInvoiceTotal(selectedItems)
+        : selectedItems.reduce((acc, item) => acc + item.amount, 0);
 
       confirmAction(
         `Are you sure you want to bill <strong>${tenant.name} (${tenant.tenantCode || ''})</strong> a total of <strong>KES ${totalBilled.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> for <strong>${periodLabel}</strong> across ${selectedItems.length} payable(s)?`,
@@ -2973,7 +2979,9 @@ const AppState = {
           const currentDebits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
           const currentCredits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
           const previousBal = currentDebits - currentCredits;
-          const newBalanceAfter = previousBal + totalBilled;
+          const newBalanceAfter = (typeof formula_LedgerDebitEntryInput === 'function')
+            ? formula_LedgerDebitEntryInput(previousBal, totalBilled)
+            : (previousBal + totalBilled);
 
           if (!AppState.ledger) AppState.ledger = [];
           AppState.ledger.push({
@@ -3125,7 +3133,11 @@ const AppState = {
         const input = tr.querySelector('.bulk-bill-amount');
         if (chk && chk.checked) {
           const tenantId = chk.getAttribute('data-tenant-id');
-          const amt = parseFloat(input.value) || 0;
+          const baselineVal = parseFloat(input.getAttribute('data-baseline') || 0);
+          const manualVal = input.value;
+          const amt = (typeof formula_BulkTenantRowInput === 'function')
+            ? formula_BulkTenantRowInput(baselineVal, manualVal, true)
+            : (parseFloat(manualVal) || 0);
           const tenant = AppState.tenants.find(t => t.id === tenantId);
           if (tenant) {
             billedItems.push({ tenant, amount: amt });
@@ -3272,7 +3284,9 @@ const AppState = {
             const currentDebits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
             const currentCredits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
             const previousBal = currentDebits - currentCredits;
-            const newBalanceAfter = previousBal + amt;
+            const newBalanceAfter = (typeof formula_LedgerDebitEntryInput === 'function')
+              ? formula_LedgerDebitEntryInput(previousBal, amt)
+              : (previousBal + amt);
 
             AppState.ledger.push({
               id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
@@ -3586,6 +3600,12 @@ const AppState = {
         unpaidTenantInvs.forEach(ti => {
           const code = ti.payable_code || '001';
           const amt = Number(ti.amount) || 0;
+          const alreadyPaid = Number(ti.amount_paid) || 0;
+          const remainingDue = (typeof formula_ReceiptPayableRemainingDue === 'function')
+            ? formula_ReceiptPayableRemainingDue(amt, alreadyPaid)
+            : Math.max(0, amt - alreadyPaid);
+          if (remainingDue <= 0.001) return; // fully cleared, skip from due matrix
+
           let cleanDesc = (ti.description || codeNames[code] || 'Payable').replace(/\s*-\s*[A-Za-z0-9\s]+$/i, '').trim();
           if (!cleanDesc) cleanDesc = codeNames[code] || 'Payable';
           const priority = codePriority[code] !== undefined ? codePriority[code] : 10;
@@ -3595,14 +3615,14 @@ const AppState = {
               item: cleanDesc,
               code: code,
               monthly: amt,
-              totalDue: amt,
+              totalDue: remainingDue,
               defaultPaid: 0.00,
               priority: priority
             });
           } else {
             const existing = mapByCode.get(code);
             existing.monthly += amt;
-            existing.totalDue += amt;
+            existing.totalDue += remainingDue;
           }
         });
         payables = Array.from(mapByCode.values());
@@ -3756,24 +3776,38 @@ const AppState = {
       });
       document.querySelectorAll('.receipt-row-overpay-badge').forEach(el => el.remove());
 
-      // Cascade cash down rows in priority order (Rent -> Service Charge -> Penalty)
-      // No upper cap — cashier can allocate more than totalDue for overpayment absorption
-      inputs.forEach((inp) => {
-        if (cash <= 0) {
-          inp.value = '0.00';
-          return;
-        }
-        const due = parseFloat(inp.getAttribute('data-due')) || 0;
-        const alloc = Math.min(cash, due);
-        inp.value = alloc.toFixed(2);
-        cash -= alloc;
-      });
+      if (typeof formula_ReceiptAutoAllocateWaterfall === 'function') {
+        const rowsData = inputs.map(inp => ({
+          code: inp.getAttribute('data-code'),
+          item: inp.getAttribute('data-item'),
+          description: inp.getAttribute('data-item'),
+          priority: inp.getAttribute('data-priority'),
+          totalDue: parseFloat(inp.getAttribute('data-due')) || 0
+        }));
+        const waterfallResult = formula_ReceiptAutoAllocateWaterfall(cash, rowsData);
+        inputs.forEach((inp, idx) => {
+          const alloc = waterfallResult.allocatedRows[idx] ? waterfallResult.allocatedRows[idx].allocated : 0;
+          inp.value = Number(alloc).toFixed(2);
+        });
+      } else {
+        // Cascade cash down rows in priority order (Rent -> Service Charge -> Penalty)
+        inputs.forEach((inp) => {
+          if (cash <= 0) {
+            inp.value = '0.00';
+            return;
+          }
+          const due = parseFloat(inp.getAttribute('data-due')) || 0;
+          const alloc = Math.min(cash, due);
+          inp.value = alloc.toFixed(2);
+          cash -= alloc;
+        });
 
-      // If cash still remains (overpayment), squeeze entire excess into the first row (Rent/primary)
-      if (cash > 0 && inputs[0]) {
-        const cur = parseFloat(inputs[0].value) || 0;
-        inputs[0].value = (cur + cash).toFixed(2);
-        cash = 0;
+        // If cash still remains (overpayment), squeeze entire excess into the first row (Rent/primary)
+        if (cash > 0 && inputs[0]) {
+          const cur = parseFloat(inputs[0].value) || 0;
+          inputs[0].value = (cur + cash).toFixed(2);
+          cash = 0;
+        }
       }
 
       validateReceiptAllocations();
@@ -3823,10 +3857,16 @@ const AppState = {
           
           if (unedited.length === 1) {
             // Last available row takes full remainder to strictly balance
-            nextTarget.value = remainder.toFixed(2);
+            const cellCalc = (typeof formula_ReceiptManualCellInput === 'function')
+              ? formula_ReceiptManualCellInput(targetDue, remainder)
+              : { allocated: remainder };
+            nextTarget.value = cellCalc.allocated.toFixed(2);
           } else {
             const alloc = Math.min(remainder, targetDue);
-            nextTarget.value = alloc.toFixed(2);
+            const cellCalc = (typeof formula_ReceiptManualCellInput === 'function')
+              ? formula_ReceiptManualCellInput(targetDue, alloc)
+              : { allocated: alloc };
+            nextTarget.value = cellCalc.allocated.toFixed(2);
           }
         }
       }
@@ -3880,8 +3920,22 @@ const AppState = {
       }
 
       // 3. DYNAMICALLY calculate Outstanding Arrears = Invoice Total - Allocated Amount Paid
-      const outstandingArrears = Math.max(0, Math.round((invoiceTotal - matrixSum) * 100) / 100);
-      const totalOverpayment = Math.max(0, Math.round((matrixSum - invoiceTotal) * 100) / 100);
+      const pillSummary = (typeof formula_ReceiptHeaderSummaryPill === 'function')
+        ? formula_ReceiptHeaderSummaryPill(invoiceTotal, paymentReceived, matrixSum)
+        : {
+            invoiceTotal: invoiceTotal,
+            paymentReceived: paymentReceived,
+            unallocatedDiff: Math.round((paymentReceived - matrixSum) * 100) / 100,
+            outstandingArrears: Math.max(0, Math.round((invoiceTotal - matrixSum) * 100) / 100),
+            totalOverpayment: Math.max(0, Math.round((matrixSum - invoiceTotal) * 100) / 100),
+            isBalanced: paymentReceived > 0 && Math.abs(Math.round((matrixSum - paymentReceived) * 100) / 100) < 0.01
+          };
+
+      const outstandingArrears = pillSummary.outstandingArrears;
+      const totalOverpayment = pillSummary.totalOverpayment;
+      const isBalanced = pillSummary.isBalanced;
+      const diff = Math.round((matrixSum - paymentReceived) * 100) / 100;
+
       const arrEl = document.getElementById('receipt-status-outstanding-arrears');
       if (arrEl) {
         if (totalOverpayment > 0) {
@@ -3912,10 +3966,6 @@ const AppState = {
           }
         }
       });
-
-      // 4. Check strict equality with Payment Received
-      const diff = Math.round((matrixSum - paymentReceived) * 100) / 100;
-      const isBalanced = paymentReceived > 0 && Math.abs(diff) < 0.01;
 
       // Buttons to control
       const btnSave = document.getElementById('btn-receipt-save');
@@ -4401,6 +4451,9 @@ const AppState = {
           const debits = tenantEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
           const credits = tenantEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
           const balanceBefore = debits - credits;
+          const balanceAfter = (typeof formula_LedgerCreditSettlementClearance === 'function')
+            ? formula_LedgerCreditSettlementClearance(balanceBefore, amount)
+            : Math.max(0, balanceBefore - amount);
 
           AppState.ledger.push({
             id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
@@ -4413,14 +4466,23 @@ const AppState = {
             description: `${method} [Ref: ${refCode}] - ${notes || 'Payment Receipt'}`,
             debit: 0,
             credit: amount,
-            balanceAfter: Math.max(0, balanceBefore - amount)
+            balanceAfter: balanceAfter
           });
 
-          // 3. Mark allocated invoices as paid in AppState.tenantInvoices and record settled items
+          // 3. Mark allocated invoices as paid in AppState.tenantInvoices and record settled items with line clearance
           allocatedList.forEach(alloc => {
             const inv = AppState.tenantInvoices.find(i => i.id === alloc.id);
             if (inv) {
-              inv.is_paid = true;
+              const billed = Number(inv.amount) || Number(alloc.month_bill) || 0;
+              const priorPaid = Number(inv.amount_paid) || 0;
+              const allocAmt = Number(alloc.amount) || 0;
+              const settlement = (typeof formula_ReceiptSettlementLineClearance === 'function')
+                ? formula_ReceiptSettlementLineClearance(billed, priorPaid, allocAmt)
+                : { updatedPaid: priorPaid + allocAmt, updatedBalanceDue: Math.max(0, billed - (priorPaid + allocAmt)), isFullyPaid: true };
+
+              inv.amount_paid = settlement.updatedPaid;
+              inv.balance_due = settlement.updatedBalanceDue;
+              inv.is_paid = settlement.isFullyPaid;
               try {
                 fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices?id=eq.${inv.id}`, {
                   method: 'PATCH',
@@ -4430,7 +4492,7 @@ const AppState = {
                     'Content-Type': 'application/json',
                     'Prefer': 'return=minimal'
                   },
-                  body: JSON.stringify({ is_paid: true })
+                  body: JSON.stringify({ is_paid: inv.is_paid, amount_paid: inv.amount_paid, balance_due: inv.balance_due })
                 }).catch(() => {});
               } catch (_) {}
             } else if (alloc.id === 'AUTO-RENT' || (typeof alloc.id === 'string' && alloc.id.startsWith('FEE-'))) {
@@ -4540,6 +4602,9 @@ const AppState = {
           renderTenantReceiptsTable();
           renderLedgerTable();
           renderInvoicesTable();
+          if (typeof renderReceiptAllocationMatrix === 'function') {
+            renderReceiptAllocationMatrix(tenant.id);
+          }
 
           // 6. Action Routing & Notifications
           if (isSmsRequested) {
@@ -5276,8 +5341,12 @@ const AppState = {
       const prev = parseFloat(document.getElementById('meter-prev-reading').value) || 0;
       const curr = parseFloat(document.getElementById('meter-curr-reading').value) || 0;
       const tariff = parseFloat(document.getElementById('meter-tariff-rate').value) || 150;
-      const consumption = Math.max(0, curr - prev);
-      const total = consumption * tariff;
+      const consumption = (typeof formula_UtilityConsumptionInput === 'function')
+        ? formula_UtilityConsumptionInput(prev, curr)
+        : Math.max(0, curr - prev);
+      const total = (typeof formula_UtilityBillAmountInput === 'function')
+        ? formula_UtilityBillAmountInput(consumption, tariff)
+        : (consumption * tariff);
 
       const consEl = document.getElementById('meter-consumption');
       const billEl = document.getElementById('meter-total-bill');
@@ -5292,8 +5361,12 @@ const AppState = {
       const prev = parseFloat(document.getElementById('meter-prev-reading').value) || 0;
       const curr = parseFloat(document.getElementById('meter-curr-reading').value) || 0;
       const tariff = parseFloat(document.getElementById('meter-tariff-rate').value) || 150;
-      const consumption = Math.max(0, curr - prev);
-      const total = consumption * tariff;
+      const consumption = (typeof formula_UtilityConsumptionInput === 'function')
+        ? formula_UtilityConsumptionInput(prev, curr)
+        : Math.max(0, curr - prev);
+      const total = (typeof formula_UtilityBillAmountInput === 'function')
+        ? formula_UtilityBillAmountInput(consumption, tariff)
+        : (consumption * tariff);
       const meterType = document.getElementById('meter-type-select').value;
       const readingDate = document.getElementById('meter-reading-date').value;
 
@@ -5533,34 +5606,77 @@ const AppState = {
 
       const prevStatus = inv.status;
       const nextStatus = (prevStatus === 'Paid') ? 'Unpaid' : 'Paid';
-      inv.status = nextStatus;
+      const invTotal = Number(inv.totalAmount) || Number(inv.total_amount) || 0;
+      const currentPaid = (prevStatus === 'Paid') ? invTotal : (Number(inv.amount_paid) || 0);
+
+      const clearance = (typeof formula_InvoiceStatusToggleClearance === 'function')
+        ? formula_InvoiceStatusToggleClearance(invTotal, currentPaid, nextStatus)
+        : { amount_paid: nextStatus === 'Paid' ? invTotal : 0, balance_due: nextStatus === 'Paid' ? 0 : invTotal, status: nextStatus, ledgerDelta: 0 };
+
+      inv.status = clearance.status;
+      inv.amount_paid = clearance.amount_paid;
+      inv.balance_due = clearance.balance_due;
 
       // Synchronize matching tenantInvoices items
       if (AppState.tenantInvoices && AppState.tenantInvoices.length > 0) {
         AppState.tenantInvoices.forEach(ti => {
-          const matchTenant = ti.tenant_id === inv.tenantId;
-          const matchPeriod = String(ti.period_month) === String(inv.periodMonth) && String(ti.period_year) === String(inv.periodYear);
-          const matchInvId = ti.id === inv.id || ti.invoice_number === inv.invoiceNumber;
+          const matchTenant = ti.tenant_id === inv.tenantId || ti.tenant_id === inv.tenant_id;
+          const matchPeriod = String(ti.period_month) === String(inv.periodMonth || inv.period_month) && String(ti.period_year) === String(inv.periodYear || inv.period_year);
+          const matchInvId = ti.id === inv.id || ti.invoice_number === inv.invoiceNumber || ti.invoice_number === inv.invoice_number;
           if (matchInvId || (matchTenant && matchPeriod)) {
             ti.is_paid = (nextStatus === 'Paid');
+            if (nextStatus === 'Paid') {
+              ti.amount_paid = Number(ti.amount) || 0;
+              ti.balance_due = 0;
+            } else {
+              ti.amount_paid = 0;
+              ti.balance_due = Number(ti.amount) || 0;
+            }
           }
         });
       }
 
       const nowIso = new Date().toISOString();
+      const tenantEntries = (AppState.ledger || []).filter(l => l.tenantId === (inv.tenantId || inv.tenant_id));
+      const debits = tenantEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
+      const credits = tenantEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
+      const balanceBefore = debits - credits;
+
       if (nextStatus === 'Paid') {
+        const balanceAfter = (typeof formula_LedgerCreditSettlementClearance === 'function')
+          ? formula_LedgerCreditSettlementClearance(balanceBefore, invTotal)
+          : Math.max(0, balanceBefore - invTotal);
+
         AppState.ledger.push({
           id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
           timestamp: nowIso.replace('T', ' ').substring(0, 16),
           refNo: `SETTLE-${Date.now().toString().slice(-6)}`,
-          tenantId: inv.tenantId,
-          tenantName: inv.tenantName,
-          unitCode: inv.unitCode || '',
+          tenantId: inv.tenantId || inv.tenant_id,
+          tenantName: inv.tenantName || inv.tenant_name,
+          unitCode: inv.unitCode || inv.unit_code || '',
           type: 'Payment',
           description: `Direct Status Settle: Invoice ${inv.invoiceNumber || inv.id} marked Paid`,
           debit: 0,
-          credit: inv.totalAmount,
-          balanceAfter: 0
+          credit: invTotal,
+          balanceAfter: balanceAfter
+        });
+      } else {
+        const balanceAfter = (typeof formula_LedgerDebitEntryInput === 'function')
+          ? formula_LedgerDebitEntryInput(balanceBefore, invTotal)
+          : (balanceBefore + invTotal);
+
+        AppState.ledger.push({
+          id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
+          timestamp: nowIso.replace('T', ' ').substring(0, 16),
+          refNo: `REV-${Date.now().toString().slice(-6)}`,
+          tenantId: inv.tenantId || inv.tenant_id,
+          tenantName: inv.tenantName || inv.tenant_name,
+          unitCode: inv.unitCode || inv.unit_code || '',
+          type: 'Adjustment',
+          description: `Status Unsettle Reversal: Invoice ${inv.invoiceNumber || inv.id} marked Unpaid`,
+          debit: invTotal,
+          credit: 0,
+          balanceAfter: balanceAfter
         });
       }
 
@@ -5569,6 +5685,14 @@ const AppState = {
 
       renderInvoicesTable();
       renderLedgerTable();
+
+      // REAL-TIME CLEARANCE: If receipt allocation matrix is displaying this tenant, re-render it immediately
+      const curTenantSelect = document.getElementById('receipt-tenant-select') || document.getElementById('receipting-tenant-select');
+      const activeTenantId = curTenantSelect ? curTenantSelect.value : (inv.tenantId || inv.tenant_id);
+      if (typeof renderReceiptAllocationMatrix === 'function') {
+        renderReceiptAllocationMatrix(activeTenantId);
+      }
+
       showToast(`✓ Invoice ${inv.invoiceNumber || inv.id} status updated: ${prevStatus} ➔ ${nextStatus}`);
     }
     window.toggleInvoicePaymentStatus = toggleInvoicePaymentStatus;
@@ -7495,7 +7619,10 @@ const AppState = {
       const unit = unitId ? AppState.units.find(u => u.id === unitId) : null;
 
       const estCost = parseFloat(document.getElementById('wo-est-cost-input').value) || 0;
-      const actCost = parseFloat(document.getElementById('wo-act-cost-input').value) || estCost;
+      const actCostRaw = parseFloat(document.getElementById('wo-act-cost-input').value) || estCost;
+      const actCost = (typeof formula_WorkOrderExpenseInput === 'function')
+        ? formula_WorkOrderExpenseInput(actCostRaw, 0, 0)
+        : actCostRaw;
       const allocation = document.getElementById('wo-allocation-select').value;
       const status = document.getElementById('wo-status-select').value;
       const approvedBy = document.getElementById('wo-approved-by-input').value;
@@ -8961,6 +9088,10 @@ const AppState = {
           let totalBilled = 0;
           for (const lse of AppState.leases) {
             if (lse.status === 'Active') {
+              const recurringAmt = (typeof formula_PeriodRollOverRecurringBill === 'function')
+                ? formula_PeriodRollOverRecurringBill(lse.rentAmount || 0, lse.serviceCharge || 0, 0)
+                : Number(lse.rentAmount || 0);
+
               const inv = {
                 id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : '00000000-0000-0000-0000-' + (Date.now() + billedCount).toString(16).padStart(12, '0'),
                 organization_id: getActiveOrgId(),
@@ -8973,7 +9104,7 @@ const AppState = {
                 property_name: lse.propertyName,
                 payable_code: '001',
                 description: `${fullMonthDesc} ${yearVal} Rent Roll-Over`,
-                amount: Number(lse.rentAmount || 0),
+                amount: recurringAmt,
                 billing_type: 'Bulk',
                 period_month: monthVal,
                 period_year: yearVal,
@@ -8981,6 +9112,14 @@ const AppState = {
                 created_at: nowStr
               };
               AppState.tenantInvoices.unshift(inv);
+
+              const tenantLedgerEntries = (AppState.ledger || []).filter(l => l.tenantId === lse.tenantId || l.tenant_id === lse.tenantId);
+              const currentDebits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
+              const currentCredits = tenantLedgerEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
+              const previousBal = currentDebits - currentCredits;
+              const newBalanceAfter = (typeof formula_LedgerDebitEntryInput === 'function')
+                ? formula_LedgerDebitEntryInput(previousBal, recurringAmt)
+                : (previousBal + recurringAmt);
 
               AppState.ledger.push({
                 id: `LED-${String(AppState.ledger.length + 1).padStart(3, '0')}`,
@@ -8991,13 +9130,13 @@ const AppState = {
                 unitCode: lse.unitCode || '',
                 type: 'Invoice',
                 description: `${fullMonthDesc} ${yearVal} Rent Roll-Over`,
-                debit: Number(lse.rentAmount || 0),
+                debit: recurringAmt,
                 credit: 0,
-                balanceAfter: Number(lse.rentAmount || 0)
+                balanceAfter: newBalanceAfter
               });
 
               billedCount++;
-              totalBilled += Number(lse.rentAmount || 0);
+              totalBilled += recurringAmt;
             }
           }
 

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="developer">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MC ERP — Cashier Receipting & Waterfall Allocation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <script>
+    // Immediate synchronous branding hydration from localStorage to prevent flash of default logo/title
+    (function() {
+      function applyEarlyBranding() {
+        try {
+          const raw = localStorage.getItem('mc_erp_company_profile');
+          if (!raw) return;
+          const cp = JSON.parse(raw);
+          if (!cp) return;
+
+          const titleEl = document.getElementById('brand-title');
+          const subEl = document.getElementById('brand-subtitle');
+          const logoEl = document.getElementById('sidebar-brand-logo');
+          const glyphEl = document.getElementById('sidebar-default-glyph');
+
+          if (titleEl && cp.companyName) {
+            titleEl.textContent = cp.companyName;
+            titleEl.title = cp.companyName;
+          }
+          if (subEl && cp.slogan) {
+            subEl.textContent = cp.slogan;
+            subEl.title = cp.slogan;
+          }
+          const logo = cp.tempLogoBase64 || cp.logoUrl;
+          if (logo && logoEl) {
+            logoEl.src = logo;
+            logoEl.style.display = 'block';
+            if (glyphEl) glyphEl.style.display = 'none';
+          }
+        } catch(e) {}
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyEarlyBranding);
+      } else {
+        applyEarlyBranding();
+      }
+    })();
+  </script>
+</head>
+<body class="theme-glass">
+
+  <!-- Desktop Rail Sidebar -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-group">
+        <div class="brand-squircle" id="brand-glyph-btn" title="MC ERP Core">
+          <img id="sidebar-brand-logo" src="" alt="Brand Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px; padding: 2px; display: none;">
+          <svg id="sidebar-default-glyph" viewBox="0 0 24 24" fill="none">
+            <defs>
+              <linearGradient id="glyph-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38BDF8"/>
+                <stop offset="50%" stop-color="#A855F7"/>
+                <stop offset="100%" stop-color="#EC4899"/>
+              </linearGradient>
+            </defs>
+            <path d="M12 4C8.5 4 6 6.5 6 10c0 4.5 6 9 6 9s6-4.5 6-9c0-3.5-2.5-6-6-6z" stroke="url(#glyph-grad)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="10" r="2.5" fill="url(#glyph-grad)"/>
+          </svg>
+        </div>
+        <div class="brand-meta">
+          <div class="brand-title" id="brand-title">MC ERP</div>
+          <div class="brand-subtitle" id="brand-subtitle">Metrocosmo Enterprise</div>
+        </div>
+      </div>
+      <button class="sidebar-collapse-btn" id="sidebar-toggle-btn" title="Toggle Rail Mode">
+        <svg id="chevron-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-container">
+      <!-- ESTATE MANAGEMENT -->
+      <div class="nav-group">
+        <div class="nav-group-label" data-full="ESTATE MANAGEMENT" data-short="EST">ESTATE MANAGEMENT</div>
+        <ul class="nav-list">
+          <li class="nav-item" data-tooltip="Registration">
+            <a class="nav-link" href="index.html#estate-reg">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              </span>
+              <span class="nav-text">Registration</span>
+            </a>
+          </li>
+          <li class="nav-item active" data-tooltip="Tenants">
+            <a class="nav-link" href="receipts.html">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </span>
+              <span class="nav-text">Receipting</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tooltip="Landlords">
+            <a class="nav-link" href="landlords.html">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><polyline points="8 11 12 15 16 11"/></svg>
+              </span>
+              <span class="nav-text">Landlords</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tooltip="Statements">
+            <a class="nav-link" href="landlord-statements.html">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </span>
+              <span class="nav-text">Statements</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tooltip="Repairs">
+            <a class="nav-link" href="index.html#estate-repairs">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </span>
+              <span class="nav-text">Repairs</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <!-- CORE ENTERPRISE DEPARTMENTS -->
+      <div class="nav-group">
+        <div class="nav-group-label" data-full="ENTERPRISE DEPARTMENTS" data-short="DEP">ENTERPRISE DEPARTMENTS</div>
+        <ul class="nav-list">
+          <li class="nav-item" data-tooltip="Agency CRM">
+            <a class="nav-link" href="index.html#mod-agency">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </span>
+              <span class="nav-text">Agency CRM</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tooltip="Valuation">
+            <a class="nav-link" href="index.html#mod-valuation">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </span>
+              <span class="nav-text">Valuation</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tooltip="Administration">
+            <a class="nav-link" href="index.html#mod-admin">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </span>
+              <span class="nav-text">Administration</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tooltip="Finance">
+            <a class="nav-link" href="index.html#mod-finance">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </span>
+              <span class="nav-text">Finance</span>
+            </a>
+          </li>
+          <li class="nav-item" data-tooltip="Workplace Operations">
+            <a class="nav-link" href="index.html#mod-operations">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect width="8" height="8" x="2" y="2" rx="2"/><rect width="8" height="8" x="14" y="2" rx="2"/><rect width="8" height="8" x="14" y="14" rx="2"/><rect width="8" height="8" x="2" y="14" rx="2"/></svg>
+              </span>
+              <span class="nav-text">Workplace Operations</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-avatar-pill">DIR</div>
+      <div class="user-details">
+        <div class="user-fullname">Metrocosmo HQ</div>
+        <div class="user-role-badge">Executive Directorship</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Canvas -->
+  <main id="workspace">
+
+    <!-- Top Sticky Header -->
+    <header id="top-nav" class="glass-surface">
+      <div class="header-left">
+        <div class="view-title-pill">
+          <span id="current-page-title">Cashier Receipting Hub</span>
+          <span class="live-pulse-badge">
+            <span class="pulse-dot"></span>
+            <span id="header-theme-indicator">Developer Plain</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <select class="pill-select" id="quick-theme-dropdown" title="Theme Selector" onchange="document.documentElement.setAttribute('data-theme', this.value)">
+          <option value="developer" selected>⚡ Developer Plain (High-Contrast Solid)</option>
+          <option value="flowly">🌸 Frosted Iridescent (Flowly)</option>
+          <option value="cobalt">💎 Cobalt Bloom (Windows 11)</option>
+          <option value="hireism">🦄 Modern SaaS Iris (Hireism)</option>
+          <option value="obsidian">🌲 Obsidian &amp; Emerald (Executive)</option>
+        </select>
+
+        <a href="index.html#settings" class="pill-btn-icon" id="quick-settings-btn" title="Open Settings &amp; Themes" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1 2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </a>
+      </div>
+    </header>
+
+    <!-- Dynamic Module Content Container -->
+    <div id="module-container" class="module-wrapper" style="padding: 24px;">
+
+      <!-- TOP HEADER STRIP & EDIT MODE NOTIFICATION -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px; max-width: 1240px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.25rem; font-weight: 800; letter-spacing: 0.5px;">Official Receipting</span>
+          <span class="stat-pill" style="padding: 4px 12px; font-size: 0.78rem; font-weight: 600;">Tenant Payment Intake &amp; Real-Time Settlement Clearance</span>
+        </div>
+        <!-- Mode Badge: Standard or Edit -->
+        <div id="receipt-mode-indicator-badge" style="display: none; background: rgba(245, 158, 11, 0.18); color: var(--accent-amber); border: 1px solid var(--accent-amber); font-size: 11.5px; font-weight: 800; padding: 4px 12px; border-radius: 6px; align-items: center; gap: 8px;">
+          <span>🔒 EDIT MODE (Facts Locked)</span>
+          <button type="button" class="btn-action-pill" onclick="cancelReceiptEditMode()" style="padding: 2px 8px; font-size: 10.5px;">Cancel Edit</button>
+        </div>
+      </div>
+
+      <!-- MAIN FORM CONTAINER -->
+      <form id="form-tenant-receipt" class="receipting-intake-container receipting-compact-form" onsubmit="event.preventDefault(); executePaymentReceipt('save');">
+
+        <!-- TOP BLOCK: TENANT & UNIT PROFILE -->
+        <div class="glass-card receipting-bounded-card receipting-profile-strip" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+          <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+              — Tenant &amp; Unit Profile —
+            </h4>
+            <div id="receipt-unit-display-container" style="display: flex; align-items: center; gap: 6px;">
+              <span id="receipt-unit-display" class="stat-pill" style="padding: 2px 8px; font-size: 0.72rem; font-weight: 700;">Unit: -</span>
+            </div>
+          </div>
+
+          <!-- Selectors Row -->
+          <div class="form-grid-2" style="gap: 10px;">
+            <div class="form-group">
+              <label class="form-label">Select Property: *</label>
+              <select id="receipt-property-select" class="form-input" onchange="onReceiptPropertyChange(this.value)" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Select Tenant: *</label>
+              <select id="receipt-tenant-select" class="form-input" onchange="onReceiptTenantChange(this.value)" required>
+                <!-- Populated dynamically based on property -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Read-Only Profile Detail Grid -->
+          <div class="glass-card receipting-profile-grid" style="padding: 8px 12px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--divider-color); border-radius: 8px;">
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.70rem; text-transform: uppercase; font-weight: 600; display: block;">Tenant Name</span>
+              <strong id="receipt-detail-tenant-name" style="color: var(--text-primary); font-size: 0.84rem;">-</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.70rem; text-transform: uppercase; font-weight: 600; display: block;">Property</span>
+              <span id="receipt-detail-property" style="color: var(--text-secondary); font-size: 0.80rem;">-</span>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.70rem; text-transform: uppercase; font-weight: 600; display: block;">Phone No.</span>
+              <span id="receipt-detail-phone" style="color: var(--text-primary); font-family: monospace; font-size: 0.82rem;">-</span>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.70rem; text-transform: uppercase; font-weight: 600; display: block;">Unit No.</span>
+              <span id="receipt-detail-unit" style="font-weight: 700; color: var(--accent-primary); font-size: 0.82rem;">-</span>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.70rem; text-transform: uppercase; font-weight: 600; display: block;">Registration Date</span>
+              <span id="receipt-detail-reg-date" style="color: var(--text-secondary); font-size: 0.80rem;">-</span>
+            </div>
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.70rem; text-transform: uppercase; font-weight: 600; display: block;">Previous Payment</span>
+              <span id="receipt-detail-prev-amt" style="color: var(--accent-secondary); font-weight: 700; font-size: 0.82rem;">-</span>
+              <span id="receipt-detail-prev-date" style="color: var(--text-muted); font-size: 0.72rem;"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MIDDLE SIDE-BY-SIDE ZONE: SUMMARY (LEFT) + BILLING BREAKDOWN (RIGHT) -->
+        <div class="receipting-middle-row" style="margin-bottom: 16px;">
+
+          <!-- Left Column: Payment Received & Status Summary -->
+          <div class="glass-card receipting-summary-col" style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 6px;">
+              <h4 style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                — Payment Received &amp; Summary —
+              </h4>
+            </div>
+
+            <!-- Payment Received & Auto Allocate Bar -->
+            <div class="glass-card receipting-auto-allocate-bar" style="padding: 10px 12px; background: rgba(255, 255, 255, 0.025); border: 1px solid var(--glass-border); border-radius: 8px; display: flex; flex-direction: column; gap: 6px; width: 100%; box-sizing: border-box; overflow: hidden;">
+              <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
+                <span>Payment Received (M-Pesa / Bank):</span>
+              </label>
+              
+              <div class="receipting-payment-input-group" style="display: flex; align-items: center; gap: 8px; width: 100%; box-sizing: border-box;">
+                <input type="number" step="0.01" id="receipt-amount-paid" class="form-input" value="0.00" placeholder="0.00" oninput="onPaymentReceivedInputChange(this.value)" required style="flex: 1; min-width: 0; font-size: 1.15rem; font-weight: 800; color: var(--accent-primary); padding: 6px 12px; box-sizing: border-box;">
+                <button type="button" id="btn-receipt-auto-allocate" class="btn-elevated-primary" onclick="autoAllocateReceiptWaterfall()" style="white-space: nowrap; flex-shrink: 0; height: 38px; padding: 0 12px; font-weight: 700; font-size: 0.80rem; border-radius: 8px;">
+                  ⚡ Auto Allocate
+                </button>
+              </div>
+
+              <!-- Strict Allocation Indicator Badge -->
+              <div id="receipt-allocation-validation-indicator" style="display: flex; align-items: center; width: 100%;">
+                <span id="receipt-alloc-status-badge" class="glass-pill" style="width: 100%; box-sizing: border-box; text-align: center; padding: 5px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; background: var(--glass-pill); border: 1px solid var(--glass-border); color: var(--text-muted);">
+                  Enter payment amount to allocate
+                </span>
+              </div>
+
+              <!-- Alert Box -->
+              <div id="receipt-strict-warning-box" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: #F87171; line-height: 1.3;">
+                <div style="font-weight: 800;">⚠️ Strict Allocation Rule:</div>
+                <div id="receipt-strict-warning-text">Matrix sum does not match Payment Received.</div>
+              </div>
+            </div>
+
+            <!-- Highlighted Stat Pills -->
+            <div class="stat-pill-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 0; margin-top: auto; gap: 10px;">
+              <div class="stat-pill" style="text-align: center; padding: 8px 10px;">
+                <span class="stat-pill-title" style="justify-content: center; font-size: 0.70rem;">Invoice Total</span>
+                <span class="stat-pill-value" id="receipt-status-invoice-total" style="color: var(--accent-primary); font-size: 1.20rem; justify-content: center;">
+                  KES 0.00
+                </span>
+              </div>
+
+              <div class="stat-pill" style="text-align: center; padding: 8px 10px;">
+                <span class="stat-pill-title" style="justify-content: center; font-size: 0.70rem;">Outstanding Arrears</span>
+                <span class="stat-pill-value" id="receipt-status-outstanding-arrears" style="color: var(--accent-amber); font-size: 1.20rem; justify-content: center;">
+                  KES 0.00
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Billing Breakdown Waterfall Table -->
+          <div class="glass-card receipting-billing-col" style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 6px;">
+              <h4 style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                — Billing Breakdown —
+              </h4>
+            </div>
+
+            <div class="builder-table-wrap" style="flex: 1;">
+              <table class="builder-table receipting-breakdown-table" style="width: 100%; table-layout: fixed;">
+                <colgroup>
+                  <col style="width: 34%;">
+                  <col style="width: 22%;">
+                  <col style="width: 22%;">
+                  <col style="width: 22%;">
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th style="text-align: left;">Payable Item</th>
+                    <th style="text-align: right;">Monthly Bill</th>
+                    <th style="text-align: right;">Total Due</th>
+                    <th style="text-align: right;">Amount Paid</th>
+                  </tr>
+                </thead>
+                <tbody id="receipt-invoices-allocation-body">
+                  <!-- Dynamically populated rows -->
+                </tbody>
+                <tfoot>
+                  <tr class="receipt-breakdown-total-row" style="font-weight: 800; font-size: 1.02rem; border-top: 3px double rgba(255, 255, 255, 0.45); background: rgba(255, 255, 255, 0.04);">
+                    <td style="padding: 10px 10px; color: var(--text-primary); font-size: 0.95rem; font-weight: 800; text-transform: uppercase; border-top: 3px double rgba(255, 255, 255, 0.45);">Total</td>
+                    <td id="receipt-matrix-sum-month-bill" style="padding: 10px 10px; text-align: right; color: var(--text-muted); font-size: 1.02rem; font-weight: 800; border-top: 3px double rgba(255, 255, 255, 0.45);">KES 0.00</td>
+                    <td id="receipt-matrix-sum-total-due" style="padding: 10px 10px; text-align: right; color: var(--accent-primary); font-size: 1.02rem; font-weight: 800; border-top: 3px double rgba(255, 255, 255, 0.45);">KES 0.00</td>
+                    <td id="receipt-matrix-sum-amount-paid" style="padding: 10px 10px; text-align: right; color: var(--accent-secondary); font-size: 1.02rem; font-weight: 800; border-top: 3px double rgba(255, 255, 255, 0.45);">KES 0.00</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-muted); font-style: italic;">
+              * Sum of "Amount Paid" column must strictly match the "Payment Received" input.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BOTTOM BLOCK: PAYMENT & TRANSACTION DETAILS -->
+        <div class="glass-card receipting-bounded-card" style="margin-bottom: 20px;">
+          <div style="border-bottom: 1px solid var(--divider-color); padding-bottom: 6px; margin-bottom: 12px;">
+            <h4 style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+              — Payment &amp; Transaction Details —
+            </h4>
+          </div>
+
+          <div class="receipting-tx-grid">
+            <div class="form-group">
+              <label class="form-label">Receipt Number</label>
+              <input type="text" id="receipt-number-display" class="form-input" readonly value="REC-2026-001" style="font-weight: 800; font-family: monospace; color: var(--accent-primary);">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Payment Date: *</label>
+              <input type="date" id="receipt-payment-date" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Payment Channel: *</label>
+              <select id="receipt-method-select" class="form-input" onchange="onReceiptPaymentModeChange(this.value)" required>
+                <option value="M-Pesa Paybill">M-Pesa Paybill</option>
+                <option value="Bank Deposit">Bank Deposit / Transfer</option>
+                <option value="Paid to Landlord">Paid to Landlord</option>
+                <option value="Cash">Cash (Office Cashier)</option>
+                <option value="Cheque">Banker's Cheque</option>
+                <option value="EFT / RTGS">EFT / RTGS</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Ref. No (M-Pesa / Slip #): *</label>
+              <input type="text" id="receipt-ref-code" class="form-input" placeholder="e.g. QKD829104A" required style="font-family: monospace; font-weight: 700;">
+            </div>
+
+            <div id="receipt-dest-mpesa-container" class="form-group">
+              <label class="form-label">Destination Paybill: *</label>
+              <select id="receipt-mpesa-paybill-select" class="form-input">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+
+            <div id="receipt-dest-bank-container" class="form-group" style="display: none;">
+              <label class="form-label">Destination Bank Account: *</label>
+              <select id="receipt-bank-account-select" class="form-input">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+
+            <div id="receipt-dest-landlord-container" class="form-group" style="display: none;">
+              <label class="form-label">Destination:</label>
+              <input type="text" class="form-input" value="Direct Landlord Account / Direct Settlement" readonly style="color: var(--text-muted);">
+            </div>
+
+            <div id="receipt-dest-cash-container" class="form-group" style="display: none;">
+              <label class="form-label">Destination:</label>
+              <input type="text" class="form-input" value="Main Office Petty Cash / Safe" readonly style="color: var(--text-muted);">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Received By:</label>
+              <input type="text" id="receipt-received-by" class="form-input" value="DEAN" readonly style="color: var(--text-muted);">
+            </div>
+
+            <div class="form-group" style="grid-column: span 2;">
+              <label class="form-label">Payment Particulars / Notes:</label>
+              <input type="text" id="receipt-notes" class="form-input" placeholder="e.g. October 2026 Rent settlement">
+            </div>
+          </div>
+
+          <!-- Action Footer -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--divider-color);">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+              <button type="button" id="btn-receipt-save" class="btn-action-pill" onclick="executePaymentReceipt('save')" style="min-width: 100px; padding: 8px 20px; font-weight: 700;">
+                Save
+              </button>
+              <button type="button" id="btn-receipt-save-print" class="btn-elevated-primary" onclick="executePaymentReceipt('print')" style="min-width: 140px; padding: 8px 24px; font-weight: 700; font-size: 0.90rem;">
+                🖨️ Save &amp; Print
+              </button>
+              <button type="button" id="btn-receipt-save-send" class="btn-action-pill" onclick="executePaymentReceipt('send_sms')" style="min-width: 130px; padding: 8px 20px; font-weight: 700;">
+                Save &amp; Send
+              </button>
+              <button type="button" class="btn-action-pill" onclick="resetReceiptForm()" style="padding: 8px 18px;">
+                Reset Form
+              </button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="receipt-send-sms" checked style="accent-color: var(--accent-primary); width: 16px; height: 16px; cursor: pointer;">
+              <label for="receipt-send-sms" style="font-size: 0.80rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; user-select: none;">
+                Send SMS Receipt to Tenant (Africa's Talking API)
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- MASTER DIRECTORY: LIST OF RECORDED TENANT RECEIPTS -->
+      <div class="glass-card clean-module-container" style="padding: 20px; max-width: 1240px; width: 100%; margin-left: 0; margin-right: auto; box-sizing: border-box;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--divider-color); padding-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+          <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+            <span>📜</span> List of Recorded Tenant Receipts
+          </h3>
+        </div>
+
+        <!-- Filter Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 10px; align-items: center; flex: 1; flex-wrap: wrap;">
+            <input type="text" id="receipt-filter-search" class="form-input" placeholder="Search Receipt, Tenant, Ref..." style="min-width: 220px; max-width: 280px;" oninput="renderTenantReceiptsTable()">
+            
+            <select id="receipt-filter-property" class="form-input" style="min-width: 180px; max-width: 240px;" onchange="renderTenantReceiptsTable()">
+              <option value="ALL">All Properties</option>
+            </select>
+
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); white-space: nowrap;">Date From:</label>
+              <input type="date" id="receipt-filter-date-from" class="form-input" style="width: 140px;" onchange="renderTenantReceiptsTable()">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); white-space: nowrap;">Date To:</label>
+              <input type="date" id="receipt-filter-date-to" class="form-input" style="width: 140px;" onchange="renderTenantReceiptsTable()">
+            </div>
+
+            <select id="receipt-filter-method" class="form-input" style="min-width: 150px; max-width: 190px;" onchange="renderTenantReceiptsTable()">
+              <option value="ALL">Filter By: All</option>
+              <option value="M-Pesa Paybill">M-Pesa Paybill</option>
+              <option value="Bank Deposit">Bank Deposit</option>
+              <option value="Paid to Landlord">Paid to Landlord</option>
+              <option value="Cash">Cash</option>
+              <option value="Cheque">Cheque</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Receipts Table -->
+        <div class="builder-table-wrap">
+          <table class="builder-table">
+            <thead>
+              <tr>
+                <th style="width: 44px; text-align: center;">#</th>
+                <th style="width: 120px; text-align: left;">Receipt No</th>
+                <th style="width: 105px; text-align: center;">Date</th>
+                <th style="text-align: left;">Tenant Name</th>
+                <th style="width: 90px; text-align: center;">Unit</th>
+                <th style="width: 120px; text-align: left;">Method</th>
+                <th style="width: 150px; text-align: left;">Destination</th>
+                <th style="width: 120px; text-align: left;">Ref Code</th>
+                <th style="width: 130px; text-align: right;">Amount (KES)</th>
+                <th style="width: 80px; text-align: center;">User</th>
+                <th style="width: 160px; text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="tenant-receipts-table-body">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- OFFICIAL RECEIPT MODAL -->
+  <div class="modal-overlay" id="modal-official-receipt" style="z-index: 2100; display: none;">
+    <div class="modal-card" style="max-width: 680px; background: #fff; color: #000; border-radius: 8px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 2px solid #000; padding-bottom: 10px;">
+        <div id="receipt-modal-header-container">
+          <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: 0.5px;">METROCOSMO LTD</h2>
+          <div style="font-size: 0.76rem; color: #4B5563;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</div>
+          <div style="font-size: 0.72rem; color: #6B7280;">Hughes Building, 7th Floor, Kenyatta Avenue, Nairobi</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 1rem; font-weight: 800; color: #008080;" id="receipt-modal-number">REC-2026-001</div>
+          <div style="font-size: 0.75rem; color: #6B7280;" id="receipt-modal-date">Date: 2026-10-26</div>
+          <button type="button" class="modal-close-btn" onclick="closeOfficialReceiptModal()" style="color: #000; font-size: 1.2rem; cursor: pointer; border: none; background: none;">✕</button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.82rem; margin-bottom: 14px;">
+        <div>Received From: <strong id="receipt-modal-tenant-name">—</strong> (<span id="receipt-modal-tenant-code">—</span>)</div>
+        <div>Property: <strong id="receipt-modal-property-name">—</strong></div>
+        <div>Unit: <strong id="receipt-modal-unit-code">—</strong></div>
+        <div>Payment Mode: <strong id="receipt-modal-payment-method">—</strong> [Ref: <span id="receipt-modal-ref-code">—</span>]</div>
+        <div style="grid-column: span 2;">Destination: <span id="receipt-modal-dest-account">—</span></div>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
+          <thead>
+            <tr style="border-top: 1px solid #000; border-bottom: 1px solid #000;">
+              <th style="text-align: left; padding: 4px;">Payable Item</th>
+              <th style="text-align: right; padding: 4px;">Allocated Amount</th>
+            </tr>
+          </thead>
+          <tbody id="receipt-modal-breakdown-body">
+            <!-- Dynamic rows -->
+          </tbody>
+          <tfoot>
+            <tr style="border-top: 1.5px solid #000; border-bottom: 2px solid #000; font-weight: 800;">
+              <td style="padding: 6px 4px;">Total Received</td>
+              <td style="padding: 6px 4px; text-align: right;" id="receipt-modal-total-amount">0.00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div style="font-size: 0.78rem; font-style: italic; margin-bottom: 16px;">
+        Amount in Words: <strong id="receipt-modal-amount-words">—</strong>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; padding-top: 12px;">
+        <div>Issued By: <strong id="receipt-modal-issued-by">DEAN</strong></div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-action-pill" onclick="closeOfficialReceiptModal()">Close</button>
+          <button type="button" class="btn-elevated-primary" onclick="window.print()">Print Official Voucher</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINTABLE RECEIPT VOUCHER (A5 / THERMAL LAYOUT) -->
+  <div id="printable-receipt-voucher" style="display: none;">
+    <div style="width: 100%; max-width: 148mm; margin: 0 auto; padding: 12px 14px; font-family: monospace, 'Courier New', Courier, sans-serif; font-size: 12px; color: #000000; background: #ffffff; box-sizing: border-box;">
+      <!-- Corporate Header -->
+      <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 10px;">
+        <h2 style="margin: 0; font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">METROCOSMO LTD</h2>
+        <div style="font-size: 11px; margin-top: 2px; font-weight: 600;">REAL ESTATE MANAGERS, PROPERTY CONSULTANTS &amp; VALUERS</div>
+        <div style="font-size: 10.5px; margin-top: 2px;">P.O. BOX 40656 - 00100 Nairobi | Hughes Building, 7th Floor</div>
+        <div style="font-size: 10.5px;">Tel: 020 2244218 / 0721 737093 | Email: info@metrocosmo.com</div>
+        <div style="font-size: 10.5px; font-weight: 700;">PIN: P051189201A</div>
+        <div style="margin-top: 8px;">
+          <span style="font-size: 14px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; border: 1.5px solid #000; padding: 3px 16px; display: inline-block;">
+            OFFICIAL RECEIPT
+          </span>
+        </div>
+      </div>
+
+      <!-- Metadata Grid -->
+      <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px; font-size: 11.5px; line-height: 1.6;">
+        <div style="display: flex; justify-content: space-between;">
+          <span><strong>Receipt No:</strong> <span id="voucher-receipt-no">REC-000</span></span>
+          <span><strong>Date:</strong> <span id="voucher-receipt-date">YYYY-MM-DD</span></span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span><strong>Property:</strong> <span id="voucher-property-name">—</span></span>
+          <span><strong>Time:</strong> <span id="voucher-receipt-time">00:00</span></span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span><strong>Unit:</strong> <span id="voucher-unit-code">—</span></span>
+        </div>
+        <div style="margin-top: 4px; border-top: 1px dotted #999; padding-top: 4px;">
+          <span><strong>Received From:</strong> <span id="voucher-tenant-name" style="font-weight: 700;">—</span></span>
+        </div>
+      </div>
+
+      <!-- Payment Details -->
+      <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px; font-size: 11.5px; line-height: 1.6;">
+        <div style="display: flex; justify-content: space-between;">
+          <span><strong>Payment Mode:</strong> <span id="voucher-payment-mode">M-Pesa</span></span>
+          <span><strong>Reference No:</strong> <span id="voucher-reference-no">—</span></span>
+        </div>
+        <div style="margin-top: 4px;">
+          <span><strong>Amount in Words:</strong> <span id="voucher-amount-words" style="font-style: italic; font-weight: 600;">—</span></span>
+        </div>
+      </div>
+
+      <!-- Allocation Breakdown Table -->
+      <div style="margin-bottom: 10px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 11.5px; font-family: inherit;">
+          <thead>
+            <tr style="border-top: 1.5px solid #000; border-bottom: 1.5px solid #000;">
+              <th style="text-align: left; padding: 5px 2px; font-weight: 800;">Description</th>
+              <th style="text-align: right; padding: 5px 2px; font-weight: 800; width: 120px;">Amount (KES)</th>
+            </tr>
+          </thead>
+          <tbody id="voucher-breakdown-body">
+            <!-- Dynamically populated rows -->
+          </tbody>
+          <tfoot>
+            <tr style="border-top: 1px dashed #000; border-bottom: 2px solid #000; font-weight: 800;">
+              <td style="padding: 6px 2px; text-align: left;">Total Amount Received:</td>
+              <td id="voucher-total-amount" style="padding: 6px 2px; text-align: right; font-variant-numeric: tabular-nums;">0.00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align: center; border-top: 1px dashed #000; padding-top: 8px; margin-top: 8px; font-size: 11px; line-height: 1.5;">
+        <div>You were served by: <strong id="voucher-cashier-name">Cashier</strong></div>
+        <div style="margin-top: 5px; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Thank you!</div>
+        <div style="font-size: 9.5px; margin-top: 4px; color: #444;">Notice: Computer-generated receipt valid without physical signature.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GLOBAL CONFIRMATION INTERCEPTOR MODAL -->
+  <div class="modal-overlay" id="modal-global-confirm" style="z-index: 2200; display: none;">
+    <div class="modal-card" style="max-width: 540px; border-left: 6px solid #F59E0B;">
+      <div class="modal-header-strip">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.5rem;" id="global-confirm-icon">⚠️</span>
+          <div>
+            <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;" id="global-confirm-title">Database Execution Warning</h3>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 2px 0 0 0;">Transaction Confirmation Interceptor</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeGlobalConfirmModal()">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.88rem; line-height: 1.5; padding: 16px 20px;">
+        <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px; color: var(--text-primary);" id="global-confirm-box">
+          <p id="global-confirm-msg" style="margin: 0; font-weight: 500;">Are you sure you want to proceed with this operation?</p>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted);">
+          This action will immediately execute database writes and commit changes to the multi-tenant ledger.
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; border-top: 1px solid var(--divider-color); padding: 16px 20px;">
+        <button type="button" class="btn-action-pill" style="padding: 9px 18px; font-size: 0.85rem;" onclick="closeGlobalConfirmModal()">Cancel / Abort</button>
+        <button type="button" class="btn-elevated-primary" id="global-confirm-execute-btn" style="background: var(--accent-primary); border-color: var(--accent-primary);" onclick="executeGlobalConfirmedAction()">
+          Confirm &amp; Execute
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-tray" id="toast-tray"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/formulas.js"></script>
+  <script src="js/seed_data.js"></script>
+  <script src="js/receipts.js"></script>
+</body>
+</html>

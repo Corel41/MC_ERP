@@ -518,7 +518,9 @@
         }
       });
 
-      const openingArrears = priorDebits - priorCredits;
+      const openingArrears = (typeof formula_StatementUnitOpeningArrears === 'function')
+        ? formula_StatementUnitOpeningArrears(priorDebits, priorCredits)
+        : (priorDebits - priorCredits);
 
       // 2. Current Month Bill
       let currentBill = 0;
@@ -541,7 +543,9 @@
         }
       });
 
-      const rowExpected = openingArrears + currentBill;
+      const rowExpected = (typeof formula_StatementUnitTotalExpected === 'function')
+        ? formula_StatementUnitTotalExpected(openingArrears, currentBill)
+        : (openingArrears + currentBill);
 
       // 3. Current Month Paid
       let currentPaid = 0;
@@ -563,7 +567,9 @@
       });
 
       // 4. Closing Balance
-      const closingBalance = rowExpected - currentPaid;
+      const closingBalance = (typeof formula_StatementUnitClosingBalance === 'function')
+        ? formula_StatementUnitClosingBalance(rowExpected, currentPaid)
+        : (rowExpected - currentPaid);
 
       totalMonthlyBill += currentBill;
       totalOpeningArrears += openingArrears;
@@ -731,7 +737,12 @@
 
         // Render each deposit record in the exact 7-column layout
         typeDeps.forEach(dep => {
-          const depAmt = Number(dep.amount || 0);
+          const rawDepAmt = Number(dep.amount || 0);
+          const depAmt = (typeof formula_StatementDepositRowInclusion === 'function')
+            ? formula_StatementDepositRowInclusion(rawDepAmt, isAgentHold)
+            : (isAgentHold ? 0 : rawDepAmt);
+          if (depAmt <= 0) return;
+
           totalMonthlyBill += depAmt;
           totalExpected += depAmt;
           totalAmountPaid += depAmt;
@@ -809,7 +820,9 @@
       // 4. Monthly Collected & Gross Collection
       // monthlyAgencyCollected includes (Rent + Deposits) net of direct to landlord
       const monthlyAgencyCollected = Math.max(0, totalAmountPaid - totalDirectPaidToLandlord);
-      const totalGrossCollection = monthlyAgencyCollected + totalOtherIncome;
+      const totalGrossCollection = (typeof formula_StatementGrossCollection === 'function')
+        ? formula_StatementGrossCollection(monthlyAgencyCollected, 0, totalOtherIncome)
+        : (monthlyAgencyCollected + totalOtherIncome);
 
       const collectedEl = document.getElementById('ll-stmt-monthly-collected');
       if (collectedEl) collectedEl.textContent = formatLandlordAmount(monthlyAgencyCollected);
@@ -840,14 +853,24 @@
       // 5. Agency Management Fees & VAT (strictly on rent, not deposits)
       const feePct = isRentStatement ? (Number(mandate.feePct) || 8.0) : 0;
       const totalRentCollected = isRentStatement ? Math.max(0, totalRentPaid - totalDirectPaidToLandlord) : 0;
-      const mgmtFee = isRentStatement ? (totalRentCollected * (feePct / 100)) : 0;
-      const vatAmt = isRentStatement ? (mgmtFee * 0.16) : 0;
+      const mgmtFee = isRentStatement
+        ? ((typeof formula_StatementManagementFee === 'function')
+            ? formula_StatementManagementFee(totalRentCollected, feePct, mandate.fixedFee || 0, mandate.commissionType || 'PERCENTAGE')
+            : (totalRentCollected * (feePct / 100)))
+        : 0;
+      const vatAmt = isRentStatement
+        ? ((typeof formula_StatementVatOnFee === 'function')
+            ? formula_StatementVatOnFee(mgmtFee, 16, mandate.vat !== false)
+            : (mgmtFee * 0.16))
+        : 0;
 
       // 6. Net Remittance Formula:
       // Net Remittance Due = (Monthly Collected + Total Other Income) - (Total Landlord Deductions + Management Fee + V.A.T on Fees)
       const allLandlordExpenses = manualDeductionsTotal + totalDirectPaidToLandlord;
       const totalDeductions = allLandlordExpenses + mgmtFee + vatAmt;
-      const netDue = totalGrossCollection - totalDeductions;
+      const netDue = (typeof formula_StatementNetDueLandlord === 'function')
+        ? formula_StatementNetDueLandlord(totalGrossCollection, mgmtFee, vatAmt, allLandlordExpenses, 0)
+        : (totalGrossCollection - totalDeductions);
 
       // Itemized deductions: manual deductions + direct landlord payments
       const itemizedDedEl = document.getElementById('ll-stmt-itemized-deductions');

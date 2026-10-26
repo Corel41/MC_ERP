@@ -463,6 +463,12 @@
       unpaidTenantInvs.forEach(ti => {
         const code = ti.payable_code || '001';
         const amt = Number(ti.amount) || 0;
+        const alreadyPaid = Number(ti.amount_paid) || 0;
+        const remainingDue = (typeof formula_ReceiptPayableRemainingDue === 'function')
+          ? formula_ReceiptPayableRemainingDue(amt, alreadyPaid)
+          : Math.max(0, amt - alreadyPaid);
+        if (remainingDue <= 0.001) return; // fully cleared, skip from due matrix
+
         let cleanDesc = (ti.description || codeNames[code] || 'Payable').replace(/\s*-\s*[A-Za-z0-9\s]+$/i, '').trim();
         if (!cleanDesc) cleanDesc = codeNames[code] || 'Payable';
         const priority = codePriority[code] !== undefined ? codePriority[code] : 10;
@@ -472,14 +478,14 @@
             item: cleanDesc,
             code: code,
             monthly: amt,
-            totalDue: amt,
+            totalDue: remainingDue,
             defaultPaid: 0.00,
             priority: priority
           });
         } else {
           const existing = mapByCode.get(code);
           existing.monthly += amt;
-          existing.totalDue += amt;
+          existing.totalDue += remainingDue;
         }
       });
       payables = Array.from(mapByCode.values());
@@ -630,23 +636,38 @@
     });
     document.querySelectorAll('.receipt-row-overpay-badge').forEach(el => el.remove());
 
-    // Cascade cash — no upper cap, overpayment absorption into Rent/primary row
-    inputs.forEach((inp) => {
-      if (cash <= 0) {
-        inp.value = '0.00';
-        return;
-      }
-      const due = parseFloat(inp.getAttribute('data-due')) || 0;
-      const alloc = Math.min(cash, due);
-      inp.value = alloc.toFixed(2);
-      cash -= alloc;
-    });
+    if (typeof formula_ReceiptAutoAllocateWaterfall === 'function') {
+      const rowsData = inputs.map(inp => ({
+        code: inp.getAttribute('data-code'),
+        item: inp.getAttribute('data-item'),
+        description: inp.getAttribute('data-item'),
+        priority: inp.getAttribute('data-priority'),
+        totalDue: parseFloat(inp.getAttribute('data-due')) || 0
+      }));
+      const waterfallResult = formula_ReceiptAutoAllocateWaterfall(cash, rowsData);
+      inputs.forEach((inp, idx) => {
+        const alloc = waterfallResult.allocatedRows[idx] ? waterfallResult.allocatedRows[idx].allocated : 0;
+        inp.value = Number(alloc).toFixed(2);
+      });
+    } else {
+      // Cascade cash — no upper cap, overpayment absorption into Rent/primary row
+      inputs.forEach((inp) => {
+        if (cash <= 0) {
+          inp.value = '0.00';
+          return;
+        }
+        const due = parseFloat(inp.getAttribute('data-due')) || 0;
+        const alloc = Math.min(cash, due);
+        inp.value = alloc.toFixed(2);
+        cash -= alloc;
+      });
 
-    // Squeeze any remaining excess into first row (Rent/primary)
-    if (cash > 0 && inputs[0]) {
-      const cur = parseFloat(inputs[0].value) || 0;
-      inputs[0].value = (cur + cash).toFixed(2);
-      cash = 0;
+      // Squeeze any remaining excess into first row (Rent/primary)
+      if (cash > 0 && inputs[0]) {
+        const cur = parseFloat(inputs[0].value) || 0;
+        inputs[0].value = (cur + cash).toFixed(2);
+        cash = 0;
+      }
     }
 
     validateReceiptAllocations();
@@ -691,10 +712,16 @@
         const targetDue = parseFloat(nextTarget.getAttribute('data-due')) || 0;
         
         if (unedited.length === 1) {
-          nextTarget.value = remainder.toFixed(2);
+          const cellCalc = (typeof formula_ReceiptManualCellInput === 'function')
+            ? formula_ReceiptManualCellInput(targetDue, remainder)
+            : { allocated: remainder };
+          nextTarget.value = cellCalc.allocated.toFixed(2);
         } else {
           const alloc = Math.min(remainder, targetDue);
-          nextTarget.value = alloc.toFixed(2);
+          const cellCalc = (typeof formula_ReceiptManualCellInput === 'function')
+            ? formula_ReceiptManualCellInput(targetDue, alloc)
+            : { allocated: alloc };
+          nextTarget.value = cellCalc.allocated.toFixed(2);
         }
       }
     }
@@ -743,8 +770,22 @@
       sumPaidEl.textContent = `KES ${matrixSum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
     }
 
-    const outstandingArrears = Math.max(0, Math.round((invoiceTotal - matrixSum) * 100) / 100);
-    const totalOverpayment = Math.max(0, Math.round((matrixSum - invoiceTotal) * 100) / 100);
+    const pillSummary = (typeof formula_ReceiptHeaderSummaryPill === 'function')
+      ? formula_ReceiptHeaderSummaryPill(invoiceTotal, paymentReceived, matrixSum)
+      : {
+          invoiceTotal: invoiceTotal,
+          paymentReceived: paymentReceived,
+          unallocatedDiff: Math.round((paymentReceived - matrixSum) * 100) / 100,
+          outstandingArrears: Math.max(0, Math.round((invoiceTotal - matrixSum) * 100) / 100),
+          totalOverpayment: Math.max(0, Math.round((matrixSum - invoiceTotal) * 100) / 100),
+          isBalanced: paymentReceived > 0 && Math.abs(Math.round((matrixSum - paymentReceived) * 100) / 100) < 0.01
+        };
+
+    const outstandingArrears = pillSummary.outstandingArrears;
+    const totalOverpayment = pillSummary.totalOverpayment;
+    const isBalanced = pillSummary.isBalanced;
+    const diff = Math.round((matrixSum - paymentReceived) * 100) / 100;
+
     const arrEl = document.getElementById('receipt-status-outstanding-arrears');
     if (arrEl) {
       if (totalOverpayment > 0) {
@@ -775,9 +816,6 @@
         }
       }
     });
-
-    const diff = Math.round((matrixSum - paymentReceived) * 100) / 100;
-    const isBalanced = paymentReceived > 0 && Math.abs(diff) < 0.01;
 
     const btnSave = document.getElementById('btn-receipt-save');
     const btnPrint = document.getElementById('btn-receipt-save-print');
@@ -1242,6 +1280,9 @@
         const debits = tenantEntries.reduce((sum, e) => sum + (Number(e.debit) || 0), 0);
         const credits = tenantEntries.reduce((sum, e) => sum + (Number(e.credit) || 0), 0);
         const balanceBefore = debits - credits;
+        const balanceAfter = (typeof formula_LedgerCreditSettlementClearance === 'function')
+          ? formula_LedgerCreditSettlementClearance(balanceBefore, amount)
+          : Math.max(0, balanceBefore - amount);
 
         AppState.ledger.push({
           id: `LED-${String((AppState.ledger || []).length + 1).padStart(3, '0')}`,
@@ -1254,14 +1295,23 @@
           description: `${method} [Ref: ${refCode}] - ${notes || 'Payment Receipt'}`,
           debit: 0,
           credit: amount,
-          balanceAfter: Math.max(0, balanceBefore - amount)
+          balanceAfter: balanceAfter
         });
 
-        // Mark allocated invoices as paid
+        // Mark allocated invoices as paid with granular line clearance
         allocatedList.forEach(alloc => {
           const inv = (AppState.tenantInvoices || []).find(i => i.id === alloc.id);
           if (inv) {
-            inv.is_paid = true;
+            const billed = Number(inv.amount) || Number(alloc.month_bill) || 0;
+            const priorPaid = Number(inv.amount_paid) || 0;
+            const allocAmt = Number(alloc.amount) || 0;
+            const settlement = (typeof formula_ReceiptSettlementLineClearance === 'function')
+              ? formula_ReceiptSettlementLineClearance(billed, priorPaid, allocAmt)
+              : { updatedPaid: priorPaid + allocAmt, updatedBalanceDue: Math.max(0, billed - (priorPaid + allocAmt)), isFullyPaid: true };
+
+            inv.amount_paid = settlement.updatedPaid;
+            inv.balance_due = settlement.updatedBalanceDue;
+            inv.is_paid = settlement.isFullyPaid;
             try {
               fetch(`${SUPABASE_CONFIG.url}/rest/v1/tenant_invoices?id=eq.${inv.id}`, {
                 method: 'PATCH',
@@ -1271,7 +1321,7 @@
                   'Content-Type': 'application/json',
                   'Prefer': 'return=minimal'
                 },
-                body: JSON.stringify({ is_paid: true })
+                body: JSON.stringify({ is_paid: inv.is_paid, amount_paid: inv.amount_paid, balance_due: inv.balance_due })
               }).catch(() => {});
             } catch (_) {}
           } else if (alloc.id === 'AUTO-RENT' || (typeof alloc.id === 'string' && alloc.id.startsWith('FEE-'))) {
@@ -1386,6 +1436,9 @@
         }
 
         renderTenantReceiptsTable();
+        if (typeof renderLedgerTable === 'function') renderLedgerTable();
+        if (typeof renderInvoicesTable === 'function') renderInvoicesTable();
+        renderReceiptAllocationMatrix(tenant.id);
 
         if (isSmsRequested) {
           const phone = tenant.phone || tenant.phoneNumber || '2547XXXXXXXX';
