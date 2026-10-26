@@ -1,6 +1,6 @@
 /**
  * MC ERP - Landlords Hub & Deductions Engine (MPA)
- * Handles Landlord Deductions, Property Expenses, Portfolios, Statements, and Remittance Payouts
+ * Handles Landlord Deductions, Other Income, Portfolios, Statements, and Remittance Payouts
  */
 
 (function () {
@@ -14,6 +14,7 @@
       propertyName: 'Sunrise Park Estate',
       landlordId: '00000001-0000-4000-8000-000000000001',
       landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Deduction',
       category: 'Caretaker Wages',
       amount: 18000.00,
       periodMonth: 1,
@@ -30,6 +31,7 @@
       propertyName: 'Sunrise Park Estate',
       landlordId: '00000001-0000-4000-8000-000000000001',
       landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Deduction',
       category: 'Security Wages',
       amount: 25000.00,
       periodMonth: 1,
@@ -46,6 +48,7 @@
       propertyName: 'Green Valley Heights',
       landlordId: '00000001-0000-4000-8000-000000000002',
       landlordName: 'Margaret Ndungu',
+      entryType: 'Deduction',
       category: 'Statutory 7.5% MRI Tax',
       amount: 15300.00,
       periodMonth: 1,
@@ -62,6 +65,7 @@
       propertyName: 'Royal Palms Apartment',
       landlordId: '00000001-0000-4000-8000-000000000003',
       landlordName: 'Deep & Nirah Shah Family Trust',
+      entryType: 'Deduction',
       category: 'Repairs & Maintenance',
       amount: 12500.00,
       periodMonth: 1,
@@ -78,6 +82,7 @@
       propertyName: 'Green Valley Heights',
       landlordId: '00000001-0000-4000-8000-000000000002',
       landlordName: 'Margaret Ndungu',
+      entryType: 'Deduction',
       category: 'Conservancy & Land Rates',
       amount: 8500.00,
       periodMonth: 1,
@@ -90,12 +95,50 @@
     }
   ];
 
+  // Seed default other income if not already in localStorage
+  const DEFAULT_OTHER_INCOME = [
+    {
+      id: 'INC-001',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'Sunrise Park Estate',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Other Income',
+      category: 'Rooftop Advertising',
+      amount: 15000.00,
+      periodMonth: 1,
+      periodYear: 2026,
+      date: '2026-01-10',
+      voucherRef: 'INC-2026-001',
+      payee: 'Safaricom Telecommunications',
+      payer: 'Safaricom Telecommunications',
+      notes: 'Monthly billboard rooftop mast leasing',
+      status: 'Approved'
+    },
+    {
+      id: 'INC-002',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'Sunrise Park Estate',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Other Income',
+      category: 'Parking Fees',
+      amount: 6000.00,
+      periodMonth: 1,
+      periodYear: 2026,
+      date: '2026-01-15',
+      voucherRef: 'INC-2026-002',
+      payee: 'Visitor Commercial Reserve Bay',
+      payer: 'Visitor Commercial Reserve Bay',
+      notes: 'Visitor commercial monthly parking fee',
+      status: 'Approved'
+    }
+  ];
+
   function getStoredDeductions() {
     try {
       const raw = localStorage.getItem('mc_erp_landlord_deductions');
-      if (raw) {
-        return JSON.parse(raw);
-      }
+      if (raw) return JSON.parse(raw);
     } catch (e) {
       console.warn('Could not read landlord deductions from localStorage', e);
     }
@@ -110,6 +153,75 @@
     }
   }
 
+  function getStoredOtherIncome() {
+    try {
+      const raw = localStorage.getItem('mc_erp_landlord_other_income');
+      if (raw) return JSON.parse(raw);
+    } catch (e) {
+      console.warn('Could not read landlord other income from localStorage', e);
+    }
+    return DEFAULT_OTHER_INCOME;
+  }
+
+  function saveStoredOtherIncome(list) {
+    try {
+      localStorage.setItem('mc_erp_landlord_other_income', JSON.stringify(list));
+    } catch (e) {
+      console.warn('Could not save landlord other income to localStorage', e);
+    }
+  }
+
+  const DEDUCTION_CATEGORIES = [
+    'Caretaker Wages',
+    'Security Wages',
+    'Statutory 7.5% MRI Tax',
+    'Repairs & Maintenance',
+    'Conservancy & Land Rates',
+    'Electricity / Water Common',
+    'Insurance Premium',
+    'Legal & Audit Fees',
+    'Direct Landlord Settlement',
+    'Other Sundry Expense'
+  ];
+
+  const OTHER_INCOME_CATEGORIES = [
+    'Rooftop Advertising',
+    'Parking Fees',
+    'Commercial Parking Fees',
+    'Telecommunication Mast',
+    'Generator Power Sale',
+    'Garbage Levy Commission',
+    'Billboard / Signage',
+    'Miscellaneous Other Income'
+  ];
+
+  function onDeductionTypeChange(type) {
+    const catSel = document.getElementById('deduction-category-select');
+    const catLabel = document.getElementById('deduction-category-label');
+    const payeeLabel = document.getElementById('deduction-payee-label');
+    const payeeInput = document.getElementById('deduction-payee');
+    const btnSubmit = document.getElementById('btn-record-deduction');
+    const vchInput = document.getElementById('deduction-voucher-ref');
+
+    const isIncome = (type === 'Other Income');
+
+    if (catLabel) catLabel.textContent = isIncome ? 'Income Category *' : 'Expense Category *';
+    if (payeeLabel) payeeLabel.textContent = isIncome ? 'Payer / Client Name' : 'Payee / Contractor Name';
+    if (payeeInput) payeeInput.placeholder = isIncome ? 'e.g. Safaricom / Tenant / Third-Party Payer' : 'e.g. Caretaker / KRA / Plumbing Tech';
+    if (btnSubmit) btnSubmit.textContent = isIncome ? '+ Record Other Income' : '+ Record Deduction';
+
+    if (catSel) {
+      const cats = isIncome ? OTHER_INCOME_CATEGORIES : DEDUCTION_CATEGORIES;
+      catSel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    if (vchInput) {
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      const year = new Date().getFullYear();
+      vchInput.value = isIncome ? `INC-${year}-${rand}` : `VCH-${year}-${rand}`;
+    }
+  }
+
   function initLandlordsHub() {
     window.AppState = window.AppState || {};
     if (!AppState.properties && window.SEED_PROPERTIES) AppState.properties = window.SEED_PROPERTIES;
@@ -119,6 +231,7 @@
     if (!AppState.landlordStatements && window.SEED_LANDLORD_STATEMENTS) AppState.landlordStatements = window.SEED_LANDLORD_STATEMENTS;
 
     AppState.landlordDeductions = getStoredDeductions();
+    AppState.landlordOtherIncome = getStoredOtherIncome();
 
     setupTabNavigation();
     populatePropertyDropdowns();
@@ -264,16 +377,22 @@
     if (dateInput) dateInput.value = today.toISOString().split('T')[0];
   }
 
-  function generateNewVoucherRef() {
+  function generateNewVoucherRef(isIncome) {
     const voucherInput = document.getElementById('deduction-voucher-ref');
+    const typeSelect = document.getElementById('deduction-entry-type');
+    const income = (isIncome !== undefined) ? isIncome : (typeSelect && typeSelect.value === 'Other Income');
+
     if (voucherInput) {
       const rnd = Math.floor(1000 + Math.random() * 9000);
-      voucherInput.value = `VCH-${new Date().getFullYear()}-${rnd}`;
+      voucherInput.value = income ? `INC-${new Date().getFullYear()}-${rnd}` : `VCH-${new Date().getFullYear()}-${rnd}`;
     }
   }
 
   function recordLandlordDeduction(e) {
     if (e) e.preventDefault();
+
+    const typeSel = document.getElementById('deduction-entry-type');
+    const entryType = (typeSel && typeSel.value === 'Other Income') ? 'Other Income' : 'Deduction';
 
     const propSel = document.getElementById('deduction-property-select');
     const landlordNameInput = document.getElementById('deduction-landlord-name');
@@ -287,47 +406,83 @@
     const payeeInput = document.getElementById('deduction-payee');
     const notesInput = document.getElementById('deduction-notes');
 
-    if (!propSel.value) {
+    if (!propSel || !propSel.value) {
       alert('Please select a managed property.');
-      propSel.focus();
+      if (propSel) propSel.focus();
       return;
     }
 
     const amount = parseFloat(amountInput.value);
     if (!amount || amount <= 0) {
-      alert('Please enter a valid deduction/expense amount greater than zero.');
+      alert('Please enter a valid amount greater than zero.');
       amountInput.focus();
       return;
     }
 
     const prop = (AppState.properties || []).find(p => p.id === propSel.value);
-    const newDeduction = {
-      id: 'DED-' + Date.now(),
-      propertyId: propSel.value,
-      propertyName: prop ? prop.name : 'Estate Property',
-      landlordId: landlordIdInput ? landlordIdInput.value : '',
-      landlordName: landlordNameInput.value || 'Principal Landlord',
-      category: categorySel.value,
-      amount: amount,
-      periodMonth: parseInt(monthSel.value) || 1,
-      periodYear: parseInt(yearSel.value) || 2026,
-      date: dateInput.value || new Date().toISOString().split('T')[0],
-      voucherRef: voucherInput.value.trim() || `VCH-${Math.floor(1000 + Math.random() * 9000)}`,
-      payee: payeeInput.value.trim() || 'Third-Party Contractor',
-      notes: notesInput.value.trim() || '',
-      status: 'Approved'
-    };
+    const propName = prop ? prop.name : 'Estate Property';
+    const pMonth = parseInt(monthSel.value, 10) || 1;
+    const pYear = parseInt(yearSel.value, 10) || 2026;
+    const pDate = dateInput.value || new Date().toISOString().split('T')[0];
+    const notes = notesInput.value.trim() || '';
 
-    AppState.landlordDeductions.unshift(newDeduction);
-    saveStoredDeductions(AppState.landlordDeductions);
+    if (entryType === 'Other Income') {
+      const newIncome = {
+        id: 'INC-' + Date.now(),
+        propertyId: propSel.value,
+        propertyName: propName,
+        landlordId: landlordIdInput ? landlordIdInput.value : '',
+        landlordName: landlordNameInput.value || 'Principal Landlord',
+        entryType: 'Other Income',
+        category: categorySel.value,
+        amount: amount,
+        periodMonth: pMonth,
+        periodYear: pYear,
+        date: pDate,
+        voucherRef: voucherInput.value.trim() || `INC-${pYear}-${Math.floor(1000 + Math.random() * 9000)}`,
+        payee: payeeInput.value.trim() || 'Client / Third Party Payer',
+        payer: payeeInput.value.trim() || 'Client / Third Party Payer',
+        notes: notes,
+        status: 'Approved'
+      };
+
+      AppState.landlordOtherIncome = AppState.landlordOtherIncome || [];
+      AppState.landlordOtherIncome.unshift(newIncome);
+      saveStoredOtherIncome(AppState.landlordOtherIncome);
+
+      showToast(`Other Income ${newIncome.voucherRef} (KES ${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}) recorded successfully!`);
+    } else {
+      const newDeduction = {
+        id: 'DED-' + Date.now(),
+        propertyId: propSel.value,
+        propertyName: propName,
+        landlordId: landlordIdInput ? landlordIdInput.value : '',
+        landlordName: landlordNameInput.value || 'Principal Landlord',
+        entryType: 'Deduction',
+        category: categorySel.value,
+        amount: amount,
+        periodMonth: pMonth,
+        periodYear: pYear,
+        date: pDate,
+        voucherRef: voucherInput.value.trim() || `VCH-${pYear}-${Math.floor(1000 + Math.random() * 9000)}`,
+        payee: payeeInput.value.trim() || 'Third-Party Contractor',
+        notes: notes,
+        status: 'Approved'
+      };
+
+      AppState.landlordDeductions = AppState.landlordDeductions || [];
+      AppState.landlordDeductions.unshift(newDeduction);
+      saveStoredDeductions(AppState.landlordDeductions);
+
+      showToast(`Deduction ${newDeduction.voucherRef} (KES ${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}) recorded successfully!`);
+    }
 
     amountInput.value = '';
     payeeInput.value = '';
     notesInput.value = '';
-    generateNewVoucherRef();
+    generateNewVoucherRef(entryType === 'Other Income');
 
     renderLandlordDeductionsTable();
-    showToast(`Deduction ${newDeduction.voucherRef} (KES ${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}) recorded successfully!`);
   }
 
   function renderLandlordDeductionsTable() {
@@ -335,19 +490,49 @@
     if (!tbody) return;
 
     const filterProp = document.getElementById('filter-deduction-property')?.value || 'ALL';
+    const filterType = document.getElementById('filter-deduction-type')?.value || 'ALL';
     const filterCat = document.getElementById('filter-deduction-category')?.value || 'ALL';
     const search = document.getElementById('filter-deduction-search')?.value.toLowerCase().trim() || '';
 
-    let list = [...(AppState.landlordDeductions || [])];
+    const deds = (AppState.landlordDeductions || []).map(d => ({ ...d, entryType: 'Deduction' }));
+    const incomes = (AppState.landlordOtherIncome || []).map(i => ({ ...i, entryType: 'Other Income' }));
 
+    let combined = [...deds, ...incomes];
+
+    // Calculate Summary Stats from all records
+    const totalDeductions = deds.reduce((sum, d) => sum + Number(d.amount || 0), 0);
+    const totalOtherIncome = incomes.reduce((sum, i) => sum + Number(i.amount || 0), 0);
+    const netImpact = totalOtherIncome - totalDeductions;
+    const mriTotal = deds.filter(d => d.category && d.category.includes('MRI')).reduce((sum, d) => sum + Number(d.amount || 0), 0);
+    const wagesTotal = deds.filter(d => d.category && d.category.includes('Wages')).reduce((sum, d) => sum + Number(d.amount || 0), 0);
+    const repairsTotal = deds.filter(d => d.category && (d.category.includes('Repairs') || d.category.includes('Maintenance'))).reduce((sum, d) => sum + Number(d.amount || 0), 0);
+
+    const elTotal = document.getElementById('stat-deductions-total');
+    const elIncomeTotal = document.getElementById('stat-other-income-total');
+    const elNet = document.getElementById('stat-deductions-net');
+    const elMri = document.getElementById('stat-deductions-mri');
+    const elWages = document.getElementById('stat-deductions-wages');
+    const elRepairs = document.getElementById('stat-deductions-repairs');
+
+    if (elTotal) elTotal.textContent = `KES ${totalDeductions.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    if (elIncomeTotal) elIncomeTotal.textContent = `KES ${totalOtherIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    if (elNet) elNet.textContent = `KES ${netImpact.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    if (elMri) elMri.textContent = `KES ${mriTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    if (elWages) elWages.textContent = `KES ${wagesTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    if (elRepairs) elRepairs.textContent = `KES ${repairsTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+    // Apply Filters
+    if (filterType !== 'ALL') {
+      combined = combined.filter(item => item.entryType === filterType);
+    }
     if (filterProp !== 'ALL') {
-      list = list.filter(d => d.propertyId === filterProp);
+      combined = combined.filter(d => d.propertyId === filterProp);
     }
     if (filterCat !== 'ALL') {
-      list = list.filter(d => d.category === filterCat);
+      combined = combined.filter(d => d.category === filterCat);
     }
     if (search) {
-      list = list.filter(d =>
+      combined = combined.filter(d =>
         (d.voucherRef && d.voucherRef.toLowerCase().includes(search)) ||
         (d.propertyName && d.propertyName.toLowerCase().includes(search)) ||
         (d.landlordName && d.landlordName.toLowerCase().includes(search)) ||
@@ -357,71 +542,71 @@
       );
     }
 
-    const totalAll = list.reduce((sum, d) => sum + Number(d.amount || 0), 0);
-    const mriTotal = list.filter(d => d.category.includes('MRI')).reduce((sum, d) => sum + Number(d.amount || 0), 0);
-    const wagesTotal = list.filter(d => d.category.includes('Wages')).reduce((sum, d) => sum + Number(d.amount || 0), 0);
-    const repairsTotal = list.filter(d => d.category.includes('Repairs') || d.category.includes('Maintenance')).reduce((sum, d) => sum + Number(d.amount || 0), 0);
+    // Sort by date descending
+    combined.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
-    const elTotal = document.getElementById('stat-deductions-total');
-    const elMri = document.getElementById('stat-deductions-mri');
-    const elWages = document.getElementById('stat-deductions-wages');
-    const elRepairs = document.getElementById('stat-deductions-repairs');
-
-    if (elTotal) elTotal.textContent = `KES ${totalAll.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-    if (elMri) elMri.textContent = `KES ${mriTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-    if (elWages) elWages.textContent = `KES ${wagesTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-    if (elRepairs) elRepairs.textContent = `KES ${repairsTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-
-    if (list.length === 0) {
+    if (combined.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="10" style="text-align: center; padding: 32px; color: var(--text-muted); font-style: italic;">
-            No landlord deductions or property expenses found matching current filters.
+          <td colspan="11" style="text-align: center; padding: 32px; color: var(--text-muted); font-style: italic;">
+            No landlord deductions or other income records found matching current filters.
           </td>
         </tr>
       `;
       return;
     }
 
-    tbody.innerHTML = list.map((item, idx) => {
+    const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    tbody.innerHTML = combined.map((item, idx) => {
+      const isIncome = (item.entryType === 'Other Income');
+      
       let badgeClass = 'badge-priority-low';
-      if (item.category.includes('MRI')) {
-        badgeClass = 'badge-priority-medium';
-      } else if (item.category.includes('Wages')) {
+      if (isIncome) {
         badgeClass = 'badge-status-completed';
-      } else if (item.category.includes('Repairs')) {
+      } else if (item.category && item.category.includes('MRI')) {
+        badgeClass = 'badge-priority-medium';
+      } else if (item.category && item.category.includes('Wages')) {
+        badgeClass = 'badge-priority-medium';
+      } else if (item.category && (item.category.includes('Repairs') || item.category.includes('Maintenance'))) {
         badgeClass = 'badge-priority-emergency';
       }
 
-      const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const periodLabel = `${monthNames[item.periodMonth] || ''} ${item.periodYear || ''}`;
+      const typeBadge = isIncome
+        ? `<span class="badge-status badge-status-completed" style="font-weight: 800; font-size: 0.72rem;">+ Income</span>`
+        : `<span class="badge-status badge-priority-emergency" style="font-weight: 800; font-size: 0.72rem; color: #F87171;">- Expense</span>`;
+
+      const amtColor = isIncome ? 'var(--accent-secondary)' : '#F87171';
+      const amtSign = isIncome ? '+' : '-';
 
       return `
         <tr>
-          <td style="text-align: center; width: 44px;">${idx + 1}</td>
-          <td><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-primary);">${item.voucherRef}</span></td>
-          <td style="text-align: center; white-space: nowrap;">${item.date} <br><small style="color: var(--text-muted);">(${periodLabel})</small></td>
-          <td style="font-weight: 600; color: var(--text-primary);">${item.propertyName}</td>
-          <td>${item.landlordName}</td>
+          <td style="text-align: center; width: 38px;">${idx + 1}</td>
+          <td><span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-primary); font-size: 0.82rem;">${item.voucherRef || 'N/A'}</span></td>
+          <td style="text-align: center; white-space: nowrap; font-size: 0.8rem;">${item.date} <br><small style="color: var(--text-muted);">(${periodLabel})</small></td>
+          <td style="font-weight: 600; color: var(--text-primary); font-size: 0.85rem;">${item.propertyName}</td>
+          <td style="font-size: 0.82rem;">${item.landlordName}</td>
+          <td style="text-align: center;">${typeBadge}</td>
           <td>
-            <span class="badge-status ${badgeClass}">
+            <span class="badge-status ${badgeClass}" style="font-size: 0.75rem;">
               ${item.category}
             </span>
           </td>
           <td>
-            <strong style="color: var(--text-primary);">${item.payee}</strong>
-            ${item.notes ? `<div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 2px;">${item.notes}</div>` : ''}
+            <strong style="color: var(--text-primary); font-size: 0.83rem;">${item.payee || item.payer || 'N/A'}</strong>
+            ${item.notes ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${item.notes}</div>` : ''}
           </td>
-          <td style="text-align: right; font-weight: 800; color: var(--text-primary); font-variant-numeric: tabular-nums;">
-            ${Number(item.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
+          <td style="text-align: right; font-weight: 800; color: ${amtColor}; font-variant-numeric: tabular-nums; font-size: 0.9rem;">
+            ${amtSign} KES ${Number(item.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </td>
           <td style="text-align: center;">
-            <span class="badge-status badge-status-completed">
+            <span class="badge-status badge-status-completed" style="font-size: 0.72rem;">
               Approved
             </span>
           </td>
           <td style="text-align: center; white-space: nowrap;">
-            <button type="button" class="btn-action-pill" onclick="deleteLandlordDeduction('${item.id}')" title="Delete this deduction" style="color: #F87171; border-color: rgba(248, 113, 113, 0.3);">
+            <button type="button" class="btn-action-pill" onclick="deleteLandlordDeduction('${item.id}', '${item.entryType}')" title="Delete this entry" style="color: #F87171; border-color: rgba(248, 113, 113, 0.3); padding: 4px 8px; font-size: 0.74rem;">
               🗑️ Delete
             </button>
           </td>
@@ -430,12 +615,25 @@
     }).join('');
   }
 
-  function deleteLandlordDeduction(id) {
-    if (!confirm('Are you sure you want to remove this deduction voucher?')) return;
-    AppState.landlordDeductions = AppState.landlordDeductions.filter(d => d.id !== id);
-    saveStoredDeductions(AppState.landlordDeductions);
+  function deleteLandlordDeduction(id, entryType) {
+    const isIncome = (entryType === 'Other Income' || (id && id.startsWith('INC-')));
+    const promptMsg = isIncome
+      ? 'Are you sure you want to remove this Other Income entry?'
+      : 'Are you sure you want to remove this deduction voucher?';
+
+    if (!confirm(promptMsg)) return;
+
+    if (isIncome) {
+      AppState.landlordOtherIncome = (AppState.landlordOtherIncome || []).filter(i => i.id !== id);
+      saveStoredOtherIncome(AppState.landlordOtherIncome);
+      showToast('Other income record removed successfully.');
+    } else {
+      AppState.landlordDeductions = (AppState.landlordDeductions || []).filter(d => d.id !== id);
+      saveStoredDeductions(AppState.landlordDeductions);
+      showToast('Deduction voucher deleted successfully.');
+    }
+
     renderLandlordDeductionsTable();
-    showToast('Deduction voucher deleted successfully.');
   }
 
   // Portfolio & Mandates Table
@@ -447,7 +645,7 @@
     const badge = document.getElementById('portfolio-count-badge');
     if (badge) badge.textContent = `${mandates.length} Active Mandates`;
 
-    tbody.innerHTML = mandates.map((m, idx) => {
+    tbody.innerHTML = mandates.map((m) => {
       const landlord = (AppState.landlords || []).find(l => l.name === m.landlordName) || (AppState.landlords || [])[0] || { name: m.landlordName, landlordCode: 'L001', kraPin: 'P051189201A', entityType: 'Corporate' };
       const property = (AppState.properties || []).find(p => p.name === m.propertyName) || { name: m.propertyName, lr: 'RUNDA VIEW' };
       const unitsCount = (AppState.units || []).filter(u => u.propertyName === m.propertyName || u.propertyId === property.id).length;
@@ -623,6 +821,7 @@
   window.switchLandlordTab = switchLandlordTab;
   window.prepareQuickStatement = prepareQuickStatement;
   window.recordLandlordDeduction = recordLandlordDeduction;
+  window.onDeductionTypeChange = onDeductionTypeChange;
   window.renderLandlordDeductionsTable = renderLandlordDeductionsTable;
   window.deleteLandlordDeduction = deleteLandlordDeduction;
   window.renderLandlordPortfolioTable = renderLandlordPortfolioTable;

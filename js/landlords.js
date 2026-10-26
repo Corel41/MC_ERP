@@ -27,6 +27,17 @@
   AppState.tenantInvoiceLines = AppState.tenantInvoiceLines || [];
   AppState.tenantReceipts = AppState.tenantReceipts || [];
   AppState.landlordStatements = AppState.landlordStatements || [];
+  AppState.landlordDeductions = AppState.landlordDeductions || [];
+  AppState.landlordOtherIncome = AppState.landlordOtherIncome || [];
+
+  try {
+    const cachedDeds = localStorage.getItem('mc_erp_landlord_deductions');
+    if (cachedDeds) AppState.landlordDeductions = JSON.parse(cachedDeds);
+    const cachedInc = localStorage.getItem('mc_erp_landlord_other_income');
+    if (cachedInc) AppState.landlordOtherIncome = JSON.parse(cachedInc);
+  } catch (e) {
+    console.warn('Could not hydrate landlord deductions or other income', e);
+  }
   AppState.landlordPayouts = AppState.landlordPayouts || [];
   AppState.activeLandlordTab = AppState.activeLandlordTab || 'statements';
   AppState.theme = AppState.theme || 'developer';
@@ -561,35 +572,96 @@
       const countEl = document.getElementById('ll-stmt-tenants-count');
       if (countEl) countEl.textContent = occupiedCount;
 
+      // 1. Query Other Income for this property & period
+      const propOtherIncome = (AppState.landlordOtherIncome || []).filter(inc => 
+        inc.propertyId === prop.id && 
+        parseInt(inc.periodMonth, 10) === monthNum && 
+        parseInt(inc.periodYear, 10) === yearNum
+      );
+      const totalOtherIncome = propOtherIncome.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+      // 2. Query Landlord Deductions for this property & period
+      const propDeductions = (AppState.landlordDeductions || []).filter(ded => 
+        ded.propertyId === prop.id && 
+        parseInt(ded.periodMonth, 10) === monthNum && 
+        parseInt(ded.periodYear, 10) === yearNum
+      );
+      const manualDeductionsTotal = propDeductions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+      // 3. Direct Landlord Payments from tenant receipts
       const totalDirectPaidToLandlord = directToLandlordPayments.reduce((sum, d) => sum + d.amount, 0);
+
+      // 4. Monthly Collected & Total Gross Pool
       const monthlyAgencyCollected = Math.max(0, totalAmountPaid - totalDirectPaidToLandlord);
+      const totalGrossPool = monthlyAgencyCollected + totalOtherIncome;
 
       const collectedEl = document.getElementById('ll-stmt-monthly-collected');
       if (collectedEl) collectedEl.textContent = formatLandlordAmount(monthlyAgencyCollected);
 
-      const expectedRemitEl = document.getElementById('ll-stmt-expected-remittance');
-      if (expectedRemitEl) expectedRemitEl.textContent = formatLandlordAmount(totalAmountPaid);
+      const otherIncomeTotalEl = document.getElementById('ll-stmt-total-other-income');
+      if (otherIncomeTotalEl) otherIncomeTotalEl.textContent = formatLandlordAmount(totalOtherIncome);
 
-      // Deductions
-      const feePct = isRentStatement ? (Number(mandate.feePct) || 8.0) : 0;
-      const mgmtFee = isRentStatement ? (totalAmountPaid * (feePct / 100)) : 0;
-      const vatAmt = isRentStatement ? (mgmtFee * 0.16) : 0;
-      const totalDeductions = mgmtFee + vatAmt + totalDirectPaidToLandlord;
-      const netDue = totalAmountPaid - totalDeductions;
-
-      const dynDedEl = document.getElementById('ll-stmt-dynamic-deductions');
-      if (dynDedEl) {
-        if (directToLandlordPayments.length > 0) {
-          dynDedEl.innerHTML = directToLandlordPayments.map(dp => `
-            <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #9A3412;">
-              <span style="width: 220px;">Direct Payment - Unit ${dp.unitCode}:</span>
-              <span style="width: 70px; text-align: right; font-size: 10px; font-weight: 700; color: #B45309;">(Direct)</span>
-              <span style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">${formatLandlordAmount(dp.amount)}</span>
+      const otherIncomeListEl = document.getElementById('ll-stmt-other-income-list');
+      if (otherIncomeListEl) {
+        if (propOtherIncome.length > 0) {
+          otherIncomeListEl.innerHTML = propOtherIncome.map(inc => `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+              <span>• ${inc.category}: ${inc.payer || inc.notes || 'Additional Income'}</span>
+              <span style="font-variant-numeric: tabular-nums;">${formatLandlordAmount(inc.amount)}</span>
             </div>
           `).join('');
         } else {
-          dynDedEl.innerHTML = '';
+          otherIncomeListEl.innerHTML = '<div style="font-style: italic; color: #6B7280;">No other manual income recorded</div>';
         }
+      }
+
+      const grossPoolEl = document.getElementById('ll-stmt-gross-pool');
+      if (grossPoolEl) grossPoolEl.textContent = formatLandlordAmount(totalGrossPool);
+
+      const expectedRemitEl = document.getElementById('ll-stmt-expected-remittance');
+      if (expectedRemitEl) expectedRemitEl.textContent = formatLandlordAmount(totalAmountPaid + totalOtherIncome);
+
+      // 5. Agency Management Fees & VAT
+      const feePct = isRentStatement ? (Number(mandate.feePct) || 8.0) : 0;
+      const mgmtFee = isRentStatement ? (totalAmountPaid * (feePct / 100)) : 0;
+      const vatAmt = isRentStatement ? (mgmtFee * 0.16) : 0;
+
+      // 6. Net Remittance Formula:
+      // Net Remittance Due = (Monthly Collected + Total Other Income) - (Total Landlord Deductions + Management Fee + V.A.T on Fees)
+      const allLandlordExpenses = manualDeductionsTotal + totalDirectPaidToLandlord;
+      const totalDeductions = allLandlordExpenses + mgmtFee + vatAmt;
+      const netDue = (monthlyAgencyCollected + totalOtherIncome) - totalDeductions;
+
+      // Itemized deductions: manual deductions + direct landlord payments
+      const itemizedDedEl = document.getElementById('ll-stmt-itemized-deductions');
+      const dynDedEl = document.getElementById('ll-stmt-dynamic-deductions');
+      let dedLinesHtml = '';
+
+      if (propDeductions.length > 0) {
+        dedLinesHtml += propDeductions.map(d => `
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #111827;">
+            <span style="width: 250px;">${d.category}: ${d.payee || d.notes || ''}</span>
+            <span style="width: 70px; text-align: right; font-size: 10px; font-weight: 700; color: #DC2626;">(Expense)</span>
+            <span style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">${formatLandlordAmount(d.amount)}</span>
+          </div>
+        `).join('');
+      }
+
+      if (directToLandlordPayments.length > 0) {
+        dedLinesHtml += directToLandlordPayments.map(dp => `
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #9A3412;">
+            <span style="width: 250px;">Direct Landlord - Unit ${dp.unitCode}: ${dp.tenantName || ''}</span>
+            <span style="width: 70px; text-align: right; font-size: 10px; font-weight: 700; color: #B45309;">(Direct)</span>
+            <span style="width: 120px; text-align: right; font-variant-numeric: tabular-nums;">${formatLandlordAmount(dp.amount)}</span>
+          </div>
+        `).join('');
+      }
+
+      if (itemizedDedEl) {
+        itemizedDedEl.innerHTML = dedLinesHtml;
+        if (dynDedEl) dynDedEl.innerHTML = '';
+      } else if (dynDedEl) {
+        dynDedEl.innerHTML = dedLinesHtml;
       }
 
       const feePctEl = document.getElementById('ll-stmt-fee-pct');
