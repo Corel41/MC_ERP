@@ -30,6 +30,7 @@
   AppState.landlordDeductions = AppState.landlordDeductions || [];
   AppState.landlordOtherIncome = AppState.landlordOtherIncome || [];
   AppState.tenantDeposits = AppState.tenantDeposits || [];
+  AppState.propertyPayablesConfig = AppState.propertyPayablesConfig || {};
 
   const SEED_TENANT_DEPOSITS = [
     {
@@ -781,8 +782,82 @@
         return a.localeCompare(b);
       });
 
+      // Retrieve Property Payables Configuration matrix for agent-held deposit check
+      let storedPayablesConfig = null;
+      try {
+        const cachedPpc = localStorage.getItem('mc_erp_property_payables_config');
+        if (cachedPpc) storedPayablesConfig = JSON.parse(cachedPpc);
+      } catch (e) {}
+
+      const propPayablesConfig = (
+        (storedPayablesConfig && (
+          storedPayablesConfig[prop.id] ||
+          (propertyId && storedPayablesConfig[propertyId]) ||
+          (prop.prefix && storedPayablesConfig[prop.prefix]) ||
+          (prop.propertyIdCode && storedPayablesConfig[prop.propertyIdCode]) ||
+          (propertyId === 'prop-sunrise-01' && (storedPayablesConfig['00000002-0000-4000-8000-000000000001'] || storedPayablesConfig['SPA']))
+        )) ||
+        (AppState.propertyPayablesConfig && (
+          AppState.propertyPayablesConfig[prop.id] ||
+          (propertyId && AppState.propertyPayablesConfig[propertyId]) ||
+          (prop.prefix && AppState.propertyPayablesConfig[prop.prefix]) ||
+          (prop.propertyIdCode && AppState.propertyPayablesConfig[prop.propertyIdCode]) ||
+          (propertyId === 'prop-sunrise-01' && (AppState.propertyPayablesConfig['00000002-0000-4000-8000-000000000001'] || AppState.propertyPayablesConfig['SPA']))
+        )) ||
+        AppState.masterPayables ||
+        []
+      );
+
       sortedTypes.forEach(depType => {
         const typeDeps = depositsByType[depType];
+        if (!typeDeps || typeDeps.length === 0) return;
+
+        // Check corresponding payable code against property payables config matrix
+        const sampleDep = typeDeps[0] || {};
+        let pCode = sampleDep.payableCode || sampleDep.payable_code;
+        if (!pCode) {
+          const lowerType = depType.toLowerCase();
+          if (lowerType.includes('rent deposit')) pCode = '004';
+          else if (lowerType.includes('water deposit')) pCode = '005';
+          else if (lowerType.includes('electricity deposit')) pCode = '006';
+        }
+
+        // Check if is_agent_hold is true
+        let isAgentHold = Boolean(sampleDep.is_agent_hold === true || sampleDep.isAgentHold === true);
+
+        let configItem = null;
+        if (Array.isArray(propPayablesConfig)) {
+          configItem = propPayablesConfig.find(p => 
+            (pCode && (String(p.code) === String(pCode) || String(p.payable_code) === String(pCode) || String(p.payableCode) === String(pCode))) ||
+            (p.description && p.description.trim().toLowerCase() === depType.trim().toLowerCase())
+          );
+        } else if (propPayablesConfig && typeof propPayablesConfig === 'object') {
+          configItem = propPayablesConfig[pCode] || Object.values(propPayablesConfig).find(p => 
+            (pCode && String(p.code) === String(pCode)) ||
+            (p.description && p.description.trim().toLowerCase() === depType.trim().toLowerCase())
+          );
+        }
+
+        if (configItem) {
+          if (configItem.is_agent_hold === true || configItem.isAgentHold === true || configItem.is_agent_hold === 'true' || configItem.isAgentHold === 'true') {
+            isAgentHold = true;
+          }
+        }
+
+        // Check UI equivalent checkbox if present in DOM
+        if (typeof document !== 'undefined') {
+          const chk = document.querySelector(`input[type="checkbox"][data-code="${pCode}"][data-field="isAgentHold"], input[type="checkbox"][onchange*="'${pCode}'"][onchange*="isAgentHold"], input[type="checkbox"][onchange*="'${pCode}'"][onchange*="is_agent_hold"]`);
+          if (chk && chk.checked) {
+            isAgentHold = true;
+          }
+        }
+
+        // If is_agent_hold === true (or UI checkbox checked), completely exclude this deposit type:
+        // Do not render its rows, and do not add its amount to Monthly Collected or Gross Collection.
+        if (isAgentHold) {
+          return;
+        }
+
         // Render Group Header row styled identically to the Rent group header
         rowsHtml.push(`
           <tr style="font-weight: 800;">
