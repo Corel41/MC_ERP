@@ -9,6 +9,40 @@
   // Seed default deductions if not already in localStorage
   const DEFAULT_DEDUCTIONS = [
     {
+      id: 'DED-SPA-2026-10-01',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Deduction',
+      category: 'Caretaker / Security Wages',
+      amount: 12000.00,
+      periodMonth: 10,
+      periodYear: 2026,
+      date: '2026-10-25',
+      voucherRef: 'VCH-2026-1042',
+      payee: 'Samuel Kiprop & Security Staff',
+      notes: 'October On-Site Security & Cleaning Wages',
+      status: 'Approved'
+    },
+    {
+      id: 'DED-SPA-2026-10-02',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Deduction',
+      category: 'Repairs & Maintenance',
+      amount: 3500.00,
+      periodMonth: 10,
+      periodYear: 2026,
+      date: '2026-10-20',
+      voucherRef: 'VCH-2026-1015',
+      payee: 'Nairobi Plumbing & Pipe Techs',
+      notes: 'Plumbing Fixes for Main Gate Water Pipe',
+      status: 'Approved'
+    },
+    {
       id: 'DED-001',
       propertyId: '00000002-0000-4000-8000-000000000001',
       propertyName: 'Sunrise Park Estate',
@@ -98,6 +132,42 @@
   // Seed default other income if not already in localStorage
   const DEFAULT_OTHER_INCOME = [
     {
+      id: 'INC-SPA-2026-10-01',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Other Income',
+      category: 'Rooftop Advertising',
+      amount: 15000.00,
+      periodMonth: 10,
+      periodYear: 2026,
+      date: '2026-10-10',
+      voucherRef: 'INC-2026-1001',
+      payee: 'Safaricom Telecommunications',
+      payer: 'Safaricom Telecommunications',
+      notes: 'Q3 Telecom Mast Lease Space - SPA',
+      status: 'Approved'
+    },
+    {
+      id: 'INC-SPA-2026-10-02',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Other Income',
+      category: 'Commercial Parking Fees',
+      amount: 4500.00,
+      periodMonth: 10,
+      periodYear: 2026,
+      date: '2026-10-15',
+      voucherRef: 'INC-2026-1002',
+      payee: 'Visitor Commercial Bay',
+      payer: 'Visitor Overflow Parking Collections',
+      notes: 'Visitor Overflow Parking Collections',
+      status: 'Approved'
+    },
+    {
       id: 'INC-001',
       propertyId: '00000002-0000-4000-8000-000000000001',
       propertyName: 'Sunrise Park Estate',
@@ -138,7 +208,13 @@
   function getStoredDeductions() {
     try {
       const raw = localStorage.getItem('mc_erp_landlord_deductions');
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const list = JSON.parse(raw);
+        DEFAULT_DEDUCTIONS.forEach(sd => {
+          if (!list.some(d => d.id === sd.id)) list.unshift(sd);
+        });
+        return list;
+      }
     } catch (e) {
       console.warn('Could not read landlord deductions from localStorage', e);
     }
@@ -156,7 +232,13 @@
   function getStoredOtherIncome() {
     try {
       const raw = localStorage.getItem('mc_erp_landlord_other_income');
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const list = JSON.parse(raw);
+        DEFAULT_OTHER_INCOME.forEach(si => {
+          if (!list.some(i => i.id === si.id)) list.unshift(si);
+        });
+        return list;
+      }
     } catch (e) {
       console.warn('Could not read landlord other income from localStorage', e);
     }

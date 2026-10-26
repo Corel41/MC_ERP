@@ -1,4 +1,4 @@
-﻿/**
+/**
  * js/landlords.js — Standalone Landlord Management & Statement Generation Engine
  * Decoupled MPA architecture for Metrocosmo ERP
  */
@@ -29,14 +29,161 @@
   AppState.landlordStatements = AppState.landlordStatements || [];
   AppState.landlordDeductions = AppState.landlordDeductions || [];
   AppState.landlordOtherIncome = AppState.landlordOtherIncome || [];
+  AppState.tenantDeposits = AppState.tenantDeposits || [];
+
+  const SEED_TENANT_DEPOSITS = [
+    {
+      id: 'DEP-SPA01-001',
+      tenantId: '00000006-0000-4000-8000-000000000001',
+      tenantName: 'John Doe',
+      tenantCode: 'T001',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      unitCode: 'SPA-01',
+      depositType: 'Rent Deposit',
+      payableCode: '004',
+      amount: 45000.00,
+      paymentDate: '2026-01-01',
+      receiptNo: 'REC-DEP-2026-001',
+      status: 'Held in Escrow'
+    },
+    {
+      id: 'DEP-SPA01-002',
+      tenantId: '00000006-0000-4000-8000-000000000001',
+      tenantName: 'John Doe',
+      tenantCode: 'T001',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      unitCode: 'SPA-01',
+      depositType: 'Water Deposit',
+      payableCode: '005',
+      amount: 3000.00,
+      paymentDate: '2026-01-01',
+      receiptNo: 'REC-DEP-2026-002',
+      status: 'Held in Escrow'
+    },
+    {
+      id: 'DEP-SPA01-003',
+      tenantId: '00000006-0000-4000-8000-000000000001',
+      tenantName: 'John Doe',
+      tenantCode: 'T001',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      unitCode: 'SPA-01',
+      depositType: 'Electricity Deposit',
+      payableCode: '006',
+      amount: 5000.00,
+      paymentDate: '2026-01-01',
+      receiptNo: 'REC-DEP-2026-003',
+      status: 'Held in Escrow'
+    }
+  ];
+
+  const SEED_OTHER_INCOME = [
+    {
+      id: 'INC-SPA-2026-10-01',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Other Income',
+      category: 'Rooftop Advertising',
+      amount: 15000.00,
+      periodMonth: 10,
+      periodYear: 2026,
+      date: '2026-10-10',
+      voucherRef: 'INC-2026-1001',
+      payee: 'Safaricom Telecommunications',
+      payer: 'Safaricom Telecommunications',
+      notes: 'Q3 Telecom Mast Lease Space - SPA',
+      status: 'Approved'
+    },
+    {
+      id: 'INC-SPA-2026-10-02',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Other Income',
+      category: 'Commercial Parking Fees',
+      amount: 4500.00,
+      periodMonth: 10,
+      periodYear: 2026,
+      date: '2026-10-15',
+      voucherRef: 'INC-2026-1002',
+      payee: 'Visitor Commercial Bay',
+      payer: 'Visitor Overflow Parking Collections',
+      notes: 'Visitor Overflow Parking Collections',
+      status: 'Approved'
+    }
+  ];
+
+  const SEED_DEDUCTIONS = [
+    {
+      id: 'DED-SPA-2026-10-01',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Deduction',
+      category: 'Caretaker / Security Wages',
+      amount: 12000.00,
+      periodMonth: 10,
+      periodYear: 2026,
+      date: '2026-10-25',
+      voucherRef: 'VCH-2026-1042',
+      payee: 'Samuel Kiprop & Security Staff',
+      notes: 'October On-Site Security & Cleaning Wages',
+      status: 'Approved'
+    },
+    {
+      id: 'DED-SPA-2026-10-02',
+      propertyId: '00000002-0000-4000-8000-000000000001',
+      propertyName: 'SUNRISE PARK APARTMENTS',
+      landlordId: '00000001-0000-4000-8000-000000000001',
+      landlordName: 'Sunrise Park Holdings Ltd',
+      entryType: 'Deduction',
+      category: 'Repairs & Maintenance',
+      amount: 3500.00,
+      periodMonth: 10,
+      periodYear: 2026,
+      date: '2026-10-20',
+      voucherRef: 'VCH-2026-1015',
+      payee: 'Nairobi Plumbing & Pipe Techs',
+      notes: 'Plumbing Fixes for Main Gate Water Pipe',
+      status: 'Approved'
+    }
+  ];
 
   try {
     const cachedDeds = localStorage.getItem('mc_erp_landlord_deductions');
-    if (cachedDeds) AppState.landlordDeductions = JSON.parse(cachedDeds);
+    AppState.landlordDeductions = cachedDeds ? JSON.parse(cachedDeds) : [...SEED_DEDUCTIONS];
+    SEED_DEDUCTIONS.forEach(sd => {
+      if (!AppState.landlordDeductions.some(d => d.id === sd.id)) {
+        AppState.landlordDeductions.unshift(sd);
+      }
+    });
+
     const cachedInc = localStorage.getItem('mc_erp_landlord_other_income');
-    if (cachedInc) AppState.landlordOtherIncome = JSON.parse(cachedInc);
+    AppState.landlordOtherIncome = cachedInc ? JSON.parse(cachedInc) : [...SEED_OTHER_INCOME];
+    SEED_OTHER_INCOME.forEach(si => {
+      if (!AppState.landlordOtherIncome.some(i => i.id === si.id)) {
+        AppState.landlordOtherIncome.unshift(si);
+      }
+    });
+
+    const cachedDeps = localStorage.getItem('mc_erp_tenant_deposits');
+    AppState.tenantDeposits = cachedDeps ? JSON.parse(cachedDeps) : [...SEED_TENANT_DEPOSITS];
+    SEED_TENANT_DEPOSITS.forEach(sdep => {
+      if (!AppState.tenantDeposits.some(dep => dep.id === sdep.id)) {
+        AppState.tenantDeposits.unshift(sdep);
+      }
+    });
   } catch (e) {
     console.warn('Could not hydrate landlord deductions or other income', e);
+    AppState.landlordDeductions = AppState.landlordDeductions.length ? AppState.landlordDeductions : [...SEED_DEDUCTIONS];
+    AppState.landlordOtherIncome = AppState.landlordOtherIncome.length ? AppState.landlordOtherIncome : [...SEED_OTHER_INCOME];
+    AppState.tenantDeposits = AppState.tenantDeposits.length ? AppState.tenantDeposits : [...SEED_TENANT_DEPOSITS];
   }
   AppState.landlordPayouts = AppState.landlordPayouts || [];
   AppState.activeLandlordTab = AppState.activeLandlordTab || 'statements';
@@ -186,6 +333,8 @@
   function initLandlordStatementGenerator() {
     const rentPropSel = document.getElementById('landlord-stmt-property-rent');
     const utilPropSel = document.getElementById('landlord-stmt-property-util');
+    const monthRentSel = document.getElementById('landlord-stmt-month-rent');
+    const yearRentSel = document.getElementById('landlord-stmt-year-rent');
     if (!rentPropSel && !utilPropSel) return;
 
     const props = AppState.properties || [];
@@ -193,12 +342,20 @@
 
     if (rentPropSel) {
       rentPropSel.innerHTML = propOptions;
-      if (props.length > 0) rentPropSel.value = props[0].id;
+      const spaProp = props.find(p => p.prefix === 'SPA' || p.id === '00000002-0000-4000-8000-000000000001' || (p.name && p.name.includes('SUNRISE PARK')));
+      if (spaProp) {
+        rentPropSel.value = spaProp.id;
+      } else if (props.length > 0) {
+        rentPropSel.value = props[0].id;
+      }
     }
     if (utilPropSel) {
       utilPropSel.innerHTML = propOptions;
       if (props.length > 0) utilPropSel.value = props[0].id;
     }
+
+    if (monthRentSel) monthRentSel.value = '10';
+    if (yearRentSel) yearRentSel.value = '2026';
 
     // Default to rent statement generation
     generateLandlordRentStatement();
@@ -328,7 +485,12 @@
     const tbody = document.getElementById('ll-stmt-table-body');
     if (!tbody) return;
 
-    const prop = (AppState.properties || []).find(p => p.id === propertyId) || (AppState.properties || [])[0];
+    const prop = (AppState.properties || []).find(p => 
+      p.id === propertyId || 
+      (propertyId === 'prop-sunrise-01' && (p.prefix === 'SPA' || p.id === '00000002-0000-4000-8000-000000000001' || (p.name && p.name.includes('SUNRISE PARK')))) ||
+      p.prefix === propertyId || 
+      p.propertyIdCode === propertyId
+    ) || (AppState.properties || [])[0];
     if (!prop) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No property selected or available.</td></tr>';
       return;
@@ -574,7 +736,7 @@
 
       // 1. Query Other Income for this property & period
       const propOtherIncome = (AppState.landlordOtherIncome || []).filter(inc => 
-        inc.propertyId === prop.id && 
+        (inc.propertyId === prop.id || inc.propertyId === 'prop-sunrise-01' || inc.propertyId === prop.prefix || (inc.propertyName && prop.name && inc.propertyName.toUpperCase() === prop.name.toUpperCase())) && 
         parseInt(inc.periodMonth, 10) === monthNum && 
         parseInt(inc.periodYear, 10) === yearNum
       );
@@ -582,7 +744,7 @@
 
       // 2. Query Landlord Deductions for this property & period
       const propDeductions = (AppState.landlordDeductions || []).filter(ded => 
-        ded.propertyId === prop.id && 
+        (ded.propertyId === prop.id || ded.propertyId === 'prop-sunrise-01' || ded.propertyId === prop.prefix || (ded.propertyName && prop.name && ded.propertyName.toUpperCase() === prop.name.toUpperCase())) && 
         parseInt(ded.periodMonth, 10) === monthNum && 
         parseInt(ded.periodYear, 10) === yearNum
       );
