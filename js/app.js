@@ -6215,6 +6215,7 @@ const AppState = {
       let totalExpected = 0;
       let totalAmountPaid = 0;
       let totalClosingBalance = 0;
+      let totalRentPaid = 0;
       let occupiedCount = 0;
       let vacantUnits = [];
       const directToLandlordPayments = [];
@@ -6335,6 +6336,7 @@ const AppState = {
         totalExpected += rowExpected;
         totalAmountPaid += currentPaid;
         totalClosingBalance += closingBalance;
+        totalRentPaid += currentPaid;
 
         rowsHtml.push(`
           <tr style="border-bottom: 1px solid #E5E7EB;">
@@ -6348,6 +6350,96 @@ const AppState = {
           </tr>
         `);
       });
+
+      // Inject Deposits into the Rent Statement Ledger (Strictly for Rent Statement)
+      const isRentStatement = (payableCode === '001');
+      let totalDepositsPaid = 0;
+
+      if (isRentStatement) {
+        const matchingDeposits = (AppState.tenantDeposits || []).filter(dep => {
+          if (!dep) return false;
+          const pId = prop.id;
+          const pPrefix = prop.prefix;
+          const pName = (prop.name || '').trim().toUpperCase();
+          const depPropId = dep.propertyId || dep.property_id;
+          const depPropName = (dep.propertyName || dep.property_name || '').trim().toUpperCase();
+
+          const matchProp = (
+            depPropId === pId ||
+            depPropId === 'prop-sunrise-01' ||
+            (propertyId === 'prop-sunrise-01' && (depPropId === '00000002-0000-4000-8000-000000000001' || depPropId === 'prop-sunrise-01')) ||
+            (pPrefix && depPropId === pPrefix) ||
+            (depPropName && pName && depPropName === pName)
+          );
+          if (!matchProp) return false;
+
+          const dStr = dep.date || dep.paymentDate || dep.payment_date || dep.created_at || '';
+          let dMonth = null;
+          let dYear = null;
+          if (dStr) {
+            const parts = dStr.split('T')[0].split(' ')[0].split('-');
+            if (parts.length >= 2) {
+              dYear = parseInt(parts[0], 10);
+              dMonth = parseInt(parts[1], 10);
+            }
+          }
+          if (!dMonth && dep.periodMonth) dMonth = parseInt(dep.periodMonth, 10);
+          if (!dYear && dep.periodYear) dYear = parseInt(dep.periodYear, 10);
+
+          return (dMonth === monthNum && dYear === yearNum);
+        });
+
+        // Group the found deposits by depositType
+        const depositsByType = {};
+        matchingDeposits.forEach(dep => {
+          const type = (dep.depositType || dep.deposit_type || 'Rent Deposit').trim();
+          if (!depositsByType[type]) {
+            depositsByType[type] = [];
+          }
+          depositsByType[type].push(dep);
+        });
+
+        const preferredOrder = ['rent deposit', 'water deposit', 'electricity deposit'];
+        const sortedTypes = Object.keys(depositsByType).sort((a, b) => {
+          const idxA = preferredOrder.indexOf(a.toLowerCase());
+          const idxB = preferredOrder.indexOf(b.toLowerCase());
+          if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+          if (idxA !== -1) return -1;
+          if (idxB !== -1) return 1;
+          return a.localeCompare(b);
+        });
+
+        sortedTypes.forEach(depType => {
+          const typeDeps = depositsByType[depType];
+          rowsHtml.push(`
+            <tr style="font-weight: 800;">
+              <td colspan="7" style="padding: 5px 6px; font-weight: 800; border-top: 1px solid #000; border-bottom: 1px solid #000; border-right: none;">
+                ${depType}
+              </td>
+            </tr>
+          `);
+
+          typeDeps.forEach(dep => {
+            const depAmt = Number(dep.amount || 0);
+            totalMonthlyBill += depAmt;
+            totalExpected += depAmt;
+            totalAmountPaid += depAmt;
+            totalDepositsPaid += depAmt;
+
+            rowsHtml.push(`
+              <tr style="border-bottom: 1px solid #E5E7EB;">
+                <td style="padding: 4px 6px; border-right: 1px solid #000000; font-weight: 600;">${dep.unitCode || dep.unit_code || '—'}</td>
+                <td style="padding: 4px 8px; border-right: 1px solid #000000;">${dep.tenantName || dep.tenant_name || 'Tenant'}</td>
+                <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(depAmt)}</td>
+                <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">0.00</td>
+                <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(depAmt)}</td>
+                <td style="padding: 4px 8px; text-align: right; border-right: 1px solid #000000;">${formatLandlordAmount(depAmt)}</td>
+                <td style="padding: 4px 8px; text-align: right;">0.00</td>
+              </tr>
+            `);
+          });
+        });
+      }
 
       // Sub totals Row
       rowsHtml.push(`
@@ -6377,7 +6469,6 @@ const AppState = {
 
       // Render Summary Block & Deductions
       const summaryBlock = document.getElementById('ll-stmt-rent-summary-block');
-      const isRentStatement = (payableCode === '001');
 
       if (summaryBlock) {
         summaryBlock.style.display = 'block';
@@ -6385,21 +6476,60 @@ const AppState = {
         const countEl = document.getElementById('ll-stmt-tenants-count');
         if (countEl) countEl.textContent = occupiedCount;
 
+        // 1. Query Other Income for this property & period
+        const propOtherIncome = (AppState.landlordOtherIncome || []).filter(inc => 
+          (inc.propertyId === prop.id || inc.propertyId === 'prop-sunrise-01' || inc.propertyId === prop.prefix || (inc.propertyName && prop.name && inc.propertyName.toUpperCase() === prop.name.toUpperCase())) && 
+          parseInt(inc.periodMonth, 10) === monthNum && 
+          parseInt(inc.periodYear, 10) === yearNum
+        );
+        const totalOtherIncome = propOtherIncome.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+        // 2. Query Landlord Deductions for this property & period
+        const propDeductions = (AppState.landlordDeductions || []).filter(ded => 
+          (ded.propertyId === prop.id || ded.propertyId === 'prop-sunrise-01' || ded.propertyId === prop.prefix || (ded.propertyName && prop.name && ded.propertyName.toUpperCase() === prop.name.toUpperCase())) && 
+          parseInt(ded.periodMonth, 10) === monthNum && 
+          parseInt(ded.periodYear, 10) === yearNum
+        );
+        const manualDeductionsTotal = propDeductions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
         const totalDirectPaidToLandlord = directToLandlordPayments.reduce((sum, d) => sum + d.amount, 0);
         const monthlyAgencyCollected = Math.max(0, totalAmountPaid - totalDirectPaidToLandlord);
+        const totalGrossCollection = monthlyAgencyCollected + totalOtherIncome;
 
         const collectedEl = document.getElementById('ll-stmt-monthly-collected');
         if (collectedEl) collectedEl.textContent = formatLandlordAmount(monthlyAgencyCollected);
 
+        const otherIncomeTotalEl = document.getElementById('ll-stmt-total-other-income');
+        if (otherIncomeTotalEl) otherIncomeTotalEl.textContent = formatLandlordAmount(totalOtherIncome);
+
+        const otherIncomeListEl = document.getElementById('ll-stmt-other-income-list');
+        if (otherIncomeListEl) {
+          if (propOtherIncome.length > 0) {
+            otherIncomeListEl.innerHTML = propOtherIncome.map(inc => `
+              <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                <span>• ${inc.category}: ${inc.payer || inc.notes || 'Additional Income'}</span>
+                <span style="font-variant-numeric: tabular-nums;">${formatLandlordAmount(inc.amount)}</span>
+              </div>
+            `).join('');
+          } else {
+            otherIncomeListEl.innerHTML = '<div style="font-style: italic; color: #6B7280;">No other manual income recorded</div>';
+          }
+        }
+
+        const grossCollectionEl = document.getElementById('ll-stmt-gross-collection') || document.getElementById('ll-stmt-gross-pool');
+        if (grossCollectionEl) grossCollectionEl.textContent = formatLandlordAmount(totalGrossCollection);
+
         const expectedRemitEl = document.getElementById('ll-stmt-expected-remittance');
-        if (expectedRemitEl) expectedRemitEl.textContent = formatLandlordAmount(totalAmountPaid);
+        if (expectedRemitEl) expectedRemitEl.textContent = formatLandlordAmount(totalAmountPaid + totalOtherIncome);
 
         // Deductions
         const feePct = isRentStatement ? (Number(mandate.feePct) || 8.0) : 0;
-        const mgmtFee = isRentStatement ? (totalAmountPaid * (feePct / 100)) : 0;
+        const totalRentCollected = isRentStatement ? Math.max(0, totalRentPaid - totalDirectPaidToLandlord) : 0;
+        const mgmtFee = isRentStatement ? (totalRentCollected * (feePct / 100)) : 0;
         const vatAmt = isRentStatement ? (mgmtFee * 0.16) : 0;
-        const totalDeductions = mgmtFee + vatAmt + totalDirectPaidToLandlord;
-        const netDue = totalAmountPaid - totalDeductions;
+        const allLandlordExpenses = manualDeductionsTotal + totalDirectPaidToLandlord;
+        const totalDeductions = allLandlordExpenses + mgmtFee + vatAmt;
+        const netDue = totalGrossCollection - totalDeductions;
 
         const dynDedEl = document.getElementById('ll-stmt-dynamic-deductions');
         if (dynDedEl) {

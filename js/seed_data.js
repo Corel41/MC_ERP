@@ -43662,7 +43662,10 @@
         "depositType": "Rent Deposit",
         "payableCode": "004",
         "amount": 45000,
-        "paymentDate": "2026-01-01",
+        "date": "2026-10-01",
+        "paymentDate": "2026-10-01",
+        "periodMonth": 10,
+        "periodYear": 2026,
         "receiptNo": "REC-DEP-2026-001",
         "status": "Held in Escrow"
     },
@@ -43677,7 +43680,10 @@
         "depositType": "Water Deposit",
         "payableCode": "005",
         "amount": 3000,
-        "paymentDate": "2026-01-01",
+        "date": "2026-10-01",
+        "paymentDate": "2026-10-01",
+        "periodMonth": 10,
+        "periodYear": 2026,
         "receiptNo": "REC-DEP-2026-002",
         "status": "Held in Escrow"
     },
@@ -43692,7 +43698,10 @@
         "depositType": "Electricity Deposit",
         "payableCode": "006",
         "amount": 5000,
-        "paymentDate": "2026-01-01",
+        "date": "2026-10-01",
+        "paymentDate": "2026-10-01",
+        "periodMonth": 10,
+        "periodYear": 2026,
         "receiptNo": "REC-DEP-2026-003",
         "status": "Held in Escrow"
     }
