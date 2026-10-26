@@ -306,6 +306,19 @@
 
   function initLandlordsHub() {
     window.AppState = window.AppState || {};
+
+    const hydrateFn = (typeof window !== 'undefined' && typeof window.hydrateAllAppState === 'function') 
+      ? window.hydrateAllAppState 
+      : null;
+
+    if (hydrateFn) {
+      hydrateFn(window.AppState);
+    } else if (typeof window !== 'undefined' && window.MC_ERP_SEED_DATA) {
+      Object.keys(window.MC_ERP_SEED_DATA).forEach(k => {
+        if (!window.AppState[k]) window.AppState[k] = window.MC_ERP_SEED_DATA[k];
+      });
+    }
+
     if (!AppState.properties && window.SEED_PROPERTIES) AppState.properties = window.SEED_PROPERTIES;
     if (!AppState.landlords && window.SEED_LANDLORDS) AppState.landlords = window.SEED_LANDLORDS;
     if (!AppState.mandates && window.SEED_MANDATES) AppState.mandates = window.SEED_MANDATES;

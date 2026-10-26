@@ -15,193 +15,65 @@
   // 2. STATE INITIALIZATION & SEED HYDRATION
   const AppState = window.AppState || {};
 
-  if (window.MC_ERP_SEED_DATA) {
+  const hydrateFn = (typeof window !== 'undefined' && typeof window.hydrateAllAppState === 'function') 
+    ? window.hydrateAllAppState 
+    : null;
+
+  if (hydrateFn) {
+    hydrateFn(AppState);
+  } else if (typeof window !== 'undefined' && window.MC_ERP_SEED_DATA) {
     Object.keys(window.MC_ERP_SEED_DATA).forEach(k => {
-      if (!AppState[k] || AppState[k].length === 0) {
-        AppState[k] = window.MC_ERP_SEED_DATA[k];
+      if (Array.isArray(window.MC_ERP_SEED_DATA[k])) {
+        AppState[k] = window.MC_ERP_SEED_DATA[k].slice();
+      } else if (typeof window.MC_ERP_SEED_DATA[k] === 'object' && window.MC_ERP_SEED_DATA[k] !== null) {
+        AppState[k] = Object.assign(AppState[k] || {}, window.MC_ERP_SEED_DATA[k]);
       }
     });
   }
 
-  AppState.organizationId = AppState.organizationId || "00000000-0000-0000-0000-000000000001";
-  AppState.properties = AppState.properties || [];
-  AppState.tenants = AppState.tenants || [];
-  AppState.units = AppState.units || [];
-  AppState.leases = AppState.leases || [];
-  AppState.invoices = AppState.invoices || [];
-  AppState.tenantInvoiceLines = AppState.tenantInvoiceLines || [];
-  AppState.tenantInvoices = AppState.tenantInvoices || [];
-  AppState.tenantReceipts = AppState.tenantReceipts || [];
-  AppState.ledger = AppState.ledger || [];
-  AppState.editingReceiptId = null;
-  AppState.theme = AppState.theme || 'developer';
-  AppState.sidebarCollapsed = false;
-
-  // Hydrate Bank Accounts
-  try {
-    const cachedBank = localStorage.getItem('mc_erp_bank_accounts');
-    if (cachedBank) {
-      AppState.bankAccounts = JSON.parse(cachedBank);
-    }
-  } catch (e) {}
-  if (!AppState.bankAccounts || AppState.bankAccounts.length === 0) {
-    AppState.bankAccounts = [
-      { id: 'BANK-01', bank_name: 'KCB Bank Kenya', branch_name: 'Kipande House', account_no: '1109283746' },
-      { id: 'BANK-02', bank_name: 'Co-operative Bank', branch_name: 'Nairobi Business Centre', account_no: '01129384756000' },
-      { id: 'BANK-03', bank_name: 'Absa Bank Kenya', branch_name: 'Queensway Branch', account_no: '2039485716' },
-      { id: 'BANK-04', bank_name: 'NCBA Bank', branch_name: 'Upper Hill HQ', account_no: '1002938475' }
-    ];
-  }
-
-  // Hydrate M-Pesa Paybills
-  try {
-    const cachedMpesa = localStorage.getItem('mc_erp_mpesa_paybills');
-    if (cachedMpesa) {
-      AppState.mpesaPaybills = JSON.parse(cachedMpesa);
-    }
-  } catch (e) {}
-  if (!AppState.mpesaPaybills || AppState.mpesaPaybills.length === 0) {
-    AppState.mpesaPaybills = [
-      { id: 'MPESA-01', paybill_number: '522522', business_name: 'Metrocosmo Ltd Primary Collection' },
-      { id: 'MPESA-02', paybill_number: '400200', business_name: 'Metrocosmo Commercial Collections' },
-      { id: 'MPESA-03', paybill_number: '247247', business_name: 'Metrocosmo Escrow & Utility Pool' }
-    ];
-  }
-
-  // Hydrate Company Profile
-  try {
-    const cachedProfile = localStorage.getItem('mc_erp_company_profile');
-    if (cachedProfile) {
-      AppState.companyProfile = JSON.parse(cachedProfile);
-    }
-  } catch (e) {}
-  if (!AppState.companyProfile) {
-    AppState.companyProfile = {
-      company_name: 'METROCOSMO LTD',
-      slogan: 'Real Estate Managers & Valuers',
-      address1: 'P.O. Box 40656',
-      postal_code: '00100',
-      city_town: 'Nairobi',
-      phone: '020 2244218, 0721 737093',
-      email: 'info@metrocosmo.com',
-      pin_no: 'P051189201A',
-      logo_url: 'assets/logo.png'
-    };
-  }
-
-  // Hydrate Cached Receipts, Invoices, and Ledger from LocalStorage
-  try {
-    const cachedReceipts = localStorage.getItem('mc_erp_tenant_receipts');
-    if (cachedReceipts) {
-      const parsed = JSON.parse(cachedReceipts);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const map = new Map();
-        parsed.forEach(rec => {
-          const key = rec.id || rec.receipt_number || rec.receiptNo;
-          if (key) map.set(key, rec);
+  const persistFn = (typeof window !== 'undefined' && typeof window.persistAllAppState === 'function')
+    ? window.persistAllAppState
+    : function(st, keys) {
+        if (!st || typeof localStorage === 'undefined') return;
+        const kMap = (typeof window !== 'undefined' && window.APP_STATE_STORAGE_KEYS) || {
+          landlords: 'mc_erp_landlords',
+          properties: 'mc_erp_properties',
+          units: 'mc_erp_units',
+          mandates: 'mc_erp_mandates',
+          propertyPayablesConfig: 'mc_erp_property_payables_config',
+          tenants: 'mc_erp_tenants',
+          leases: 'mc_erp_leases',
+          accountingPeriods: 'mc_erp_accounting_periods',
+          utilityReadings: 'mc_erp_utility_readings',
+          invoices: 'mc_erp_invoices',
+          tenantInvoices: 'mc_erp_tenant_invoices',
+          tenantInvoiceLines: 'mc_erp_tenant_invoice_lines',
+          tenantReceipts: 'mc_erp_tenant_receipts',
+          ledger: 'mc_erp_ledger',
+          tenantDeposits: 'mc_erp_tenant_deposits',
+          landlordDeductions: 'mc_erp_landlord_deductions',
+          landlordOtherIncome: 'mc_erp_landlord_other_income',
+          landlordStatements: 'mc_erp_landlord_statements',
+          remittancePayouts: 'mc_erp_remittance_payouts',
+          maintenanceWorkOrders: 'mc_erp_maintenance_work_orders',
+          bankAccounts: 'mc_erp_bank_accounts',
+          mpesaPaybills: 'mc_erp_mpesa_paybills'
+        };
+        const list = Array.isArray(keys) ? keys : Object.keys(kMap);
+        list.forEach(k => {
+          const sKey = kMap[k];
+          if (sKey && st[k] !== undefined) {
+            try { localStorage.setItem(sKey, JSON.stringify(st[k])); } catch(e){}
+          }
         });
-        (AppState.tenantReceipts || []).forEach(rec => {
-          const key = rec.id || rec.receipt_number || rec.receiptNo;
-          if (key && !map.has(key)) map.set(key, rec);
-        });
-        AppState.tenantReceipts = Array.from(map.values());
-      }
-    }
-
-    const cachedTenantInvoices = localStorage.getItem('mc_erp_tenant_invoices');
-    if (cachedTenantInvoices) {
-      const parsed = JSON.parse(cachedTenantInvoices);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const map = new Map();
-        parsed.forEach(ti => {
-          const key = ti.id || `${ti.tenant_id}_${ti.payable_code}_${ti.period_month}_${ti.period_year}`;
-          if (key) map.set(key, ti);
-        });
-        (AppState.tenantInvoices || []).forEach(ti => {
-          const key = ti.id || `${ti.tenant_id}_${ti.payable_code}_${ti.period_month}_${ti.period_year}`;
-          if (key && !map.has(key)) map.set(key, ti);
-        });
-        AppState.tenantInvoices = Array.from(map.values());
-      }
-    }
-
-    const cachedInvoices = localStorage.getItem('mc_erp_invoices');
-    if (cachedInvoices) {
-      const parsed = JSON.parse(cachedInvoices);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const map = new Map();
-        parsed.forEach(inv => {
-          const key = inv.id || inv.invoiceNumber;
-          if (key) map.set(key, inv);
-        });
-        (AppState.invoices || []).forEach(inv => {
-          const key = inv.id || inv.invoiceNumber;
-          if (key && !map.has(key)) map.set(key, inv);
-        });
-        AppState.invoices = Array.from(map.values());
-      }
-    }
-
-    const cachedLedger = localStorage.getItem('mc_erp_ledger');
-    if (cachedLedger) {
-      const parsed = JSON.parse(cachedLedger);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const map = new Map();
-        parsed.forEach(entry => {
-          const key = entry.id || entry.refNo;
-          if (key) map.set(key, entry);
-        });
-        (AppState.ledger || []).forEach(entry => {
-          const key = entry.id || entry.refNo;
-          if (key && !map.has(key)) map.set(key, entry);
-        });
-        AppState.ledger = Array.from(map.values());
-      }
-    }
-
-    const cachedLines = localStorage.getItem('mc_erp_tenant_invoice_lines');
-    if (cachedLines) {
-      const parsed = JSON.parse(cachedLines);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const map = new Map();
-        parsed.forEach(l => {
-          const key = l.id || `${l.invoice_id}_${l.payable_code}`;
-          if (key) map.set(key, l);
-        });
-        (AppState.tenantInvoiceLines || []).forEach(l => {
-          const key = l.id || `${l.invoice_id}_${l.payable_code}`;
-          if (key && !map.has(key)) map.set(key, l);
-        });
-        AppState.tenantInvoiceLines = Array.from(map.values());
-      }
-    }
-  } catch (e) {
-    console.warn('Error hydrating state from localStorage in receipts.js:', e);
-  }
+      };
 
   function persistBillingState() {
-    try {
-      if (AppState.tenantInvoices) {
-        localStorage.setItem('mc_erp_tenant_invoices', JSON.stringify(AppState.tenantInvoices));
-      }
-      if (AppState.invoices) {
-        localStorage.setItem('mc_erp_invoices', JSON.stringify(AppState.invoices));
-      }
-      if (AppState.tenantInvoiceLines) {
-        localStorage.setItem('mc_erp_tenant_invoice_lines', JSON.stringify(AppState.tenantInvoiceLines));
-      }
-      if (AppState.ledger) {
-        localStorage.setItem('mc_erp_ledger', JSON.stringify(AppState.ledger));
-      }
-      if (AppState.tenantReceipts) {
-        localStorage.setItem('mc_erp_tenant_receipts', JSON.stringify(AppState.tenantReceipts));
-      }
-    } catch (err) {
-      console.warn('Error persisting billing state to localStorage:', err);
-    }
+    persistFn(AppState, ['tenantInvoices', 'invoices', 'tenantInvoiceLines', 'ledger', 'utilityReadings', 'tenantReceipts', 'tenantDeposits']);
   }
-  window.persistBillingState = persistBillingState;
 
+  window.persistAllAppState = persistFn;
+  window.persistBillingState = persistBillingState;
   window.AppState = AppState;
 
   function getActiveOrgId() {
@@ -1432,6 +1304,50 @@
                 body: JSON.stringify(autoInv)
               }).catch(() => {});
             } catch (_) {}
+          }
+        });
+
+        // Part 2: Link Deposit Receipting -> AppState.tenantDeposits
+        allocatedList.forEach(alloc => {
+          const isDeposit = (alloc.payable_code === '004' || alloc.payable_code === '005' || alloc.payable_code === '006' || 
+                             (alloc.description && alloc.description.toLowerCase().includes('deposit')));
+          if (isDeposit && alloc.amount > 0) {
+            AppState.tenantDeposits = AppState.tenantDeposits || [];
+            const depType = alloc.description || (alloc.payable_code === '004' ? 'Rent Deposit' : alloc.payable_code === '005' ? 'Water Deposit' : 'Electricity Deposit');
+            const pMonth = parseInt(dateStr.split('-')[1], 10) || (new Date().getMonth() + 1);
+            const pYear = parseInt(dateStr.split('-')[0], 10) || new Date().getFullYear();
+
+            const existingDep = AppState.tenantDeposits.find(d => 
+              (d.receiptNo && d.receiptNo === receiptNo && d.depositType === depType) ||
+              (d.tenantId === tenant.id && d.depositType === depType && d.periodMonth === pMonth && d.periodYear === pYear)
+            );
+
+            if (existingDep) {
+              existingDep.amount = Number(alloc.amount);
+              existingDep.date = dateStr;
+              existingDep.paymentDate = dateStr;
+              existingDep.receiptNo = receiptNo;
+            } else {
+              AppState.tenantDeposits.unshift({
+                id: `DEP-${tenant.id ? tenant.id.slice(0, 8) : 'TEN'}-${alloc.payable_code || '004'}-${Date.now().toString(36)}`,
+                propertyId: property.id,
+                propertyName: property.name,
+                unitId: tenant.unitId || '',
+                unitCode: tenant.unitCode || '',
+                tenantId: tenant.id,
+                tenantName: tenant.name,
+                tenantCode: tenant.tenantCode || '',
+                payableCode: alloc.payable_code || (depType.includes('Rent') ? '004' : depType.includes('Water') ? '005' : '006'),
+                depositType: depType,
+                amount: Number(alloc.amount),
+                periodMonth: pMonth,
+                periodYear: pYear,
+                date: dateStr,
+                paymentDate: dateStr,
+                receiptNo: receiptNo,
+                status: 'Held in Escrow'
+              });
+            }
           }
         });
 

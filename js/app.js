@@ -191,148 +191,65 @@ const AppState = {
       ]
     };
 
-    // Immediate synchronous hydration from 6-month showcase dataset
-    if (typeof window !== 'undefined' && window.MC_ERP_SEED_DATA) {
+    // Immediate synchronous hydration of unified 22-collection dataset
+    const hydrateFn = (typeof window !== 'undefined' && typeof window.hydrateAllAppState === 'function') 
+      ? window.hydrateAllAppState 
+      : null;
+
+    if (hydrateFn) {
+      hydrateFn(AppState);
+    } else if (typeof window !== 'undefined' && window.MC_ERP_SEED_DATA) {
       Object.keys(window.MC_ERP_SEED_DATA).forEach(function(k) {
         if (Array.isArray(window.MC_ERP_SEED_DATA[k])) {
-          AppState[k] = window.MC_ERP_SEED_DATA[k];
+          AppState[k] = window.MC_ERP_SEED_DATA[k].slice();
         } else if (typeof window.MC_ERP_SEED_DATA[k] === 'object' && window.MC_ERP_SEED_DATA[k] !== null) {
           AppState[k] = Object.assign(AppState[k] || {}, window.MC_ERP_SEED_DATA[k]);
         }
       });
     }
 
-    // Synchronous hydration of persisted billing, invoices, receipts, and ledger from localStorage
-    try {
-      const cachedTenantInvoices = localStorage.getItem('mc_erp_tenant_invoices');
-      if (cachedTenantInvoices) {
-        const parsed = JSON.parse(cachedTenantInvoices);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const map = new Map();
-          parsed.forEach(ti => {
-            const key = ti.id || `${ti.tenant_id}_${ti.payable_code}_${ti.period_month}_${ti.period_year}`;
-            if (key) map.set(key, ti);
+    const persistFn = (typeof window !== 'undefined' && typeof window.persistAllAppState === 'function')
+      ? window.persistAllAppState
+      : function(st, keys) {
+          if (!st || typeof localStorage === 'undefined') return;
+          const kMap = (typeof window !== 'undefined' && window.APP_STATE_STORAGE_KEYS) || {
+            landlords: 'mc_erp_landlords',
+            properties: 'mc_erp_properties',
+            units: 'mc_erp_units',
+            mandates: 'mc_erp_mandates',
+            propertyPayablesConfig: 'mc_erp_property_payables_config',
+            tenants: 'mc_erp_tenants',
+            leases: 'mc_erp_leases',
+            accountingPeriods: 'mc_erp_accounting_periods',
+            utilityReadings: 'mc_erp_utility_readings',
+            invoices: 'mc_erp_invoices',
+            tenantInvoices: 'mc_erp_tenant_invoices',
+            tenantInvoiceLines: 'mc_erp_tenant_invoice_lines',
+            tenantReceipts: 'mc_erp_tenant_receipts',
+            ledger: 'mc_erp_ledger',
+            tenantDeposits: 'mc_erp_tenant_deposits',
+            landlordDeductions: 'mc_erp_landlord_deductions',
+            landlordOtherIncome: 'mc_erp_landlord_other_income',
+            landlordStatements: 'mc_erp_landlord_statements',
+            remittancePayouts: 'mc_erp_remittance_payouts',
+            maintenanceWorkOrders: 'mc_erp_maintenance_work_orders',
+            bankAccounts: 'mc_erp_bank_accounts',
+            mpesaPaybills: 'mc_erp_mpesa_paybills'
+          };
+          const list = Array.isArray(keys) ? keys : Object.keys(kMap);
+          list.forEach(k => {
+            const sKey = kMap[k];
+            if (sKey && st[k] !== undefined) {
+              try { localStorage.setItem(sKey, JSON.stringify(st[k])); } catch(e){}
+            }
           });
-          (AppState.tenantInvoices || []).forEach(ti => {
-            const key = ti.id || `${ti.tenant_id}_${ti.payable_code}_${ti.period_month}_${ti.period_year}`;
-            if (key && !map.has(key)) map.set(key, ti);
-          });
-          AppState.tenantInvoices = Array.from(map.values());
-        }
-      }
-
-      const cachedInvoices = localStorage.getItem('mc_erp_invoices');
-      if (cachedInvoices) {
-        const parsed = JSON.parse(cachedInvoices);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const map = new Map();
-          parsed.forEach(inv => {
-            const key = inv.id || inv.invoiceNumber;
-            if (key) map.set(key, inv);
-          });
-          (AppState.invoices || []).forEach(inv => {
-            const key = inv.id || inv.invoiceNumber;
-            if (key && !map.has(key)) map.set(key, inv);
-          });
-          AppState.invoices = Array.from(map.values());
-        }
-      }
-
-      const cachedLedger = localStorage.getItem('mc_erp_ledger');
-      if (cachedLedger) {
-        const parsed = JSON.parse(cachedLedger);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const map = new Map();
-          parsed.forEach(entry => {
-            const key = entry.id || entry.refNo;
-            if (key) map.set(key, entry);
-          });
-          (AppState.ledger || []).forEach(entry => {
-            const key = entry.id || entry.refNo;
-            if (key && !map.has(key)) map.set(key, entry);
-          });
-          AppState.ledger = Array.from(map.values());
-        }
-      }
-
-      const cachedReadings = localStorage.getItem('mc_erp_utility_readings');
-      if (cachedReadings) {
-        const parsed = JSON.parse(cachedReadings);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const map = new Map();
-          parsed.forEach(r => {
-            const key = r.id || `${r.unitId}_${r.readingDate}`;
-            if (key) map.set(key, r);
-          });
-          (AppState.utilityReadings || []).forEach(r => {
-            const key = r.id || `${r.unitId}_${r.readingDate}`;
-            if (key && !map.has(key)) map.set(key, r);
-          });
-          AppState.utilityReadings = Array.from(map.values());
-        }
-      }
-
-      const cachedTenantReceipts = localStorage.getItem('mc_erp_tenant_receipts');
-      if (cachedTenantReceipts) {
-        const parsed = JSON.parse(cachedTenantReceipts);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const map = new Map();
-          parsed.forEach(rec => {
-            const key = rec.id || rec.receipt_number || rec.receiptNo;
-            if (key) map.set(key, rec);
-          });
-          (AppState.tenantReceipts || []).forEach(rec => {
-            const key = rec.id || rec.receipt_number || rec.receiptNo;
-            if (key && !map.has(key)) map.set(key, rec);
-          });
-          AppState.tenantReceipts = Array.from(map.values());
-        }
-      }
-
-      const cachedLines = localStorage.getItem('mc_erp_tenant_invoice_lines');
-      if (cachedLines) {
-        const parsed = JSON.parse(cachedLines);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const map = new Map();
-          parsed.forEach(l => {
-            const key = l.id || `${l.invoice_id}_${l.payable_code}`;
-            if (key) map.set(key, l);
-          });
-          (AppState.tenantInvoiceLines || []).forEach(l => {
-            const key = l.id || `${l.invoice_id}_${l.payable_code}`;
-            if (key && !map.has(key)) map.set(key, l);
-          });
-          AppState.tenantInvoiceLines = Array.from(map.values());
-        }
-      }
-    } catch (e) {
-      console.warn('Error hydrating billing state from localStorage:', e);
-    }
+        };
 
     function persistBillingState() {
-      try {
-        if (AppState.tenantInvoices) {
-          localStorage.setItem('mc_erp_tenant_invoices', JSON.stringify(AppState.tenantInvoices));
-        }
-        if (AppState.invoices) {
-          localStorage.setItem('mc_erp_invoices', JSON.stringify(AppState.invoices));
-        }
-        if (AppState.tenantInvoiceLines) {
-          localStorage.setItem('mc_erp_tenant_invoice_lines', JSON.stringify(AppState.tenantInvoiceLines));
-        }
-        if (AppState.ledger) {
-          localStorage.setItem('mc_erp_ledger', JSON.stringify(AppState.ledger));
-        }
-        if (AppState.utilityReadings) {
-          localStorage.setItem('mc_erp_utility_readings', JSON.stringify(AppState.utilityReadings));
-        }
-        if (AppState.tenantReceipts) {
-          localStorage.setItem('mc_erp_tenant_receipts', JSON.stringify(AppState.tenantReceipts));
-        }
-      } catch (err) {
-        console.warn('Error persisting billing state to localStorage:', err);
-      }
+      persistFn(AppState, ['tenantInvoices', 'invoices', 'tenantInvoiceLines', 'ledger', 'utilityReadings', 'tenantReceipts', 'tenantDeposits']);
     }
+
+    window.persistAllAppState = persistFn;
     window.persistBillingState = persistBillingState;
     window.AppState = AppState;
 
@@ -955,6 +872,7 @@ const AppState = {
               AppState.mandates.forEach(m => {
                 if (m.landlordName === oldName) m.landlordName = name;
               });
+              persistFn(AppState, ['landlords', 'mandates']);
             }
             cancelLandlordEdit();
             renderLandlordsTable();
@@ -990,6 +908,7 @@ const AppState = {
             };
 
             AppState.landlords.push(newLL);
+            persistFn(AppState, ['landlords']);
             renderLandlordsTable();
             populateDropdowns();
             e.target.reset();
@@ -1160,6 +1079,7 @@ const AppState = {
           };
 
           AppState.tenants.push(newTenant);
+          persistFn(AppState, ['tenants']);
           renderTenantsTable();
           populateTenantDropdowns();
           e.target.reset();
@@ -1459,6 +1379,7 @@ const AppState = {
               AppState.mandates.forEach(m => {
                 if (m.propertyId === prop.id) m.propertyName = name;
               });
+              persistFn(AppState, ['properties', 'units', 'mandates']);
             }
             cancelPropertyEdit();
             renderPropertiesTable();
@@ -1543,6 +1464,7 @@ const AppState = {
               });
             }
 
+            persistFn(AppState, ['properties', 'units']);
             renderPropertiesTable();
             renderUnitsTable();
             populateDropdowns();
@@ -1878,6 +1800,37 @@ const AppState = {
             lease.startDate = dateIn;
             lease.tenantName = name;
           }
+
+          // Part 2: Auto-link tenant onboarding deposit to AppState.tenantDeposits
+          if (lease && lease.depositAmount > 0) {
+            AppState.tenantDeposits = AppState.tenantDeposits || [];
+            const depExists = AppState.tenantDeposits.some(d => d.tenantId === tenantId && d.depositType === 'Rent Deposit');
+            if (!depExists) {
+              const dDate = dateIn || new Date().toISOString().split('T')[0];
+              const dMonth = parseInt(dDate.split('-')[1], 10) || 10;
+              const dYear = parseInt(dDate.split('-')[0], 10) || 2026;
+              AppState.tenantDeposits.unshift({
+                id: `DEP-${tenantId}-${Date.now().toString(36)}`,
+                propertyId: (prop ? prop.id : '') || '00000002-0000-4000-8000-000000000001',
+                propertyName: prop ? prop.name : (unit ? unit.propertyName : 'Property'),
+                unitId: unitId,
+                unitCode: unit ? unit.code : '—',
+                tenantId: tenantId,
+                tenantName: name,
+                tenantCode: code || '',
+                payableCode: '004',
+                depositType: 'Rent Deposit',
+                amount: Number(lease.depositAmount),
+                periodMonth: dMonth,
+                periodYear: dYear,
+                date: dDate,
+                paymentDate: dDate,
+                receiptNo: `DEP-INIT-${code || tenantId}`,
+                status: 'Held in Escrow'
+              });
+            }
+          }
+          persistFn(AppState, ['leases', 'tenants', 'units', 'tenantDeposits']);
 
           // Re-render components across the application
           renderTenantsTable();
@@ -2260,6 +2213,8 @@ const AppState = {
           prop.unitsCount = unitsToSave.length;
           prop.noOfUnits = unitsToSave.length;
 
+          persistFn(AppState, ['units', 'properties']);
+
           // Re-render other relevant tables
           renderPropertiesTable();
           renderUnitsTable();
@@ -2459,6 +2414,7 @@ const AppState = {
           if (prop) {
             prop.payablesCount = activeCount;
           }
+          persistFn(AppState, ['propertyPayablesConfig', 'properties']);
           renderPropertiesTable();
           renderPropertyPayablesTable();
           showToast(`✓ Property Payables Matrix successfully committed for "${propName}"!`);
@@ -2792,9 +2748,30 @@ const AppState = {
 
       tbody.innerHTML = payablesList.map((p, idx) => {
         const isRent = p.code === '001';
+        const isWater = p.code === '002' || (p.description && p.description.toLowerCase().includes('water'));
+        const isElec = p.code === '003' || (p.description && p.description.toLowerCase().includes('electricity'));
+
         let defaultVal = p.defaultAmount !== undefined ? p.defaultAmount : 0.00;
         if (isRent && tenant && tenant.rentAmount) {
           defaultVal = tenant.rentAmount;
+        } else if (isWater && tenant) {
+          const unbilledWater = (AppState.utilityReadings || []).filter(r => 
+            (r.unitId === tenant.unitId || r.unitCode === tenant.unitCode || r.unitId === tenant.unit_id) &&
+            (r.meterType === 'Water' || !r.meterType) &&
+            (!r.billedStatus && !r.billed_status)
+          );
+          if (unbilledWater.length > 0) {
+            defaultVal = unbilledWater.reduce((sum, r) => sum + (Number(r.totalAmount) || 0), 0);
+          }
+        } else if (isElec && tenant) {
+          const unbilledElec = (AppState.utilityReadings || []).filter(r => 
+            (r.unitId === tenant.unitId || r.unitCode === tenant.unitCode || r.unitId === tenant.unit_id) &&
+            (r.meterType === 'Electricity') &&
+            (!r.billedStatus && !r.billed_status)
+          );
+          if (unbilledElec.length > 0) {
+            defaultVal = unbilledElec.reduce((sum, r) => sum + (Number(r.totalAmount) || 0), 0);
+          }
         }
 
         return `
@@ -3019,6 +2996,26 @@ const AppState = {
             credit: 0,
             balance_after: newBalanceAfter,
             balanceAfter: newBalanceAfter
+          });
+
+          // Mark matching unbilled utility readings as billed
+          selectedItems.forEach(item => {
+            const isWaterItem = item.code === '002' || (item.description && item.description.toLowerCase().includes('water'));
+            const isElecItem = item.code === '003' || (item.description && item.description.toLowerCase().includes('electricity'));
+            if (isWaterItem || isElecItem) {
+              (AppState.utilityReadings || []).forEach(r => {
+                if (r.unitId === unitIdVal || r.unitCode === unitCodeVal || (tenant && r.unitId === tenant.unitId)) {
+                  if (isWaterItem && (r.meterType === 'Water' || !r.meterType)) {
+                    r.billedStatus = true;
+                    r.billed_status = true;
+                  }
+                  if (isElecItem && r.meterType === 'Electricity') {
+                    r.billedStatus = true;
+                    r.billed_status = true;
+                  }
+                }
+              });
+            }
           });
 
           // 5. Global Persistence & UI Re-renders:
@@ -3300,6 +3297,31 @@ const AppState = {
             });
 
             count++;
+          }
+
+          // Mark matching unbilled utility readings as billed if utility was bulk-billed
+          const isBulkWater = payableCode === '002' || (payableDesc && payableDesc.toLowerCase().includes('water'));
+          const isBulkElec = payableCode === '003' || (payableDesc && payableDesc.toLowerCase().includes('electricity'));
+          if (isBulkWater || isBulkElec) {
+            rows.forEach(tr => {
+              const chk = tr.querySelector('.bulk-tenant-select');
+              if (chk && chk.checked) {
+                const uId = tr.getAttribute('data-unitid');
+                const uCode = tr.getAttribute('data-unitcode');
+                (AppState.utilityReadings || []).forEach(r => {
+                  if (r.unitId === uId || r.unitCode === uCode) {
+                    if (isBulkWater && (r.meterType === 'Water' || !r.meterType)) {
+                      r.billedStatus = true;
+                      r.billed_status = true;
+                    }
+                    if (isBulkElec && r.meterType === 'Electricity') {
+                      r.billedStatus = true;
+                      r.billed_status = true;
+                    }
+                  }
+                });
+              }
+            });
           }
 
           // 5. Global Persistence & UI Re-renders:
@@ -4444,6 +4466,50 @@ const AppState = {
             }
           });
 
+          // Part 2: Link Deposit Receipting -> AppState.tenantDeposits
+          allocatedList.forEach(alloc => {
+            const isDeposit = (alloc.payable_code === '004' || alloc.payable_code === '005' || alloc.payable_code === '006' || 
+                               (alloc.description && alloc.description.toLowerCase().includes('deposit')));
+            if (isDeposit && alloc.amount > 0) {
+              AppState.tenantDeposits = AppState.tenantDeposits || [];
+              const depType = alloc.description || (alloc.payable_code === '004' ? 'Rent Deposit' : alloc.payable_code === '005' ? 'Water Deposit' : 'Electricity Deposit');
+              const pMonth = parseInt(paymentDate.split('-')[1], 10) || (new Date().getMonth() + 1);
+              const pYear = parseInt(paymentDate.split('-')[0], 10) || new Date().getFullYear();
+
+              const existingDep = AppState.tenantDeposits.find(d => 
+                (d.receiptNo && d.receiptNo === receiptNo && d.depositType === depType) ||
+                (d.tenantId === tenant.id && d.depositType === depType && d.periodMonth === pMonth && d.periodYear === pYear)
+              );
+
+              if (existingDep) {
+                existingDep.amount = Number(alloc.amount);
+                existingDep.date = paymentDate;
+                existingDep.paymentDate = paymentDate;
+                existingDep.receiptNo = receiptNo;
+              } else {
+                AppState.tenantDeposits.unshift({
+                  id: `DEP-${tenant.id ? tenant.id.slice(0, 8) : 'TEN'}-${alloc.payable_code || '004'}-${Date.now().toString(36)}`,
+                  propertyId: property.id,
+                  propertyName: property.name,
+                  unitId: tenant.unitId || '',
+                  unitCode: tenant.unitCode || '',
+                  tenantId: tenant.id,
+                  tenantName: tenant.name,
+                  tenantCode: tenant.tenantCode || '',
+                  payableCode: alloc.payable_code || (depType.includes('Rent') ? '004' : depType.includes('Water') ? '005' : '006'),
+                  depositType: depType,
+                  amount: Number(alloc.amount),
+                  periodMonth: pMonth,
+                  periodYear: pYear,
+                  date: paymentDate,
+                  paymentDate: paymentDate,
+                  receiptNo: receiptNo,
+                  status: 'Held in Escrow'
+                });
+              }
+            }
+          });
+
           // Also mark matching invoices in AppState.invoices as Paid
           if (AppState.invoices) {
             AppState.invoices.forEach(inv => {
@@ -5101,6 +5167,38 @@ const AppState = {
             });
           }
 
+          // Part 2: Auto-link tenant onboarding deposit to AppState.tenantDeposits
+          if (newLease.depositAmount > 0) {
+            AppState.tenantDeposits = AppState.tenantDeposits || [];
+            const depExists = AppState.tenantDeposits.some(d => d.tenantId === tenant.id && d.depositType === 'Rent Deposit');
+            if (!depExists) {
+              const dDate = newLease.startDate || new Date().toISOString().split('T')[0];
+              const dMonth = parseInt(dDate.split('-')[1], 10) || 10;
+              const dYear = parseInt(dDate.split('-')[0], 10) || 2026;
+              AppState.tenantDeposits.unshift({
+                id: `DEP-${tenant.id}-${Date.now().toString(36)}`,
+                propertyId: unit.propertyId || '',
+                propertyName: unit.propertyName || '',
+                unitId: unit.id,
+                unitCode: unit.code,
+                tenantId: tenant.id,
+                tenantName: tenant.name,
+                tenantCode: tenant.tenantCode || '',
+                payableCode: '004',
+                depositType: 'Rent Deposit',
+                amount: Number(newLease.depositAmount),
+                periodMonth: dMonth,
+                periodYear: dYear,
+                date: dDate,
+                paymentDate: dDate,
+                receiptNo: `DEP-INIT-${newLease.id}`,
+                status: 'Held in Escrow'
+              });
+            }
+          }
+
+          persistFn(AppState, ['leases', 'units', 'utilityReadings', 'tenantDeposits']);
+
           renderLeasesTable();
           renderUnitsTable();
           populateTenantDropdowns();
@@ -5148,6 +5246,7 @@ const AppState = {
           lease.status = 'Expired';
           const unit = AppState.units.find(u => u.id === lease.unitId);
           if (unit) unit.status = 'VACANT';
+          persistFn(AppState, ['leases', 'units']);
           renderLeasesTable();
           renderUnitsTable();
           populateTenantDropdowns();
@@ -5217,6 +5316,7 @@ const AppState = {
           };
 
           AppState.utilityReadings.unshift(newReading);
+          persistFn(AppState, ['utilityReadings']);
           renderReadingsTable();
           e.target.reset();
           handleMeterUnitSelect(unit.id);
@@ -5256,6 +5356,8 @@ const AppState = {
       const reading = AppState.utilityReadings.find(r => r.id === readingId);
       if (!reading) return;
       reading.billedStatus = true;
+      reading.billed_status = true;
+      persistFn(AppState, ['utilityReadings']);
       renderReadingsTable();
       showToast(`Reading ${readingId} queued for upcoming invoice.`);
     }
@@ -7409,12 +7511,53 @@ const AppState = {
           let accountingImpact = 'Absorbed into Common Service Charge Pool';
 
           if (allocation === 'Landlord Deductible') {
-            const mandate = AppState.mandates.find(m => m.propertyName === (property ? property.name : ''));
+            const mandate = AppState.mandates.find(m => m.propertyName === (property ? property.name : '') || m.propertyId === propId);
             targetAccount = mandate ? mandate.landlordName : 'Property Landlord';
             accountingImpact = `Deducted from ${targetAccount} Monthly Remittance Statement`;
 
+            AppState.landlordDeductions = AppState.landlordDeductions || [];
+            const issuedMonth = parseInt(issuedDate.split('-')[1], 10) || 10;
+            const issuedYear = parseInt(issuedDate.split('-')[0], 10) || 2026;
+            const deductionId = `DED-LPO-${lpoNum}`;
+
+            const existingDed = AppState.landlordDeductions.find(d => d.id === deductionId || d.voucherNo === lpoNum || d.voucherRef === lpoNum);
+            if (existingDed) {
+              existingDed.amount = actCost;
+              existingDed.category = 'Repairs & Maintenance';
+              existingDed.propertyId = propId;
+              existingDed.month = issuedMonth;
+              existingDed.periodMonth = issuedMonth;
+              existingDed.year = issuedYear;
+              existingDed.periodYear = issuedYear;
+              existingDed.date = issuedDate;
+              existingDed.status = (status === 'Fulfilled') ? 'Completed' : 'Approved';
+              existingDed.notes = scope || 'Repairs & Maintenance Work Order';
+              existingDed.payee = vendor ? vendor.name : 'Contractor';
+            } else {
+              AppState.landlordDeductions.unshift({
+                id: deductionId,
+                propertyId: propId,
+                propertyName: property ? property.name : 'Property',
+                landlordId: (property && property.landlord_id) || (mandate && mandate.landlordId) || null,
+                landlordName: targetAccount,
+                entryType: 'Deduction',
+                category: 'Repairs & Maintenance',
+                amount: actCost,
+                month: issuedMonth,
+                periodMonth: issuedMonth,
+                year: issuedYear,
+                periodYear: issuedYear,
+                date: issuedDate,
+                voucherNo: lpoNum,
+                voucherRef: lpoNum,
+                payee: vendor ? vendor.name : 'Contractor',
+                notes: scope || 'Repairs & Maintenance Work Order',
+                status: (status === 'Fulfilled') ? 'Completed' : 'Approved'
+              });
+            }
+
             // Update landlord statement maintenance deduction if statement exists
-            const stmt = AppState.landlordStatements.find(s => s.propertyName === (property ? property.name : ''));
+            const stmt = AppState.landlordStatements.find(s => s.propertyName === (property ? property.name : '') || s.propertyId === propId);
             if (stmt) {
               stmt.maintenance += actCost;
               stmt.netPayable = Math.max(0, stmt.grossRent - stmt.commAmount - stmt.vatAmount - stmt.maintenance - stmt.mriTax);
@@ -7458,6 +7601,8 @@ const AppState = {
             targetAccount: targetAccount,
             accountingImpact: accountingImpact
           });
+
+          persistFn(AppState, ['maintenanceWorkOrders', 'landlordDeductions']);
 
           document.getElementById('form-work-order').reset();
           populateWoTicketDropdown();

@@ -43779,20 +43779,277 @@
         "notes": "Plumbing Fixes for Main Gate Water Pipe",
         "status": "Approved"
     }
-]
+],
+  "maintenanceWorkOrders": [
+    {
+      "id": "LPO-2026-001",
+      "lpoNumber": "LPO-2026-001",
+      "ticketId": "TCK-2026-001",
+      "ticketNumber": "TCK-2026-001",
+      "vendorId": "VND-001",
+      "vendorName": "Nairobi Plumbing & Pipe Techs",
+      "propertyId": "00000002-0000-4000-8000-000000000001",
+      "propertyName": "SUNRISE PARK APARTMENTS",
+      "unitId": "00000003-0000-4000-8000-000000000001",
+      "unitCode": "SPA-01",
+      "scopeOfWork": "Plumbing Fixes for Main Gate Water Pipe",
+      "estimatedCost": 3500.00,
+      "actualCost": 3500.00,
+      "costAllocation": "Landlord Deductible",
+      "approvalStatus": "Approved",
+      "approvedBy": "DEAN",
+      "issuedDate": "2026-10-20",
+      "completionDate": "2026-10-20",
+      "targetAccount": "Sunrise Park Holdings Ltd",
+      "accountingImpact": "Deducted from Sunrise Park Holdings Ltd Monthly Remittance Statement"
+    }
+  ],
+  "bankAccounts": [
+    {
+      "id": "00000000-0000-0000-0000-000000000010",
+      "bank_name": "Equity Bank Kenya",
+      "branch_name": "Kilimani Branch",
+      "account_no": "0180294819201",
+      "swift_code": "EQBLKENA",
+      "is_active": true
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000020",
+      "bank_name": "KCB Bank Kenya",
+      "branch_name": "Kipande House Branch",
+      "account_no": "1109283746",
+      "swift_code": "KCBLKENX",
+      "is_active": true
+    },
+    {
+      "id": "BANK-01",
+      "bank_name": "KCB Bank Kenya",
+      "branch_name": "Kipande House",
+      "account_no": "1109283746",
+      "is_active": true
+    },
+    {
+      "id": "BANK-02",
+      "bank_name": "Co-operative Bank",
+      "branch_name": "Nairobi Business Centre",
+      "account_no": "01129384756000",
+      "is_active": true
+    }
+  ],
+  "mpesaPaybills": [
+    {
+      "id": "00000000-0000-0000-0000-000000000030",
+      "paybill_number": "522522",
+      "business_name": "Metrocosmo Ltd Primary Collection",
+      "account_prefix": "TENANT CODE",
+      "bank_account_id": "00000000-0000-0000-0000-000000000020",
+      "is_active": true
+    },
+    {
+      "id": "00000000-0000-0000-0000-000000000040",
+      "paybill_number": "247247",
+      "business_name": "Metrocosmo Properties & Escrow",
+      "account_prefix": "UNIT NUMBER",
+      "bank_account_id": "00000000-0000-0000-0000-000000000020",
+      "is_active": true
+    },
+    {
+      "id": "MPESA-01",
+      "paybill_number": "522522",
+      "business_name": "Metrocosmo Ltd Primary Collection",
+      "is_active": true
+    },
+    {
+      "id": "MPESA-02",
+      "paybill_number": "400200",
+      "business_name": "Metrocosmo Commercial Collections",
+      "is_active": true
+    },
+    {
+      "id": "MPESA-03",
+      "paybill_number": "247247",
+      "business_name": "Metrocosmo Escrow & Utility Pool",
+      "is_active": true
+    }
+  ],
+  "remittancePayouts": [
+    {
+      "id": "PAYOUT-2026-10-001",
+      "statementId": "STMT-2026-10-SPA",
+      "propertyId": "00000002-0000-4000-8000-000000000001",
+      "propertyName": "SUNRISE PARK APARTMENTS",
+      "landlordId": "00000001-0000-4000-8000-000000000001",
+      "landlordName": "Sunrise Park Holdings Ltd",
+      "periodMonth": 10,
+      "periodYear": 2026,
+      "amount": 320000.00,
+      "paymentMethod": "Bank Transfer",
+      "bank": "Equity Bank Kenya",
+      "accountNo": "0180294819201",
+      "payoutDate": "2026-10-28",
+      "status": "Pending",
+      "batchNo": "BATCH-2026-10-01"
+    }
+  ]
 };
+
+  const APP_STATE_STORAGE_KEYS = {
+    landlords: 'mc_erp_landlords',
+    properties: 'mc_erp_properties',
+    units: 'mc_erp_units',
+    mandates: 'mc_erp_mandates',
+    propertyPayablesConfig: 'mc_erp_property_payables_config',
+    tenants: 'mc_erp_tenants',
+    leases: 'mc_erp_leases',
+    accountingPeriods: 'mc_erp_accounting_periods',
+    utilityReadings: 'mc_erp_utility_readings',
+    invoices: 'mc_erp_invoices',
+    tenantInvoices: 'mc_erp_tenant_invoices',
+    tenantInvoiceLines: 'mc_erp_tenant_invoice_lines',
+    tenantReceipts: 'mc_erp_tenant_receipts',
+    ledger: 'mc_erp_ledger',
+    tenantDeposits: 'mc_erp_tenant_deposits',
+    landlordDeductions: 'mc_erp_landlord_deductions',
+    landlordOtherIncome: 'mc_erp_landlord_other_income',
+    landlordStatements: 'mc_erp_landlord_statements',
+    remittancePayouts: 'mc_erp_remittance_payouts',
+    maintenanceWorkOrders: 'mc_erp_maintenance_work_orders',
+    bankAccounts: 'mc_erp_bank_accounts',
+    mpesaPaybills: 'mc_erp_mpesa_paybills'
+  };
+
+  function getItemEntityKey(item, collectionKey) {
+    if (!item || typeof item !== 'object') return null;
+    if (collectionKey === 'tenantInvoices') {
+      return item.id || `${item.tenant_id || item.tenantId}_${item.payable_code || item.payableCode}_${item.period_month || item.periodMonth}_${item.period_year || item.periodYear}`;
+    }
+    if (collectionKey === 'tenantInvoiceLines') {
+      return item.id || `${item.invoice_id || item.invoiceId}_${item.payable_code || item.payableCode}`;
+    }
+    if (collectionKey === 'utilityReadings') {
+      return item.id || `${item.unitId || item.unit_id}_${item.readingDate || item.reading_date || ''}_${item.meterType || item.meter_type || ''}`;
+    }
+    if (collectionKey === 'tenantDeposits') {
+      return item.id || `${item.tenantId || item.tenant_id}_${item.payableCode || item.payable_code || item.depositType}_${item.periodMonth || item.period_month}_${item.periodYear || item.period_year}`;
+    }
+    if (collectionKey === 'landlordDeductions' || collectionKey === 'landlordOtherIncome') {
+      return item.id || item.voucherRef || item.voucherNo || `${item.propertyId}_${item.category}_${item.periodMonth || item.month}_${item.periodYear || item.year}_${item.amount}`;
+    }
+    if (collectionKey === 'invoices') {
+      return item.id || item.invoiceNumber || item.invoice_number;
+    }
+    if (collectionKey === 'tenantReceipts') {
+      return item.id || item.receipt_number || item.receiptNo;
+    }
+    if (collectionKey === 'ledger') {
+      return item.id || item.refNo || item.ref_no;
+    }
+    if (collectionKey === 'accountingPeriods') {
+      return item.id || item.period_no || `${item.period_year}_${item.period_month}`;
+    }
+    if (collectionKey === 'maintenanceWorkOrders') {
+      return item.id || item.lpoNumber || item.lpoNum;
+    }
+    if (collectionKey === 'bankAccounts') {
+      return item.id || item.account_no || item.accountNo;
+    }
+    if (collectionKey === 'mpesaPaybills') {
+      return item.id || item.paybill_number || item.paybillNumber;
+    }
+    return item.id || item.code || item.tenantCode || item.uuid || JSON.stringify(item);
+  }
+
+  function hydrateAllAppState(state) {
+    if (!state) return;
+    const seed = (typeof window !== 'undefined' && window.MC_ERP_SEED_DATA) ? window.MC_ERP_SEED_DATA : SEED_DATA;
+
+    Object.keys(APP_STATE_STORAGE_KEYS).forEach(k => {
+      const storageKey = APP_STATE_STORAGE_KEYS[k];
+      let cachedVal = null;
+      try {
+        if (typeof localStorage !== 'undefined') {
+          const raw = localStorage.getItem(storageKey);
+          if (raw) cachedVal = JSON.parse(raw);
+        }
+      } catch (e) {
+        console.warn('Error reading from localStorage key ' + storageKey, e);
+      }
+
+      if (k === 'propertyPayablesConfig') {
+        const seedConfig = (seed && seed.propertyPayablesConfig) || {};
+        const stateConfig = state.propertyPayablesConfig || {};
+        state.propertyPayablesConfig = Object.assign({}, seedConfig, stateConfig, cachedVal || {});
+        return;
+      }
+
+      const seedList = (seed && Array.isArray(seed[k])) ? seed[k] : [];
+      const stateList = Array.isArray(state[k]) ? state[k] : [];
+      const cachedList = Array.isArray(cachedVal) ? cachedVal : [];
+
+      if (cachedList.length === 0 && seedList.length === 0 && stateList.length === 0) {
+        if (!state[k]) state[k] = [];
+        return;
+      }
+
+      const map = new Map();
+      // 1. Cached items first so user mutations take precedence
+      cachedList.forEach(item => {
+        const key = getItemEntityKey(item, k);
+        if (key) map.set(key, item);
+      });
+
+      // 2. State items if not yet present
+      stateList.forEach(item => {
+        const key = getItemEntityKey(item, k);
+        if (key && !map.has(key)) map.set(key, item);
+      });
+
+      // 3. Seed items if not yet present
+      seedList.forEach(item => {
+        const key = getItemEntityKey(item, k);
+        if (key && !map.has(key)) map.set(key, item);
+      });
+
+      state[k] = Array.from(map.values());
+    });
+  }
+
+  function persistAllAppState(state, specificKeys) {
+    if (!state || typeof localStorage === 'undefined') return;
+    const keysToSave = Array.isArray(specificKeys) ? specificKeys : Object.keys(APP_STATE_STORAGE_KEYS);
+    keysToSave.forEach(k => {
+      const storageKey = APP_STATE_STORAGE_KEYS[k];
+      if (storageKey && state[k] !== undefined) {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(state[k]));
+        } catch (err) {
+          console.warn('Error saving to localStorage key ' + storageKey, err);
+        }
+      }
+    });
+  }
 
   if (typeof window !== 'undefined') {
     window.MC_ERP_SEED_DATA = SEED_DATA;
+    window.APP_STATE_STORAGE_KEYS = APP_STATE_STORAGE_KEYS;
+    window.getItemEntityKey = getItemEntityKey;
+    window.hydrateAllAppState = hydrateAllAppState;
+    window.persistAllAppState = persistAllAppState;
+
     if (typeof AppState !== 'undefined') {
-      Object.keys(SEED_DATA).forEach(function(k) {
-        AppState[k] = SEED_DATA[k];
-      });
-      console.log('✅ AppState successfully hydrated with 6-month showcase dataset (5 properties, 50 tenants, 300 invoices, 285 receipts).');
+      hydrateAllAppState(AppState);
+      console.log('✅ AppState successfully hydrated with unified 22-collection dataset.');
     }
   }
 
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = SEED_DATA;
+    module.exports = {
+      ...SEED_DATA,
+      SEED_DATA,
+      APP_STATE_STORAGE_KEYS,
+      getItemEntityKey,
+      hydrateAllAppState,
+      persistAllAppState
+    };
   }
 })();

@@ -6,206 +6,68 @@
 (function () {
   'use strict';
 
-  // 1. STATE INITIALIZATION & SEED HYDRATION
+  // 1. STATE INITIALIZATION & UNIFIED SEED HYDRATION
   const AppState = window.AppState || {};
 
-  if (window.MC_ERP_SEED_DATA) {
+  const hydrateFn = (typeof window !== 'undefined' && typeof window.hydrateAllAppState === 'function') 
+    ? window.hydrateAllAppState 
+    : null;
+
+  if (hydrateFn) {
+    hydrateFn(AppState);
+  } else if (typeof window !== 'undefined' && window.MC_ERP_SEED_DATA) {
     Object.keys(window.MC_ERP_SEED_DATA).forEach(k => {
-      if (!AppState[k] || AppState[k].length === 0) {
-        AppState[k] = window.MC_ERP_SEED_DATA[k];
+      if (Array.isArray(window.MC_ERP_SEED_DATA[k])) {
+        AppState[k] = window.MC_ERP_SEED_DATA[k].slice();
+      } else if (typeof window.MC_ERP_SEED_DATA[k] === 'object' && window.MC_ERP_SEED_DATA[k] !== null) {
+        AppState[k] = Object.assign(AppState[k] || {}, window.MC_ERP_SEED_DATA[k]);
       }
     });
   }
 
-  AppState.properties = AppState.properties || [];
-  AppState.landlords = AppState.landlords || [];
-  AppState.mandates = AppState.mandates || [];
-  AppState.units = AppState.units || [];
-  AppState.leases = AppState.leases || [];
-  AppState.tenants = AppState.tenants || [];
-  AppState.invoices = AppState.invoices || [];
-  AppState.tenantInvoiceLines = AppState.tenantInvoiceLines || [];
-  AppState.tenantReceipts = AppState.tenantReceipts || [];
-  AppState.landlordStatements = AppState.landlordStatements || [];
-  AppState.landlordDeductions = AppState.landlordDeductions || [];
-  AppState.landlordOtherIncome = AppState.landlordOtherIncome || [];
-  AppState.tenantDeposits = AppState.tenantDeposits || [];
-  AppState.propertyPayablesConfig = AppState.propertyPayablesConfig || {};
+  const persistFn = (typeof window !== 'undefined' && typeof window.persistAllAppState === 'function')
+    ? window.persistAllAppState
+    : function(st, keys) {
+        if (!st || typeof localStorage === 'undefined') return;
+        const kMap = (typeof window !== 'undefined' && window.APP_STATE_STORAGE_KEYS) || {
+          landlords: 'mc_erp_landlords',
+          properties: 'mc_erp_properties',
+          units: 'mc_erp_units',
+          mandates: 'mc_erp_mandates',
+          propertyPayablesConfig: 'mc_erp_property_payables_config',
+          tenants: 'mc_erp_tenants',
+          leases: 'mc_erp_leases',
+          accountingPeriods: 'mc_erp_accounting_periods',
+          utilityReadings: 'mc_erp_utility_readings',
+          invoices: 'mc_erp_invoices',
+          tenantInvoices: 'mc_erp_tenant_invoices',
+          tenantInvoiceLines: 'mc_erp_tenant_invoice_lines',
+          tenantReceipts: 'mc_erp_tenant_receipts',
+          ledger: 'mc_erp_ledger',
+          tenantDeposits: 'mc_erp_tenant_deposits',
+          landlordDeductions: 'mc_erp_landlord_deductions',
+          landlordOtherIncome: 'mc_erp_landlord_other_income',
+          landlordStatements: 'mc_erp_landlord_statements',
+          remittancePayouts: 'mc_erp_remittance_payouts',
+          maintenanceWorkOrders: 'mc_erp_maintenance_work_orders',
+          bankAccounts: 'mc_erp_bank_accounts',
+          mpesaPaybills: 'mc_erp_mpesa_paybills'
+        };
+        const list = Array.isArray(keys) ? keys : Object.keys(kMap);
+        list.forEach(k => {
+          const sKey = kMap[k];
+          if (sKey && st[k] !== undefined) {
+            try { localStorage.setItem(sKey, JSON.stringify(st[k])); } catch(e){}
+          }
+        });
+      };
 
-  const SEED_TENANT_DEPOSITS = [
-    {
-      id: 'DEP-SPA01-001',
-      tenantId: '00000006-0000-4000-8000-000000000001',
-      tenantName: 'John Doe',
-      tenantCode: 'T001',
-      propertyId: '00000002-0000-4000-8000-000000000001',
-      propertyName: 'SUNRISE PARK APARTMENTS',
-      unitCode: 'SPA-01',
-      depositType: 'Rent Deposit',
-      payableCode: '004',
-      amount: 45000.00,
-      date: '2026-10-01',
-      paymentDate: '2026-10-01',
-      periodMonth: 10,
-      periodYear: 2026,
-      receiptNo: 'REC-DEP-2026-001',
-      status: 'Held in Escrow'
-    },
-    {
-      id: 'DEP-SPA01-002',
-      tenantId: '00000006-0000-4000-8000-000000000001',
-      tenantName: 'John Doe',
-      tenantCode: 'T001',
-      propertyId: '00000002-0000-4000-8000-000000000001',
-      propertyName: 'SUNRISE PARK APARTMENTS',
-      unitCode: 'SPA-01',
-      depositType: 'Water Deposit',
-      payableCode: '005',
-      amount: 3000.00,
-      date: '2026-10-01',
-      paymentDate: '2026-10-01',
-      periodMonth: 10,
-      periodYear: 2026,
-      receiptNo: 'REC-DEP-2026-002',
-      status: 'Held in Escrow'
-    },
-    {
-      id: 'DEP-SPA01-003',
-      tenantId: '00000006-0000-4000-8000-000000000001',
-      tenantName: 'John Doe',
-      tenantCode: 'T001',
-      propertyId: '00000002-0000-4000-8000-000000000001',
-      propertyName: 'SUNRISE PARK APARTMENTS',
-      unitCode: 'SPA-01',
-      depositType: 'Electricity Deposit',
-      payableCode: '006',
-      amount: 5000.00,
-      date: '2026-10-01',
-      paymentDate: '2026-10-01',
-      periodMonth: 10,
-      periodYear: 2026,
-      receiptNo: 'REC-DEP-2026-003',
-      status: 'Held in Escrow'
-    }
-  ];
-
-  const SEED_OTHER_INCOME = [
-    {
-      id: 'INC-SPA-2026-10-01',
-      propertyId: '00000002-0000-4000-8000-000000000001',
-      propertyName: 'SUNRISE PARK APARTMENTS',
-      landlordId: '00000001-0000-4000-8000-000000000001',
-      landlordName: 'Sunrise Park Holdings Ltd',
-      entryType: 'Other Income',
-      category: 'Rooftop Advertising',
-      amount: 15000.00,
-      periodMonth: 10,
-      periodYear: 2026,
-      date: '2026-10-10',
-      voucherRef: 'INC-2026-1001',
-      payee: 'Safaricom Telecommunications',
-      payer: 'Safaricom Telecommunications',
-      notes: 'Q3 Telecom Mast Lease Space - SPA',
-      status: 'Approved'
-    },
-    {
-      id: 'INC-SPA-2026-10-02',
-      propertyId: '00000002-0000-4000-8000-000000000001',
-      propertyName: 'SUNRISE PARK APARTMENTS',
-      landlordId: '00000001-0000-4000-8000-000000000001',
-      landlordName: 'Sunrise Park Holdings Ltd',
-      entryType: 'Other Income',
-      category: 'Commercial Parking Fees',
-      amount: 4500.00,
-      periodMonth: 10,
-      periodYear: 2026,
-      date: '2026-10-15',
-      voucherRef: 'INC-2026-1002',
-      payee: 'Visitor Commercial Bay',
-      payer: 'Visitor Overflow Parking Collections',
-      notes: 'Visitor Overflow Parking Collections',
-      status: 'Approved'
-    }
-  ];
-
-  const SEED_DEDUCTIONS = [
-    {
-      id: 'DED-SPA-2026-10-01',
-      propertyId: '00000002-0000-4000-8000-000000000001',
-      propertyName: 'SUNRISE PARK APARTMENTS',
-      landlordId: '00000001-0000-4000-8000-000000000001',
-      landlordName: 'Sunrise Park Holdings Ltd',
-      entryType: 'Deduction',
-      category: 'Caretaker / Security Wages',
-      amount: 12000.00,
-      periodMonth: 10,
-      periodYear: 2026,
-      date: '2026-10-25',
-      voucherRef: 'VCH-2026-1042',
-      payee: 'Samuel Kiprop & Security Staff',
-      notes: 'October On-Site Security & Cleaning Wages',
-      status: 'Approved'
-    },
-    {
-      id: 'DED-SPA-2026-10-02',
-      propertyId: '00000002-0000-4000-8000-000000000001',
-      propertyName: 'SUNRISE PARK APARTMENTS',
-      landlordId: '00000001-0000-4000-8000-000000000001',
-      landlordName: 'Sunrise Park Holdings Ltd',
-      entryType: 'Deduction',
-      category: 'Repairs & Maintenance',
-      amount: 3500.00,
-      periodMonth: 10,
-      periodYear: 2026,
-      date: '2026-10-20',
-      voucherRef: 'VCH-2026-1015',
-      payee: 'Nairobi Plumbing & Pipe Techs',
-      notes: 'Plumbing Fixes for Main Gate Water Pipe',
-      status: 'Approved'
-    }
-  ];
-
-  try {
-    const cachedDeds = localStorage.getItem('mc_erp_landlord_deductions');
-    AppState.landlordDeductions = cachedDeds ? JSON.parse(cachedDeds) : [...SEED_DEDUCTIONS];
-    SEED_DEDUCTIONS.forEach(sd => {
-      if (!AppState.landlordDeductions.some(d => d.id === sd.id)) {
-        AppState.landlordDeductions.unshift(sd);
-      }
-    });
-
-    const cachedInc = localStorage.getItem('mc_erp_landlord_other_income');
-    AppState.landlordOtherIncome = cachedInc ? JSON.parse(cachedInc) : [...SEED_OTHER_INCOME];
-    SEED_OTHER_INCOME.forEach(si => {
-      if (!AppState.landlordOtherIncome.some(i => i.id === si.id)) {
-        AppState.landlordOtherIncome.unshift(si);
-      }
-    });
-
-    const cachedDeps = localStorage.getItem('mc_erp_tenant_deposits');
-    AppState.tenantDeposits = cachedDeps ? JSON.parse(cachedDeps) : [...SEED_TENANT_DEPOSITS];
-    SEED_TENANT_DEPOSITS.forEach(sdep => {
-      const existing = AppState.tenantDeposits.find(dep => dep.id === sdep.id);
-      if (!existing) {
-        AppState.tenantDeposits.unshift(sdep);
-      } else {
-        existing.paymentDate = sdep.paymentDate || existing.paymentDate;
-        existing.date = sdep.date || existing.date || existing.paymentDate;
-        existing.periodMonth = sdep.periodMonth || existing.periodMonth;
-        existing.periodYear = sdep.periodYear || existing.periodYear;
-      }
-    });
-  } catch (e) {
-    console.warn('Could not hydrate landlord deductions or other income', e);
-    AppState.landlordDeductions = AppState.landlordDeductions.length ? AppState.landlordDeductions : [...SEED_DEDUCTIONS];
-    AppState.landlordOtherIncome = AppState.landlordOtherIncome.length ? AppState.landlordOtherIncome : [...SEED_OTHER_INCOME];
-    AppState.tenantDeposits = AppState.tenantDeposits.length ? AppState.tenantDeposits : [...SEED_TENANT_DEPOSITS];
-  }
   AppState.landlordPayouts = AppState.landlordPayouts || [];
   AppState.activeLandlordTab = AppState.activeLandlordTab || 'statements';
   AppState.theme = AppState.theme || 'developer';
   AppState.sidebarCollapsed = false;
 
+  window.persistAllAppState = persistFn;
   window.AppState = AppState;
 
   // 2. TOAST NOTIFICATIONS & CONFIRMATION INTERCEPTOR
