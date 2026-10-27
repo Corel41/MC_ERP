@@ -1,0 +1,32 @@
+# MC ERP — static response headers.
+# Copied to the root of the asset directory by scripts/stage-public.cjs.
+#
+# Cloudflare notes:
+#   - `_headers` is parsed from the static asset directory and is not served itself.
+#   - Rules are additive; the first line is the URL pattern, headers must be indented.
+#   - Max 100 rules, 2000 characters per line.
+#   - `#` is the only comment syntax. Do not use CSS-style comments here.
+#   - Headers do not apply to Worker/Function responses; this project is assets-only.
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://uwkqihhvkegiadelowft.supabase.co; frame-ancestors 'self'; form-action 'self'
+
+# HTML shells: always revalidate so a deploy is visible immediately.
+/*.html
+  Cache-Control: no-cache, must-revalidate
+
+# Source JS is not fingerprinted, so keep the window short.
+/js/*
+  Cache-Control: public, max-age=300
+
+/css/*
+  Cache-Control: public, max-age=300
+
+# Images are effectively immutable.
+/assets/*
+  Cache-Control: public, max-age=86400

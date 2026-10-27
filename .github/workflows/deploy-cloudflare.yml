@@ -1,0 +1,53 @@
+name: Deploy to Cloudflare
+
+# Static site — no build toolchain, just an allowlist staging step + wrangler deploy.
+# Required repo secrets:
+#   CLOUDFLARE_API_TOKEN  — scoped token, "Workers Scripts: Edit" + "Account Settings: Read"
+#   CLOUDFLARE_ACCOUNT_ID — from the dashboard URL
+#
+# Create the token at: https://dash.cloudflare.com/profile/api-tokens
+# Never commit it; never paste it into chat.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: cf-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Fails the job if any .sql / .env / tooling file would reach public/.
+      - name: Stage public/
+        run: npm run build:public
+
+      - name: Syntax check
+        run: |
+          for f in public/js/*.js; do node --check "$f"; done
+
+      # Production deploy only from main. PRs get a preview URL instead.
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: >-
+            deploy
+            ${{ github.ref == 'refs/heads/main' && '--name mc-erp' || '--name mc-erp-preview' }}
