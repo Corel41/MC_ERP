@@ -138,3 +138,60 @@ Staying on Supabase **Free** is tempting but wrong for this workload: free proje
 - [ ] Supabase Auth redirect URLs updated (currently `site_url = http://127.0.0.1:3000` in `supabase/config.toml:160`)
 - [ ] Signed Windows installer attached to a GitHub Release
 - [ ] Uptime check (Cloudflare Health Check or BetterStack free) + a documented restore-from-backup drill
+
+---
+
+## 8. Troubleshooting: "Asset too large" (seen 2026-10-27)
+
+**Symptom**
+
+```
+Detected Project Settings:
+ - Worker Name: mc-erp
+ - Output Directory: .
+...
+✨ Read 2227 files from the assets directory /opt/buildhome/repo
+✘ [ERROR] Asset too large.
+  ... node_modules/workerd/bin/workerd with a size of 137 MiB
+```
+
+**What happened.** The Workers Builds project tracks `main`. At the time of that
+build, `wrangler.jsonc` existed only on the feature branch, so wrangler found no
+config, auto-generated one with `assets.directory: "."`, and tried to upload the
+entire repo — dependencies included — against the **25 MiB per-asset limit**.
+
+**Two independent fixes, both now committed:**
+
+1. `wrangler.jsonc` points assets at `./public`, so the repo root is never the
+   asset directory.
+2. `postinstall` runs `node scripts/stage-public.cjs`, so `public/` is populated
+   by `npm clean-install` alone. This makes *any* deploy command safe, including
+   a bare `npx wrangler deploy`, without depending on dashboard settings.
+3. A root `.assetsignore` is the backstop if the asset directory is ever
+   misconfigured back to `.`.
+
+Verified by cloning the branch clean and re-running the exact failing command:
+
+```
+$ npm clean-install --progress=false      # postinstall stages public/
+$ npx wrangler deploy --dry-run
+✨ Read 35 files from the assets directory /tmp/cfbuild/public
+No bindings found.
+```
+
+**Workers Builds settings to use** (dashboard → Worker → Settings → Build):
+
+| Setting | Value |
+|---|---|
+| Production branch | `main` — **must contain `wrangler.jsonc`** |
+| Root directory | `/` (empty) |
+| Build command | `npm run build:public` (optional — `postinstall` already does it) |
+| Deploy command | `npx wrangler deploy` |
+| Output directory | leave blank; `wrangler.jsonc` wins |
+
+If the project still holds an auto-generated config from the failed build, delete
+it in the dashboard so the committed `wrangler.jsonc` is authoritative.
+
+**Rule of thumb:** never let the asset directory be the repo root. `node_modules`
+alone exceeds the upload limits, and `mc_erp_6month_showcase_seed.sql` would be
+publicly downloadable.
