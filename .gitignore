@@ -33,3 +33,6 @@ public/
 
 # Duplicate skill tree created by the skills CLI for the generic "agent" target
 agent/
+
+# Exported build artifacts
+*.zip
