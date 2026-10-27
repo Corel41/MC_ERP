@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "tauri": "tauri",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:public": "node scripts/stage-public.cjs",
+    "preview": "npm run build:public && wrangler dev",
+    "deploy": "npm run build:public && wrangler deploy",
+    "cf:whoami": "wrangler whoami",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "node scripts/stage-public.cjs"
   },
   "repository": {
     "type": "git",
@@ -20,6 +25,7 @@
   },
   "homepage": "https://github.com/Corel41/MC_ERP#readme",
   "devDependencies": {
-    "@tauri-apps/cli": "^2.12.4"
+    "@tauri-apps/cli": "^2.12.4",
+    "wrangler": "^4.153.0"
   }
 }

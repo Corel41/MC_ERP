@@ -1,0 +1,33 @@
+# Defense in depth for Cloudflare Workers static assets.
+#
+# `wrangler.jsonc` points assets at ./public, which never contains any of this.
+# This file only matters if a deploy is ever misconfigured to use the repo root
+# as the asset directory — which is exactly what Workers Builds auto-generated
+# on 2026-10-27, uploading node_modules/workerd (137 MiB) and failing with
+# "Asset too large" against the 25 MiB per-asset limit.
+#
+# Keep this list broad. It costs nothing when the asset dir is ./public.
+
+**/node_modules
+**/.git
+**/.github
+**/.wrangler
+**/.DS_Store
+**/*.sql
+**/*.bak
+**/*.env
+**/.env*
+**/src-tauri/target
+src-tauri
+supabase
+node_modules
+.git
+cloudflare
+scripts
+package.json
+package-lock.json
+wrangler.jsonc
+MASTER_PLAN.md
+CODE_REVIEW.md
+DEPLOYMENT.md
+skills-lock.json
