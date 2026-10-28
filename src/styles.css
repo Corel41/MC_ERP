@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+:root {
+  --mc-bg: #0e1214;
+  --mc-raised: #141b1f;
+  --mc-surface: #1a2329;
+  --mc-surface-2: #243038;
+  --mc-line: #314049;
+  --mc-fg: #e7eef2;
+  --mc-muted: #93a3ad;
+  --mc-faint: #6d7e88;
+  --mc-primary: #3ec4ef;
+  --mc-ink: #06222c;
+  --mc-good: #8fd0a8;
+  --mc-bad: #f0a394;
+  --mc-warn: #e6c98a;
+  --mc-paper: #f7fbfc;
+  color-scheme: dark;
+}
+
+:root[data-theme="day"] {
+  --mc-bg: #eef2f4;
+  --mc-raised: #fbfcfd;
+  --mc-surface: #ffffff;
+  --mc-surface-2: #e4ebef;
+  --mc-line: #d3dee4;
+  --mc-fg: #152026;
+  --mc-muted: #5b6d78;
+  --mc-faint: #8aa0ab;
+  --mc-primary: #087ea8;
+  --mc-ink: #f3fbfe;
+  --mc-good: #0f7a48;
+  --mc-bad: #b3382c;
+  --mc-warn: #8a5a10;
+  --mc-paper: #ffffff;
+  color-scheme: light;
+}
+
+@theme inline {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --color-bg: var(--mc-bg);
+  --color-raised: var(--mc-raised);
+  --color-surface: var(--mc-surface);
+  --color-surface-2: var(--mc-surface-2);
+  --color-line: var(--mc-line);
+  --color-fg: var(--mc-fg);
+  --color-muted: var(--mc-muted);
+  --color-faint: var(--mc-faint);
+  --color-primary: var(--mc-primary);
+  --color-ink: var(--mc-ink);
+  --color-good: var(--mc-good);
+  --color-bad: var(--mc-bad);
+  --color-warn: var(--mc-warn);
+  --color-paper: var(--mc-paper);
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    background: var(--mc-bg);
+    color: var(--mc-fg);
+  }
+  body {
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 2px solid var(--mc-primary);
+    outline-offset: 2px;
+  }
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .field {
+    height: 2.75rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--mc-line);
+    background: var(--mc-bg);
+    color: var(--mc-fg);
+    padding-inline: 0.75rem;
+    font-size: 1rem;
+  }
+  textarea.field {
+    height: auto;
+    padding-block: 0.6rem;
+  }
+  .field:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--mc-primary) 35%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
