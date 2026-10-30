@@ -93,7 +93,7 @@ Safaricom Daraja (M-Pesa C2B) · KRA eTIMS · MobileSasa SMS Gateway · Google D
 
 ```bash
 npm install
-npm run dev        # Vite dev server on http://0.0.0.0:8080
+npm run dev        # Vite dev server on http://localhost:5173 (override with PORT=xxxx)
 ```
 
 Other scripts:
