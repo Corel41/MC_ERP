@@ -414,3 +414,44 @@ export type DueLine = {
   due: number;
   period: string;
 };
+
+/* ── Payroll / HR ─────────────────────────────────────────────── */
+
+export type Employee = Staff & {
+  payePin: string;
+  nssfNo: string;
+  shifNo: string;
+  bankId?: string;
+  mpesaPaybill?: string;
+  basicSalary: number; // monthly gross KES
+  startedOn: string;
+};
+
+export type PaySlipLine = { label: string; amount: number };
+
+export type PaySlip = {
+  employeeId: string;
+  name: string;
+  role: string;
+  branch: string;
+  gross: number;
+  earnings: PaySlipLine[];
+  deductions: PaySlipLine[];
+  taxablePay: number;
+  paye: number;
+  net: number;
+  method: "Bank" | "M-Pesa";
+};
+
+export type PayrollRun = {
+  id: string;
+  number: string;
+  month: number; // 1-12
+  year: number;
+  status: "Draft" | "Posted";
+  preparedBy: string;
+  slips: PaySlip[];
+  totals: { gross: number; paye: number; nhif: number; nssf: number; halp: number; net: number };
+  postedAt?: string;
+  paymentRef?: string;
+};

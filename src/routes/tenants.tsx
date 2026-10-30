@@ -41,8 +41,9 @@ function TenantsPage() {
       actions={
         <button
           type="button"
-          className={`h-11 rounded-xl border px-4 text-sm ${onlyArrears ? "border-bad bg-bad/15 text-bad" : "border-line bg-surface"}`}
+          className={`press h-11 rounded-xl border px-4 text-sm transition-colors ${onlyArrears ? "border-bad bg-bad/15 text-bad" : "border-line bg-surface hover:bg-surface-2"}`}
           onClick={() => setOnlyArrears((v) => !v)}
+          aria-pressed={onlyArrears}
         >
           {onlyArrears ? "Showing arrears" : "Arrears only"}
         </button>
@@ -71,7 +72,7 @@ function TenantsPage() {
                 setFocus(t.id);
                 setMeter("");
               }}
-              className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-left"
+              className="lift flex items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-left hover:border-primary/40 focus-visible:border-primary"
             >
               <span className="min-w-0">
                 <span className="block truncate font-medium">{t.name}</span>
@@ -110,7 +111,11 @@ function TenantsPage() {
               </Card>
             ) : null}
             <div className="flex gap-2">
-              <Link to="/desk" search={{ tenant: tenant.id }} className="inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-primary text-sm font-medium text-ink">
+              <Link
+                to="/desk"
+                search={{ tenant: tenant.id }}
+                className="press inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-primary text-sm font-medium text-ink shadow-sm transition-[filter] hover:brightness-110 active:brightness-95"
+              >
                 Take payment
               </Link>
               <Button
