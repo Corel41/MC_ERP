@@ -67,12 +67,16 @@ function BoardPage() {
       lede="Collections, arrears and what is still due to landlords. Aged as at 28 October 2026, the open period in this portfolio."
       actions={
         <>
-          <Link to="/desk" search={{ tenant: "" }} className="inline-flex h-11 items-center rounded-xl bg-primary px-4 text-sm font-medium text-ink">
+          <Link
+            to="/desk"
+            search={{ tenant: "" }}
+            className="press inline-flex h-11 items-center rounded-xl bg-primary px-4 text-sm font-medium text-ink shadow-sm transition-[filter] hover:brightness-110 active:brightness-95"
+          >
             Take a payment
           </Link>
           <button
             type="button"
-            className="inline-flex h-11 items-center rounded-xl border border-line bg-surface px-4 text-sm"
+            className="press inline-flex h-11 items-center rounded-xl border border-line bg-surface px-4 text-sm transition-colors hover:bg-surface-2"
             onClick={() => raiseInvoices()}
           >
             Bill open period
@@ -137,7 +141,11 @@ function BoardPage() {
           <ul className="flex flex-col gap-2">
             {owing.map(({ t, bal }) => (
               <li key={t.id}>
-                <Link to="/desk" search={{ tenant: t.id }} className="flex items-center justify-between gap-3 rounded-xl bg-surface-2 px-3 py-2">
+                <Link
+                  to="/desk"
+                  search={{ tenant: t.id }}
+                  className="lift flex items-center justify-between gap-3 rounded-xl bg-surface-2 px-3 py-2 hover:bg-surface-2/70 hover:ring-1 hover:ring-primary/30"
+                >
                   <span className="min-w-0">
                     <span className="block truncate text-sm">{t.name}</span>
                     <span className="text-xs text-muted">{t.unitCode}</span>

@@ -48,3 +48,32 @@ export function formula_StatementNetDueLandlord(
       (Number(paidToLandlordDirectSum) || 0),
   );
 }
+
+/**
+ * Receipt waterfall allocation.
+ * Rows arrive pre-sorted by priority and each carries `due` (outstanding on an invoice line).
+ * The payment is applied top-down: fully clearing the earliest lines before moving on.
+ * Returns rows annotated with `paid`, `allocated`, `remaining`, and `invoice_id`/`invoice_number`
+ * so callers can persist allocations against specific invoices.
+ */
+export function formula_ReceiptAutoAllocateWaterfall<
+  T extends { due?: number; totalDue?: number; invoiceId?: string; invoiceNumber?: string },
+>(
+  amount: number,
+  rows: T[],
+): (T & { paid: number; allocated: number; remaining: number; invoice_id: string; invoice_number: string })[] {
+  let left = Math.max(0, round(Number(amount) || 0));
+  return rows.map((row) => {
+    const due = Math.max(0, round(row.due ?? row.totalDue ?? 0));
+    const take = Math.min(left, due);
+    left = round(left - take);
+    return {
+      ...row,
+      paid: take,
+      allocated: take,
+      remaining: round(due - take),
+      invoice_id: row.invoiceId ?? "",
+      invoice_number: row.invoiceNumber ?? "",
+    };
+  });
+}
