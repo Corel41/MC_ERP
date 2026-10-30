@@ -1,11 +1,18 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "sonner";
-import { formula_ReceiptAutoAllocateWaterfall, formula_UtilityBillAmountInput, formula_UtilityConsumptionInput } from "@/lib/formulas";
+import {
+  formula_BuildPaySlip,
+  formula_ReceiptAutoAllocateWaterfall,
+  formula_UtilityBillAmountInput,
+  formula_UtilityConsumptionInput,
+} from "@/lib/formulas";
 import { seedData } from "@/lib/seed";
 import type {
   Appraisal,
   Asset,
+  Employee,
+  PayrollRun,
   Audit,
   Bank,
   Booking,
@@ -65,13 +72,14 @@ export type DataState = {
   leads: Lead[];
   listings: Listing[];
   appraisals: Appraisal[];
-  staff: Staff[];
+  staff: Employee[];
   fleet: Vehicle[];
   assets: Asset[];
   bookings: Booking[];
   documents: DocItem[];
   expenses: Expense[];
   audit: Audit[];
+  payrollRuns: PayrollRun[];
 
   setCompany: (patch: Partial<Company>) => void;
   setOfficer: (name: string) => void;
@@ -91,6 +99,10 @@ export type DataState = {
   addBooking: (input: { room: string; title: string; when: string }) => void;
   addExpense: (input: { payee: string; category: string; amount: number; notes: string }) => void;
   requestLeave: (staffId: string, days: number) => void;
+  generatePayrollDraft: (month: number, year: number) => string | null;
+  recalculatePayrollDraft: (runId: string) => void;
+  postPayrollRun: (runId: string) => void;
+  payStaffViaMpesa: (runId: string) => void;
   toggleVehicle: (id: string) => void;
   resetDemo: () => void;
 };
@@ -381,6 +393,98 @@ export const useErp = create<DataState>()(
         toggleVehicle: (id) => {
           set((st) => ({ fleet: st.fleet.map((v) => (v.id === id ? { ...v, status: v.status === "Out" ? "In yard" : "Out" } : v)) }));
           log("Vehicle status", id);
+        },
+
+        generatePayrollDraft: (month, year) => {
+          const st = get();
+          const existing = st.payrollRuns.find((r) => r.month === month && r.year === year);
+          if (existing) {
+            if (existing.status === "Posted") {
+              toast.error(`Payroll for ${monthName(month)} ${year} is already posted`);
+              return null;
+            }
+            toast(`Draft for ${monthName(month)} ${year} already exists — opening it`, { description: "Recalculate replaces the current draft." });
+            return existing.id;
+          }
+          const slips = st.staff.map((emp) =>
+            formula_BuildPaySlip(emp, {
+              basic: emp.basicSalary,
+              method: emp.mpesaPaybill ? "M-Pesa" : "Bank",
+            }),
+          );
+          const totals = slips.reduce(
+            (acc, sl) => ({
+              gross: acc.gross + sl.gross,
+              paye: acc.paye + sl.paye,
+              nhif: acc.nhif + (sl.deductions.find((d) => d.label.startsWith("SHIF"))?.amount || 0),
+              nssf: acc.nssf + (sl.deductions.find((d) => d.label.startsWith("NSSF"))?.amount || 0),
+              halp: acc.halp + (sl.deductions.find((d) => d.label.startsWith("Housing"))?.amount || 0),
+              net: acc.net + sl.net,
+            }),
+            { gross: 0, paye: 0, nhif: 0, nssf: 0, halp: 0, net: 0 },
+          );
+          const run: PayrollRun = {
+            id: uid(),
+            number: `PR-${year}-${String(month).padStart(2, "0")}`,
+            month,
+            year,
+            status: "Draft",
+            preparedBy: st.officer,
+            slips,
+            totals,
+          };
+          set((s) => ({ payrollRuns: [run, ...s.payrollRuns] }));
+          log("Payroll drafted", `${run.number} · ${slips.length} staff · net ${kes(totals.net)}`);
+          return run.id;
+        },
+        recalculatePayrollDraft: (runId) => {
+          const run = get().payrollRuns.find((r) => r.id === runId);
+          if (!run || run.status !== "Draft") return;
+          const slips = get().staff.map((emp) =>
+            formula_BuildPaySlip(emp, { basic: emp.basicSalary, method: emp.mpesaPaybill ? "M-Pesa" : "Bank" }),
+          );
+          const totals = slips.reduce(
+            (acc, sl) => ({
+              gross: acc.gross + sl.gross,
+              paye: acc.paye + sl.paye,
+              nhif: acc.nhif + (sl.deductions.find((d) => d.label.startsWith("SHIF"))?.amount || 0),
+              nssf: acc.nssf + (sl.deductions.find((d) => d.label.startsWith("NSSF"))?.amount || 0),
+              halp: acc.halp + (sl.deductions.find((d) => d.label.startsWith("Housing"))?.amount || 0),
+              net: acc.net + sl.net,
+            }),
+            { gross: 0, paye: 0, nhif: 0, nssf: 0, halp: 0, net: 0 },
+          );
+          set((s) => ({ payrollRuns: s.payrollRuns.map((r) => (r.id === runId ? { ...r, slips, totals } : r)) }));
+          log("Payroll recalculated", run.number);
+        },
+        postPayrollRun: (runId) => {
+          const run = get().payrollRuns.find((r) => r.id === runId);
+          if (!run || run.status !== "Draft") return;
+          const date = new Date(run.year, run.month - 1, 28).toISOString().slice(0, 10);
+          const rows: Expense[] = [
+            { id: uid(), date, payee: "KRA — PAYE", category: "Payroll statutory", amount: run.totals.paye, branch: get().branch === "all" ? "Nairobi Head Office" : get().branch, notes: `${run.number} PAYE payable` },
+            { id: uid(), date, payee: "NSSF", category: "Payroll statutory", amount: run.totals.nssf * 2, branch: get().branch === "all" ? "Nairobi Head Office" : get().branch, notes: `${run.number} NSSF employer+employee` },
+            { id: uid(), date, payee: "SHA / SHIF", category: "Payroll statutory", amount: run.totals.nhif * 2, branch: get().branch === "all" ? "Nairobi Head Office" : get().branch, notes: `${run.number} SHIF employer+employee` },
+            { id: uid(), date, payee: "National Housing Corp", category: "Payroll statutory", amount: run.totals.halp * 2, branch: get().branch === "all" ? "Nairobi Head Office" : get().branch, notes: `${run.number} Housing levy employer+employee` },
+            { id: uid(), date, payee: "Staff salaries", category: "Payroll net pay", amount: run.totals.net, branch: get().branch === "all" ? "Nairobi Head Office" : get().branch, notes: `${run.number} net pay disbursement` },
+          ];
+          set((s) => ({
+            expenses: [...rows, ...s.expenses],
+            payrollRuns: s.payrollRuns.map((r) => (r.id === runId ? { ...r, status: "Posted", postedAt: new Date().toISOString(), paymentRef: `BATCH-${monthName(r.month).toUpperCase().slice(0, 3)}-${r.year}-PAY` } : r)),
+          }));
+          log("Payroll posted", `${run.number} · gross ${kes(run.totals.gross)} · net ${kes(run.totals.net)} · statutory booked to expenses`);
+        },
+        payStaffViaMpesa: (runId) => {
+          const run = get().payrollRuns.find((r) => r.id === runId);
+          if (!run) return;
+          const mobileStaff = run.slips.filter((sl) => sl.method === "M-Pesa");
+          if (!mobileStaff.length) {
+            toast.error("No M-Pesa staff in this run");
+            return;
+          }
+          const total = mobileStaff.reduce((a, s) => a + s.net, 0);
+          toast.success(`Disbursement queued: ${mobileStaff.length} staff via paybill ${get().company.paybill} · ${kes(total)}`);
+          log("M-Pesa payroll batch", `${run.number}: ${mobileStaff.length} recipients · ${kes(total)} (Daraja batch simulation)`);
         },
 
         resetDemo: () => {

@@ -61,7 +61,7 @@ export function Stat({
   label: string;
   value: string;
   hint?: string;
-  tone?: "default" | "good" | "bad" | "warn";
+  tone?: "default" | "good" | "bad" | "warn" | "info";
 }) {
   return (
     <div className="lift rounded-2xl border border-line bg-surface px-4 py-3 hover:border-primary/30">
@@ -72,6 +72,7 @@ export function Stat({
           tone === "good" && "text-good",
           tone === "bad" && "text-bad",
           tone === "warn" && "text-warn",
+          tone === "info" && "text-primary",
         )}
       >
         {value}

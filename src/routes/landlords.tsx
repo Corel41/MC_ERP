@@ -52,7 +52,7 @@ function LandlordsPage() {
       </div>
 
       <div className="mt-3 flex flex-col gap-3">
-        {rows.filter(Boolean).map(({ mandate, property, st }) => (
+        {rows.filter((r): r is NonNullable<typeof r> => r !== null).map(({ mandate, property, st }) => (
           <Card key={mandate.id} className="fade-slide">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>

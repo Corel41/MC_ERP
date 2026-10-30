@@ -22,12 +22,14 @@ import type {
   Property,
   Reading,
   Receipt,
-  Staff,
   Tenant,
   Ticket,
   Unit,
   Vehicle,
+  Employee,
+  PayrollRun,
 } from "@/lib/types";
+import { formula_BuildPaySlip } from "@/lib/formulas";
 
 export const seedCompany: Company = {
   name: "Metrocosmo Ltd",
@@ -162,7 +164,7 @@ for (const lease of leases) {
     const unit = units.find((u) => u.id === lease.unitId)!;
     const util = mi % 2 === 0 ? 1800 : 2100;
     const total = lease.rentAmount + lease.serviceCharge + util;
-    const overdueTenant = tenants.indexOf(lease.tenantId ? tenants.find((t) => t.id === lease.tenantId) : undefined as unknown as Tenant) >= 0 && lease.tenantCode.endsWith("3");
+    const overdueTenant = Boolean(lease.tenantId) && tenants.some((t) => t.id === lease.tenantId) && lease.tenantCode.endsWith("3");
     const unpaidOct = month === 10 && overdueTenant;
     const invoiceNumber = `INV-2026-${String(invSeq).padStart(4, "0")}`;
     invoices.push({
@@ -213,7 +215,7 @@ for (const inv of invoices) {
     issuedBy: "System",
   };
   receipts.push(rcp);
-  ledger.push({ id: `led-d-${balSeq++}`, timestamp: `${inv.date}T09:00:00+03:00`, refNo: inv.invoiceNumber, tenantId: inv.tenantId, tenantName: inv.tenantName, unitCode: inv.unitCode, leaseId: inv.leaseId, type: "Invoice", description: `${["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"][inv.periodMonth]} bill`, debit: inv.totalAmount, credit: 0, balanceAfter: 0 });
+  ledger.push({ id: `led-d-${balSeq++}`, timestamp: `${inv.dueDate}T09:00:00+03:00`, refNo: inv.invoiceNumber, tenantId: inv.tenantId, tenantName: inv.tenantName, unitCode: inv.unitCode, leaseId: inv.leaseId, type: "Invoice", description: `${["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"][inv.periodMonth]} bill`, debit: inv.totalAmount, credit: 0, balanceAfter: 0 });
   ledger.push({ id: `led-c-${balSeq++}`, timestamp: `${rcp.date}T10:30:00+03:00`, refNo: rcp.number, tenantId: rcp.tenantId, tenantName: rcp.tenantName, unitCode: rcp.unitCode, leaseId: inv.leaseId, type: "Receipt", description: "Payment received", debit: 0, credit: rcp.amount, balanceAfter: 0 });
   rcSeq++;
 }
@@ -293,11 +295,11 @@ const appraisals: Appraisal[] = [
   { id: "ap-2", client: "Private buyer", asset: "Nyali apartment block", purpose: "Market value", fee: 120000, status: "Instructed", valuer: "Achieng' O.", instructedOn: "2026-10-22" },
 ];
 
-const staff: Staff[] = [
-  { id: "st-1", name: "Achieng' Odhiambo", role: "Portfolio manager", branch: "Nairobi Head Office", phone: "+254711222333", leaveDays: 14 },
-  { id: "st-2", name: "Kiptoo Sang", role: "Senior property officer", branch: "Westlands", phone: "+254711444555", leaveDays: 9 },
-  { id: "st-3", name: "Njoroge Waweru", role: "Caretaker", branch: "Thika", phone: "+254711666777", leaveDays: 21 },
-  { id: "st-4", name: "Salim Hassan", role: "Caretaker", branch: "Mombasa Coastal", phone: "+254711888999", leaveDays: 12 },
+const staff: Employee[] = [
+  { id: "st-1", name: "Achieng' Odhiambo", role: "Portfolio manager", branch: "Nairobi Head Office", phone: "+254711222333", leaveDays: 14, basicSalary: 145000, payePin: "A012345678P", nssfNo: "N-5510233", shifNo: "SH-8890122", bankId: "bk-1", startedOn: "2022-03-01" },
+  { id: "st-2", name: "Kiptoo Sang", role: "Senior property officer", branch: "Westlands", phone: "+254711444555", leaveDays: 9, basicSalary: 98000, payePin: "A098765432P", nssfNo: "N-5540112", shifNo: "SH-8871043", bankId: "bk-1", startedOn: "2023-01-15" },
+  { id: "st-3", name: "Njoroge Waweru", role: "Caretaker", branch: "Thika", phone: "+254711666777", leaveDays: 21, basicSalary: 32000, payePin: "A055512345P", nssfNo: "N-5599210", shifNo: "SH-8812005", mpesaPaybill: "4001234", startedOn: "2021-08-02" },
+  { id: "st-4", name: "Salim Hassan", role: "Caretaker", branch: "Mombasa Coastal", phone: "+254711888999", leaveDays: 12, basicSalary: 35000, payePin: "A066678901P", nssfNo: "N-5601337", shifNo: "SH-8823119", mpesaPaybill: "4001234", startedOn: "2020-11-09" },
 ];
 
 const fleet: Vehicle[] = [
@@ -331,6 +333,40 @@ const audit: Audit[] = [
   { id: "au-2", at: "2026-10-25T09:11:00+03:00", action: "Payout posted", detail: "September remittance — Nyali", by: "Achieng' O." },
 ];
 
+
+/* Reference posted run generated with the same statutory engine the UI uses,
+   so draft-vs-posted figures always agree. Kept in seed (not computed at
+   runtime) to stay deterministic and cheap on hydration. */
+function buildPayrollRun(month: number, year: number, id: string, number: string, status: "Draft" | "Posted"): PayrollRun {
+  const slips = staff.map((emp) =>
+    formula_BuildPaySlip(emp, { basic: emp.basicSalary, method: emp.mpesaPaybill ? "M-Pesa" : "Bank" }),
+  );
+  const totals = slips.reduce(
+    (acc, sl) => ({
+      gross: acc.gross + sl.gross,
+      paye: acc.paye + sl.paye,
+      nhif: acc.nhif + (sl.deductions.find((d) => d.label.startsWith("SHIF"))?.amount || 0),
+      nssf: acc.nssf + (sl.deductions.find((d) => d.label.startsWith("NSSF"))?.amount || 0),
+      halp: acc.halp + (sl.deductions.find((d) => d.label.startsWith("Housing"))?.amount || 0),
+      net: acc.net + sl.net,
+    }),
+    { gross: 0, paye: 0, nhif: 0, nssf: 0, halp: 0, net: 0 },
+  );
+  return {
+    id,
+    number,
+    month,
+    year,
+    status,
+    preparedBy: "Finance Officer",
+    slips,
+    totals,
+    ...(status === "Posted" ? { postedAt: `${year}-${String(month).padStart(2, "0")}-28T10:00:00+03:00`, paymentRef: `BATCH-${["", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"][month]}-${year}-PAY` } : {}),
+  };
+}
+
+const payrollRuns: PayrollRun[] = [buildPayrollRun(9, 2026, "pr-9", "PR-2026-09", "Posted")];
+
 export const seedData = {
   company: seedCompany,
   landlords,
@@ -361,6 +397,7 @@ export const seedData = {
   documents,
   expenses,
   audit,
+  payrollRuns,
   statements: [] as import("@/lib/types").FiledStatement[],
 };
 

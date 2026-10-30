@@ -1,12 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  Banknote,
   Building2,
   CalendarClock,
   IdCard,
   Landmark,
   LayoutDashboard,
-  Menu,
   Megaphone,
+  Menu,
   Moon,
   PieChart,
   Scale,
@@ -33,6 +34,7 @@ const NAV = [
   { to: "/agency", label: "Agency", icon: Megaphone, mobile: false },
   { to: "/valuation", label: "Valuation", icon: Scale, mobile: false },
   { to: "/people", label: "Administration", icon: IdCard, mobile: false },
+  { to: "/payroll", label: "Payroll", icon: Banknote, mobile: false },
   { to: "/finance", label: "Finance", icon: PieChart, mobile: false },
   { to: "/ops", label: "Workplace", icon: CalendarClock, mobile: false },
   { to: "/settings", label: "Settings", icon: Settings, mobile: false },
